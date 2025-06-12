@@ -1,0 +1,55 @@
+argo-cd:
+  namespaceOverride: argocd
+  crds:
+    install: true
+    keep: false
+  global:
+    domain: argo-cd.build-t.chorus-tre.ch
+  configs:
+    cm:
+      admin.enabled: true
+      # See: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/keycloak/
+      oidc.config: |
+        name: Keycloak
+        issuer: $argocd-oidc:keycloak.issuer
+        clientId: $argocd-oidc:keycloak.clientId
+        clientSecret: $argocd-oidc:keycloak.clientSecret
+        requestedScopes: ["openid", "profile", "email", "groups"]
+    rbac:
+      policy.csv: |-
+        g, ArgoCDAdmins, role:admin
+    params:
+      server.insecure: true
+  server:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      extraTls:
+        - hosts:
+          - argo-cd.build-t.chorus-tre.ch
+          secretName: argocd-ingress-http
+    ingressGrpc:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      extraTls:
+        - hosts:
+          - grpc.argo-cd.build-t.chorus-tre.ch
+          secretName: argocd-ingress-grpc
+
+  # External Redis to better manage the upgrades.
+  redis:
+    enabled: false
+  redisSecretInit:
+    enabled: false
+  externalRedis:
+    host: chorus-build-t-argo-cd-cache-valkey-primary
+    existingSecret: argo-cd-cache-secret

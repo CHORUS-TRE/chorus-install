@@ -1,0 +1,6 @@
+# That self signed CA certificate will expire at some point.
+# Do monitor it.
+nameOverride: selfsigned-202408
+
+clusterIssuers:
+  - name: private-ca-cluster-issuer

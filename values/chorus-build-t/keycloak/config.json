@@ -1,0 +1,5 @@
+{
+  "chart": "keycloak",
+  "version": "0.0.30",
+  "namespace": "keycloak"
+}

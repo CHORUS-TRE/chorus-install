@@ -1,0 +1,59 @@
+harbor:
+  namespace: harbor # used only by terraform
+  # If using existingSecretSecretKey, the key must be secretKey
+  # The secret key used for encryption. Must be a string of 16 chars.
+  existingSecretSecretKey: harbor-key
+  existingSecretAdminPassword: harbor-admin-password
+  existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
+
+  core:
+    # If using existingSecret, the key must be secret
+    # Must be a string of 16 chars.
+    existingSecret: harbor-core
+    existingXsrfSecret: harbor-xsrf
+    existingXsrfSecretKey: CSRF_KEY
+    extraEnvVars:
+      - name: CONFIG_OVERWRITE_JSON
+        valueFrom:
+          secretKeyRef:
+            key: CONFIG_OVERWRITE_JSON
+            name: harbor-oidc
+
+  expose:
+    tls:
+      certSource: secret
+      secret:
+        secretName: harbor.build-t.chorus-tre.ch-tls
+    ingress:
+      hosts:
+        core: harbor.build-t.chorus-tre.ch
+
+  externalURL: https://harbor.build-t.chorus-tre.ch
+
+  database:
+    external:
+      host: "chorus-build-t-harbor-db-postgresql"
+
+  redis:
+    external:
+      addr: "chorus-build-t-harbor-cache-valkey-primary:6379"
+
+  jobservice:
+    # Must be a string of 16 chars.
+    existingSecret: harbor-jobservice
+    existingSecretKey: JOBSERVICE_SECRET
+
+  registry:
+    # Must be a string of 16 chars.
+    existingSecret: harbor-registry
+    existingSecretKey: REGISTRY_HTTP_SECRET
+    credentials:
+      # If using existingSecret, the key must be REGISTRY_PASSWD and REGISTRY_HTPASSWD
+      existingSecret: harbor-registry-credentials
+
+certificate:
+  enabled: true
+
+  issuerRef:
+    name: private-ca-cluster-issuer
+    kind: ClusterIssuer

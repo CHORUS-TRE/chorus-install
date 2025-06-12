@@ -1,0 +1,56 @@
+argo-workflows:
+  workflow:
+    serviceAccount:
+      create: true
+    #rbac:
+    #  serviceAccounts:
+    #    - name: argo-ci
+    #      namespace: argo
+
+  controller:
+    workflowNamespaces:
+      - argo
+    workflowDefaults:
+      spec:
+        ttlStrategy:
+          # 3 days and one day.
+          secondsAfterCompletion: 259200 # Time to live after workflow is completed, replaces ttlSecondsAfterFinished
+          secondsAfterSuccess: 86400 # Time to live after workflow is successful
+          secondsAfterFailure: 259200 # Time to live after workflow fails
+
+  server:
+    authModes:
+      - client
+      - sso
+
+    logging:
+      level: debug
+
+    sso:
+      enabled: true
+      issuer: https://auth.build.chorus-tre.ch/realms/build
+      clientId:
+        name: argo-workflows-oidc
+        key: client-id
+      clientSecret:
+        name: argo-workflows-oidc
+        key: client-secret
+      redirectUrl: https://argo-workflows.build.chorus-tre.ch/oauth2/callback
+      rbac:
+        enabled: true
+      scopes: [openid, email, profile, groups]
+
+    ingress:
+      enabled: true
+      ingressClassName: "nginx"
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      hosts:
+        - argo-workflows.build.chorus-tre.ch
+      paths:
+        - /
+      pathType: Prefix
+      tls:
+        - hosts:
+            - argo-workflows.build.chorus-tre.ch
+          secretName: argo-workflows-tls

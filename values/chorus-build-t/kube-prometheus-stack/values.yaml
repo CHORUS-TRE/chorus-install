@@ -1,0 +1,123 @@
+kube-prometheus-stack:
+  defaultRules:
+    create: true
+    rules:
+      etcd: # No accesses to the control plane
+      kubeControllerManager: false
+      kubeProxy: false # Cilium is used
+      kubeSchedulerAlerting: false
+      kubeSchedulerRecording: false
+      windows: false
+
+  kubeEtcd:
+    enabled: false
+  kubeProxy:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+
+  alertmanager:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+      hosts:
+        - alertmanager.build.chorus-tre.ch
+      tls:
+        - secretName: alertmanager-general-tls
+          hosts:
+            - alertmanager.build.chorus-tre.ch
+
+    alertmanagerSpec:
+      storage:
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+
+  grafana:
+    enabled: true
+
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+      hosts:
+        - grafana.build.chorus-tre.ch
+
+      tls:
+        - secretName: grafana-general-tls
+          hosts:
+            - grafana.build.chorus-tre.ch
+
+    envValueFrom:
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+        secretKeyRef:
+          name: grafana-secret
+          key: oauth-client-secret
+
+    grafana.ini:
+      auth.generic_oauth:
+        enabled: true
+        name: Keycloak
+        allow_sign_up: true
+        client_id: grafana
+        scopes: openid email profile offline_access
+        email_attribute_path: email
+        login_attribute_path: username
+        name_attribute_path: full_name
+        auth_url: https://auth.build.chorus-tre.ch/realms/build/protocol/openid-connect/auth?kc_idp_hint=google
+        token_url: https://auth.build.chorus-tre.ch/realms/build/protocol/openid-connect/token
+        api_url: https://auth.build.chorus-tre.ch/realms/build/protocol/openid-connect/userinfo
+        role_attribute_path: contains(roles[*], 'admin') && 'Admin' || contains(roles[*], 'editor') && 'Editor' || 'Viewer'
+        allow_assign_grafana_admin: true
+      server:
+        domain: grafana.build.chorus-tre.ch
+        root_url: https://grafana.build.chorus-tre.ch/
+
+    serviceMonitor:
+      enabled: true
+
+  prometheus:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+      hosts:
+        - prometheus.build.chorus-tre.ch
+      tls:
+        - secretName: prometheus-general-tls
+          hosts:
+            - prometheus.build.chorus-tre.ch
+
+    prometheusSpec:
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 50Gi
+
+alertmanagerConfiguration:
+  webex:
+    enabled: true
+    credentials:
+      name: config-webex-secret
+      key: access-token
+    roomID: 33a87080-10fa-11ef-9932-7de5d097e655 # Alerts (chorus-build)

@@ -1,0 +1,7 @@
+valkey:
+  auth:
+    enabled: true
+    sentinel: false
+
+    existingSecret: oauth2-proxy-valkey-secret
+    existingSecretPasswordKey: REDIS_PASSWORD

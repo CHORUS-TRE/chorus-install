@@ -1,0 +1,48 @@
+argo-cd:
+  global:
+    domain: argo-cd.build.chorus-tre.local
+  configs:
+    params:
+      server.insecure: true
+  dex:
+    enabled: false
+  notifications:
+    enabled: false
+  applicationSet:
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+  controller:
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+  server:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      extraTls:
+        - hosts:
+          - argo-cd.build.chorus-tre.local
+          secretName: argocd-ingress-http
+    ingressGrpc:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      extraTls:
+        - hosts:
+          - grpc.argo-cd.build.chorus-tre.local
+          secretName: argocd-ingress-grpc
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true

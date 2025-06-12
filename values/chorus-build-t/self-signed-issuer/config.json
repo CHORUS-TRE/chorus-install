@@ -1,0 +1,5 @@
+{
+  "chart": "self-signed-issuer",
+  "version": "0.0.1",
+  "namespace": "cert-manager"
+}
