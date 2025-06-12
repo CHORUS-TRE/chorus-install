@@ -1,6 +1,6 @@
-# REPOSITORY
+# CHORUS-INSTALL
 
-Please edit the repository name in the LICENSE file and in the line above.
+Terraform installation of CHORUS-TRE.
 
 ## License and Usage Restrictions
 
