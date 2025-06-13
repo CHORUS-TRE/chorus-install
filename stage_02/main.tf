@@ -137,9 +137,9 @@ module "argo_cd" {
   argocd_helm_values_path               = "../${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml"
   argocd_cache_helm_chart_path          = "../${var.helm_chart_path}/${var.valkey_chart_name}"
   argocd_cache_helm_values_path         = "../${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/values.yaml"
-  github_environments_repository_secret = var.github_environments_repository_secret
-  github_environments_repository_pat    = var.github_environments_repository_pat
-  github_environments_repository_url    = var.github_environments_repository_url
+  helm_charts_values_credentials_secret = var.helm_values_credentials_secret
+  helm_values_pat                       = var.helm_values_pat
+  helm_values_url                       = var.helm_values_url
   harbor_robot_username                 = var.argocd_harbor_robot_username
   harbor_robot_password                 = module.harbor_config.argocd_robot_password
 }
@@ -196,8 +196,8 @@ module "argocd_config" {
   oidc_client_id                          = var.argocd_keycloak_client_id
   oidc_client_secret                      = random_password.argocd_keycloak_client_secret.result
   helm_chart_repository_url               = replace(local.harbor_url, "https://", "")
-  github_environments_repository_url      = var.github_environments_repository_url
-  github_environments_repository_revision = var.github_environments_repository_revision
+  helm_values_url                         = var.helm_values_url
+  helm_values_revision                    = var.helm_values_revision
 
   depends_on = [
     module.argo_cd,

@@ -98,8 +98,8 @@ resource "argocd_application_set" "chorus_build_test" {
     go_template_options = [ "missingkey=error" ]
     generator {
       git {
-        repo_url = var.github_environments_repository_url
-        revision = var.github_environments_repository_revision
+        repo_url = var.helm_values_url
+        revision = var.helm_values_revision
         file {
           path = "${var.cluster_name}/*/config.json"
         }
@@ -151,8 +151,8 @@ resource "argocd_application_set" "chorus_build_test" {
           }
         }
         source {
-          repo_url = var.github_environments_repository_url
-          target_revision = var.github_environments_repository_revision
+          repo_url = var.helm_values_url
+          target_revision = var.helm_values_revision
           ref = "values"
         }
         destination {

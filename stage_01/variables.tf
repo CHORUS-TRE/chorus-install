@@ -20,16 +20,50 @@ variable "kubeconfig_context" {
   type        = string
 }
 
-variable "helm_chart_path" {
-  description = "Path to the repository storing the Helm charts"
-  type        = string
-  default     = "../charts"
+variable "chorus_release" {
+  description = "CHORUS-TRE release to install"
+  type = string
+  default = "0.1.0-alpha"
+}
+
+variable "helm_registry" {
+  description = "CHORUS Helm chart registry"
+  type = string
+  default = "harbor.build.chorus-tre.ch"
+}
+
+variable "helm_registry_username" {
+  description = "Username to connect to the CHORUS Helm chart registry"
+  type = string
+}
+
+variable "helm_registry_password" {
+  description = "Password to connect to the CHORUS Helm chart registry"
+  type = string
 }
 
 variable "helm_values_path" {
   description = "Path to the repository storing the Helm chart values"
   type        = string
   default     = "../values"
+}
+
+variable "github_orga" {
+  description = "GitHub organization to use repositories from"
+  type = string
+  default = "CHORUS-TRE"
+}
+
+variable "helm_values_repo" {
+  description = "GitHub repository to get the Helm charts values from"
+  type = string
+  default = "environment-template"
+}
+
+variable "helm_values_revision" {
+  description = "Helm charts values repository revision"
+  type = string
+  default = "HEAD"
 }
 
 variable "ingress_nginx_chart_name" {

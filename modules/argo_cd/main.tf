@@ -53,7 +53,7 @@ resource "kubernetes_secret" "argocd_cache" {
 
 resource "kubernetes_secret" "environments_repository_credentials" {
   metadata {
-    name = var.github_environments_repository_secret
+    name = var.helm_charts_values_credentials_secret
     namespace = local.argocd_namespace
     labels = {
       "argocd.argoproj.io/secret-type" = "repository"
@@ -61,8 +61,8 @@ resource "kubernetes_secret" "environments_repository_credentials" {
   }
 
   data = {
-    url      = var.github_environments_repository_url
-    password = var.github_environments_repository_pat
+    url      = var.helm_values_url
+    password = var.helm_values_pat
     type     = "git"
   }
 

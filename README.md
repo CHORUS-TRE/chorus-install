@@ -59,7 +59,9 @@
 
 1. Set sensitive variables for your usecase
     ```
-    export TF_VAR_github_environments_repository_pat=<github_pat_example>
+    export TF_VAR_helm_registry_username=<your-username>
+    export TF_VAR_helm_registry_password=<your-password>
+    export TF_VAR_helm_values_pat=<github_pat_example>
     ```
 
 1. Pull the necessary Helm charts dependencies
@@ -69,10 +71,20 @@
     ./scripts/pull_helm_charts_dependencies.sh ./charts
     ```
 
+1. Initialize, plan and apply stage 0
+
+    ```
+    cd stage_00
+    terraform init
+    terraform plan -var-file="../terraform.tfvars" -out="stage_00.plan"
+    terraform apply "stage_00.plan"
+    cd ..
+    ```
+
 1. Initialize, plan and apply stage 1
 
     ```
-    cd stage_01
+    cd ../stage_01
     terraform init
     terraform plan -var-file="../terraform.tfvars" -out="stage_01.plan"
     terraform apply "stage_01.plan"

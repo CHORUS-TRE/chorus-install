@@ -23,17 +23,17 @@ variable "oidc_client_secret" {
   type        = string
 }
 
-variable "github_environments_repository_url" {
-  description = "URL of the environments repository"
+variable "helm_values_url" {
+  description = "Helm charts values repository URL"
   type        = string
 }
 
-variable "github_environments_repository_revision" {
-  description = "Revision of the environments repository"
+variable "helm_values_revision" {
+  description = "Helm charts values repository revision"
   type        = string
 }
 
 variable "helm_chart_repository_url" {
-  description = "URL of the Helm chart repository"
+  description = "Helm chart repository URL"
   type        = string
 }
