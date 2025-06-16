@@ -1,15 +1,3 @@
-/*
-locals {
-  ingress_nginx_chart_yaml = yamldecode(file("${var.helm_chart_path}/${var.ingress_nginx_chart_name}/Chart.yaml"))
-  cert_manager_chart_yaml  = yamldecode(file("${var.helm_chart_path}/${var.cert_manager_chart_name}/Chart.yaml"))
-  selfsigned_chart_yaml    = yamldecode(file("${var.helm_chart_path}/${var.selfsigned_chart_name}/Chart.yaml"))
-  valkey_chart_yaml        = yamldecode(file("${var.helm_chart_path}/${var.valkey_chart_name}/Chart.yaml"))
-  keycloak_chart_yaml      = yamldecode(file("${var.helm_chart_path}/${var.keycloak_chart_name}/Chart.yaml"))
-  postgresql_chart_yaml    = yamldecode(file("${var.helm_chart_path}/${var.postgresql_chart_name}/Chart.yaml"))
-  harbor_chart_yaml        = yamldecode(file("${var.helm_chart_path}/${var.harbor_chart_name}/Chart.yaml"))
-}
-*/
-
 locals {
   release_desc = yamldecode(file("../releases/${var.chorus_release}.yaml"))
 }
