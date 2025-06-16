@@ -59,7 +59,7 @@ resource "time_sleep" "wait_for_webhook" {
 resource "helm_release" "selfsigned" {
   name       = "${var.cluster_name}-${var.selfsigned_chart_name}"
   repository = "oci://${var.helm_registry}"
-  chart      = var.selfsigned_chart_name
+  chart      = "charts/${var.selfsigned_chart_name}"
   version    = var.selfsigned_chart_version
   namespace  = local.cert_manager_namespace
   create_namespace = false
