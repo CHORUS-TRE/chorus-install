@@ -48,24 +48,6 @@ variable "helm_values_path" {
   default     = "../values"
 }
 
-variable "github_orga" {
-  description = "GitHub organization to use repositories from"
-  type = string
-  default = "CHORUS-TRE"
-}
-
-variable "helm_values_repo" {
-  description = "GitHub repository to get the Helm charts values from"
-  type = string
-  default = "environment-template"
-}
-
-variable "helm_values_revision" {
-  description = "Helm charts values repository revision"
-  type = string
-  default = "HEAD"
-}
-
 variable "ingress_nginx_chart_name" {
   description = "Ingress-Nginx Helm chart folder name"
   type        = string
