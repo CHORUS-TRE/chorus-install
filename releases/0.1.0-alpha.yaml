@@ -1,61 +1,61 @@
 ---
 charts:
-  self-signed-issuer:
-    version: 0.0.1
-  i2b2-wildfly:
-    version: 0.0.1
-  postgresql:
-    version: 0.0.14
-  trivy-operator:
-    version: 0.0.1
-  kube-prometheus-stack:
-    version: 0.0.23
-  argo-events:
-    version: 0.0.6
-  i2b2-postgres:
-    version: 0.0.1
-  mariadb:
-    version: 0.0.13
-  harbor:
-    version: 0.0.2
-  brainstorm:
-    version: 0.0.5
-    appVersion: 0.0.2
   argo-cd:
     version: 0.0.31
     appVersion: v2.13.2
-  oauth2-proxy:
-    version: 0.0.8
-  valkey:
-    version: 0.0.8
+  argo-ci:
+    version: 0.0.82
+  argo-events:
+    version: 0.0.6
+  argo-workflows:
+    version: 0.0.18
+  brainstorm:
+    version: 0.0.5
+    appVersion: 0.0.2
   cert-manager:
     version: 0.0.10
     appVersion: v1.16.2
-  sealed-secrets:
-    version: 0.0.4
   cluster-secret:
     version: 0.0.6
-  i2b2-frontend:
-    version: 0.0.1
-  prometheus-operator-crds:
-    version: 0.0.6
-  workbench:
-    version: 0.0.11
-    appVersion: 0.0.2
-  argo-ci:
-    version: 0.0.82
-  argo-workflows:
-    version: 0.0.18
-  prometheus-blackbox-exporter:
-    version: 0.0.5
   didata:
     version: 0.0.6
     appVersion: 6.2.21
-  trust-manager:
-    version: 0.0.3
-  keycloak:
-    version: 0.0.30
+  harbor:
+    version: 0.0.2
+  i2b2-frontend:
+    version: 0.0.1
+  i2b2-postgres:
+    version: 0.0.1
+  i2b2-wildfly:
+    version: 0.0.1
   ingress-nginx:
     version: 0.0.4
+  keycloak:
+    version: 0.0.30
+  kube-prometheus-stack:
+    version: 0.0.23
+  mariadb:
+    version: 0.0.13
   matomo:
     version: 0.0.7
+  oauth2-proxy:
+    version: 0.0.8
+  postgresql:
+    version: 0.0.14
+  prometheus-blackbox-exporter:
+    version: 0.0.5
+  prometheus-operator-crds:
+    version: 0.0.6
+  sealed-secrets:
+    version: 0.0.4
+  self-signed-issuer:
+    version: 0.0.1
+  trivy-operator:
+    version: 0.0.1
+  trust-manager:
+    version: 0.0.3
+  valkey:
+    version: 0.0.8
+  workbench:
+    version: 0.0.11
+    appVersion: 0.0.2
