@@ -11,3 +11,5 @@
 **/*_output.yaml
 **/*output.yaml
 **/tmp
+**/.terraform.lock.hcl
+**/*.tfstate.lock.info
