@@ -1,6 +1,27 @@
-variable "harbor_helm_values_path" {
-  description = "Path to the Harbor Helm chart values"
+variable "harbor_helm_values" {
+  description = "Harbor Helm chart values"
   type        = string
+}
+
+variable "release_desc" {
+  description = "Description of all the charts and container images being part of the release"
+  type = string
+}
+
+variable "source_helm_registry" {
+  description = "Source Helm chart registry"
+  type = string
+}
+
+variable "source_helm_registry_username" {
+  description = "Username to connect to the source Helm chart registry"
+  type = string
+}
+
+variable "source_helm_registry_password" {
+  description = "Password to connect to the source Helm chart registry"
+  type        = string
+  sensitive   = true
 }
 
 variable "argocd_robot_username" {
@@ -13,11 +34,6 @@ variable "argoci_robot_username" {
   type        = string
 }
 
-variable "chorus_charts_revision" {
-  description = "Revision of the CHORUS-TRE/chorus-tre repository to get the Helm charts to upload to Harbor"
-  type        = string
-}
-
 variable "harbor_admin_username" {
   description = "Harbor admin username"
   type        = string
@@ -27,9 +43,4 @@ variable "harbor_admin_password" {
   description = "Harbor admin password"
   type        = string
   sensitive   = true
-}
-
-variable "helm_chart_path" {
-  description = "Path to the repository storing the Helm charts"
-  type        = string
 }
