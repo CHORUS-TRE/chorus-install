@@ -1,10 +1,8 @@
 # Read values
 locals {
-  argocd_values = file("${path.module}/${var.argocd_helm_values_path}")
-  argocd_values_parsed = yamldecode(local.argocd_values)
+  argocd_values_parsed = yamldecode(var.argocd_helm_values)
   argocd_namespace = local.argocd_values_parsed.argo-cd.namespaceOverride
-  argocd_cache_values = file("${path.module}/${var.argocd_cache_helm_values_path}")
-  argocd_cache_values_parsed = yamldecode(local.argocd_cache_values)
+  argocd_cache_values_parsed = yamldecode(var.argocd_cache_helm_values)
   argocd_cache_existing_secret = local.argocd_cache_values_parsed.valkey.auth.existingSecret
   argocd_cache_existing_secret_key = local.argocd_cache_values_parsed.valkey.auth.existingSecretPasswordKey
   argocd_cache_existing_user_key = "redis-username"
@@ -61,7 +59,7 @@ resource "kubernetes_secret" "environments_repository_credentials" {
   }
 
   data = {
-    url      = var.helm_values_url
+    url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
     password = var.helm_values_pat
     type     = "git"
   }
@@ -83,7 +81,7 @@ resource "kubernetes_secret" "oci-build" {
     name      = "chorus-build-harbor"
     password  = var.harbor_robot_password
     type      = "helm"
-    url       = "harbor.build-t.chorus-tre.ch"
+    url       = var.harbor_domain
     username  = join("", ["robot$", var.harbor_robot_username])
   }
 
@@ -126,14 +124,14 @@ inject it in the secret
 
 # ArgoCD Cache (Valkey) Deployment
 resource "helm_release" "argocd_cache" {
-  name       = "${var.cluster_name}-argo-cd-cache"
-  namespace  = local.argocd_namespace
-  chart      = "${path.module}/${var.argocd_cache_helm_chart_path}"
+  name       = "${var.cluster_name}-${var.argocd_chart_name}-cache"
+  repository = "oci://${var.helm_registry}"
+  chart      = "charts/${var.argocd_cache_chart_name}"
   version    = var.argocd_cache_chart_version
+  namespace  = local.argocd_namespace
   create_namespace = false
   wait       = true
-
-  values = [ local.argocd_cache_values ]
+  values = [ var.argocd_cache_helm_values ]
 
   set {
     name  = "valkey.metrics.enabled"
@@ -152,33 +150,24 @@ resource "helm_release" "argocd_cache" {
     kubernetes_namespace.argocd,
     kubernetes_secret.argocd_cache
   ]
-
-  lifecycle {
-    ignore_changes = [ values ]
-  }
 }
 
 # ArgoCD Deployment
 resource "helm_release" "argocd" {
-  name       = "${var.cluster_name}-argo-cd"
-  namespace  = local.argocd_namespace
-  chart      = "${path.module}/${var.argocd_helm_chart_path}"
+  name       = "${var.cluster_name}-${var.argocd_chart_name}"
+  repository = "oci://${var.helm_registry}"
+  chart      = "charts/${var.argocd_chart_name}"
   version    = var.argocd_chart_version
+  namespace  = local.argocd_namespace
   create_namespace = false
   wait       = true
   skip_crds  = false
-
-  values = [ local.argocd_values ]
+  values = [ var.argocd_helm_values ]
 
   depends_on = [
     kubernetes_namespace.argocd,
     helm_release.argocd_cache
   ]
-
-  # TODO: double check why we want to ignor changes
-  lifecycle {
-    ignore_changes = [ values ]
-  }
 }
 
 # ArgoCD initial credentials
