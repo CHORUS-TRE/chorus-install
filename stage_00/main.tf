@@ -1,6 +1,6 @@
 resource "null_resource" "fetch_helm_charts_values" {
   provisioner "local-exec" {
-    quiet = true
+    quiet   = true
     command = <<EOT
         set -e
         mkdir -p ${var.helm_values_path}/${var.helm_values_repo}
