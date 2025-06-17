@@ -22,24 +22,24 @@ variable "kubeconfig_context" {
 
 variable "chorus_release" {
   description = "CHORUS-TRE release to install"
-  type = string
-  default = "0.1.0-alpha"
+  type        = string
+  default     = "0.1.0-alpha"
 }
 
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
-  type = string
-  default = "harbor.build.chorus-tre.ch"
+  type        = string
+  default     = "harbor.build.chorus-tre.ch"
 }
 
 variable "helm_registry_username" {
   description = "Username to connect to the CHORUS Helm chart registry"
-  type = string
+  type        = string
 }
 
 variable "helm_registry_password" {
   description = "Password to connect to the CHORUS Helm chart registry"
-  type = string
+  type        = string
 }
 
 variable "helm_values_path" {
