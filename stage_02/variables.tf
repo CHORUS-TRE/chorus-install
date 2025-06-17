@@ -40,6 +40,7 @@ variable "helm_registry_username" {
 variable "helm_registry_password" {
   description = "Password to connect to the CHORUS Helm chart registry"
   type        = string
+  sensitive   = true
 }
 
 variable "helm_values_path" {
