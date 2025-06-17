@@ -20,22 +20,38 @@ variable "kubeconfig_context" {
   type        = string
 }
 
-variable "helm_values_pat" {
-  description = "Fine-grained personal access token (PAT) to access the environments repository"
+variable "chorus_release" {
+  description = "CHORUS-TRE release to install"
   type        = string
-  sensitive   = true
+  default     = "0.1.0-alpha"
 }
 
-variable "helm_chart_path" {
-  description = "Path to the repository storing the Helm charts"
+variable "helm_registry" {
+  description = "CHORUS Helm chart registry"
   type        = string
-  default     = "../charts"
+  default     = "harbor.build.chorus-tre.ch"
+}
+
+variable "helm_registry_username" {
+  description = "Username to connect to the CHORUS Helm chart registry"
+  type        = string
+}
+
+variable "helm_registry_password" {
+  description = "Password to connect to the CHORUS Helm chart registry"
+  type        = string
 }
 
 variable "helm_values_path" {
   description = "Path to the repository storing the Helm chart values"
   type        = string
   default     = "../values"
+}
+
+variable "helm_values_pat" {
+  description = "Fine-grained personal access token (PAT) to access the environments repository"
+  type        = string
+  sensitive   = true
 }
 
 variable "argocd_chart_name" {
@@ -56,10 +72,16 @@ variable "harbor_chart_name" {
   default     = "harbor"
 }
 
-variable "helm_values_url" {
-  description = "Environments repository URL"
+variable "github_orga" {
+  description = "GitHub organization to use repositories from"
   type        = string
-  default     = "https://github.com/CHORUS-TRE/environment-template"
+  default     = "CHORUS-TRE"
+}
+
+variable "helm_values_repo" {
+  description = "GitHub repository to get the Helm charts values from"
+  type        = string
+  default     = "environment-template"
 }
 
 variable "helm_values_revision" {
@@ -141,10 +163,5 @@ variable "argocd_keycloak_base_url" {
 
 variable "harbor_admin_username" {
   description = "Harbor admin username"
-  type        = string
-}
-
-variable "chorus_charts_revision" {
-  description = "Revision of the CHORUS-TRE/chorus-tre repository to get the Helm charts to upload to Harbor"
   type        = string
 }
