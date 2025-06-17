@@ -1,5 +1,15 @@
-variable "argocd_cache_chart_version" {
-  description = "ArgoCD cache Helm chart version (e.g. Valkey)"
+variable "cluster_name" {
+  description = "The cluster name to be used as a prefix to release names"
+  type        = string
+}
+
+variable "helm_registry" {
+  description = "Helm chart registry to get the chart from"
+  type = string
+}
+
+variable "argocd_chart_name" {
+  description = "ArgoCD Helm chart name"
   type        = string
 }
 
@@ -8,33 +18,23 @@ variable "argocd_chart_version" {
   type        = string
 }
 
-variable "cluster_name" {
-  description = "The cluster name to be used as a prefix to release names"
+variable "argocd_helm_values" {
+  description = "ArgoCD Helm chart values"
   type        = string
 }
 
-variable "argocd_cache_helm_chart_path" {
-  description = "Path to the ArgoCD cache Helm chart (e.g. Valkey)"
+variable "argocd_cache_chart_name" {
+  description = "ArgoCD cache (e.g. Valkey) Helm chart name"
   type        = string
 }
 
-variable "argocd_cache_helm_values_path" {
-  description = "Path to the ArgoCD cache Helm chart values (e.g. Valkey)"
+variable "argocd_cache_chart_version" {
+  description = "ArgoCD cache (e.g. Valkey) Helm chart version"
   type        = string
 }
 
-variable "argocd_helm_chart_path" {
-  description = "Path to the ArgoCD Helm chart"
-  type        = string
-}
-
-variable "argocd_helm_values_path" {
-  description = "Path to the ArgoCD Helm chart values"
-  type        = string
-}
-
-variable "helm_values_pat" {
-  description = "Fine-grained personal access token (PAT) to access the Helm charts values repository"
+variable "argocd_cache_helm_values" {
+  description = "ArgoCD cache (e.g. Valkey) Helm chart values"
   type        = string
 }
 
@@ -43,8 +43,24 @@ variable "helm_charts_values_credentials_secret" {
   type        = string
 }
 
-variable "helm_values_url" {
-  description = "Helm charts values repository URL"
+variable "github_orga" {
+  description = "GitHub organization to use repositories from"
+  type = string
+}
+
+variable "helm_values_repo" {
+  description = "GitHub repository to get the Helm charts values from"
+  type = string
+}
+
+variable "helm_values_pat" {
+  description = "Fine-grained personal access token (PAT) to access the environments repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "harbor_domain" {
+  description = "Harbor OCI repository domain"
   type        = string
 }
 
