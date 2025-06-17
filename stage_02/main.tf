@@ -198,8 +198,8 @@ resource "null_resource" "wait_for_argocd" {
     command = <<EOT
       set -e
       for i in {1..30}; do
-        status=$(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz)
-        if [ "$status" -eq 200 ]; then
+        response_code=$(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz)
+        if [ "$response_code" -eq 200 ]; then
           exit 0
         else
           echo "Waiting for ArgoCD... ($i)"
