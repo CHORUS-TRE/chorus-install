@@ -123,6 +123,7 @@ variable "keycloak_realm" {
 variable "keycloak_admin_username" {
   description = "Keycloak admin username"
   type        = string
+  default     = "admin"
 }
 
 variable "harbor_keycloak_client_id" {
@@ -164,4 +165,5 @@ variable "argocd_keycloak_base_url" {
 variable "harbor_admin_username" {
   description = "Harbor admin username"
   type        = string
+  default     = "admin"
 }

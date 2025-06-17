@@ -1,7 +1,5 @@
 kubeconfig_path = "~/.kube/config"
 kubeconfig_context = "chorus-build"
 
-harbor_admin_username = "admin"
-keycloak_admin_username = "admin"
 cluster_name = "chorus-build"
 chorus_charts_release = "0.1.0-alpha"

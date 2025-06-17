@@ -111,4 +111,5 @@ variable "harbor_keycloak_oidc_admin_group" {
 variable "harbor_admin_username" {
   description = "Harbor admin username"
   type        = string
+  default     = "admin"
 }
