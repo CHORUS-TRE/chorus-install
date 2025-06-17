@@ -1,5 +1,5 @@
 locals {
-  release_desc        = file("../releases/${var.chorus_release}.yaml")
+  release_desc        = file("../charts/${var.chorus_release}.yaml")
   release_desc_parsed = yamldecode(local.release_desc)
 
   harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")

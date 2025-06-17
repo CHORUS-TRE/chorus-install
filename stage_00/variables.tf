@@ -4,6 +4,18 @@ variable "github_orga" {
   default     = "CHORUS-TRE"
 }
 
+variable "helm_charts_repo" {
+  description = "GitHub repository to get the Helm charts versions from"
+  type        = string
+  default     = "chorus-tre"
+}
+
+variable "helm_charts_revision" {
+  description = "Helm charts repository revision"
+  type        = string
+  default     = "v0.1.0-alpha"
+}
+
 variable "helm_values_repo" {
   description = "GitHub repository to get the Helm charts values from"
   type        = string

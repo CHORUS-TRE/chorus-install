@@ -17,8 +17,7 @@ fi
 
 charts_folder=$1
 output_file=$2
-charts=$(find $charts_folder -maxdepth 1 -mindepth 1 -type d | sort)
-
+charts=$(find $charts_folder -mindepth 2 -maxdepth 2 -type d -not -path "$charts_folder/.*" | sort)
 declare -a charts_versions=()
 for chart in $charts; do
     app_version=$(yq '.appVersion' $chart/Chart.yaml)

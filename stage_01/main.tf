@@ -1,5 +1,5 @@
 locals {
-  release_desc = yamldecode(file("../releases/${var.chorus_release}.yaml"))
+  release_desc = yamldecode(file("../charts/${var.chorus_release}.yaml"))
 }
 
 # Install charts
