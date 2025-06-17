@@ -1,7 +1,6 @@
 # Read values
 locals {
-  argocd_values = file("${path.module}/${var.argocd_helm_values_path}")
-  argocd_values_parsed = yamldecode(local.argocd_values)
+  argocd_values_parsed = yamldecode(var.argocd_helm_values)
   argocd_namespace = local.argocd_values_parsed.argo-cd.namespaceOverride
   argocd_oidc_config = yamldecode(local.argocd_values_parsed.argo-cd.configs.cm["oidc.config"])
   argocd_oidc_secret = regex("\\$(.*?):", local.argocd_oidc_config.clientSecret).0
@@ -29,11 +28,6 @@ resource "kubernetes_secret" "argocd_secret" {
 # it does work when one run terraform apply
 # within a kubie session though
 resource "null_resource" "wait_for_argocd_server" {
-
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     quiet = true
     command = <<EOT
@@ -50,6 +44,9 @@ resource "null_resource" "wait_for_argocd_server" {
       echo "Timed out waiting for ArgoCD gRPC API" >&2
       exit 1
     EOT
+  }
+  triggers = {
+    always_run = timestamp()
   }
 }
 
@@ -143,7 +140,7 @@ resource "argocd_application_set" "chorus_build_test" {
       spec {
         project = var.cluster_name
         source {
-          repo_url = var.helm_chart_repository_url
+          repo_url = var.harbor_domain
           chart = "charts/{{ trimPrefix \"charts/\" .chart }}"
           target_revision = "{{.version}}"
           helm {
