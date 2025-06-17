@@ -65,13 +65,6 @@
     export TF_VAR_helm_values_pat=<github_pat_example>
     ```
 
-1. Pull the necessary Helm charts dependencies
-
-    ```
-    chmod +x ./scripts/pull_helm_charts_dependencies.sh && \
-    ./scripts/pull_helm_charts_dependencies.sh ./charts
-    ```
-
 1. Initialize, plan and apply stage 0
 
     ```
