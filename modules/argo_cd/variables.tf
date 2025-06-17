@@ -43,13 +43,8 @@ variable "helm_charts_values_credentials_secret" {
   type        = string
 }
 
-variable "github_orga" {
-  description = "GitHub organization to use repositories from"
-  type = string
-}
-
-variable "helm_values_repo" {
-  description = "GitHub repository to get the Helm charts values from"
+variable "helm_values_url" {
+  description = "Repository where to get the Helm charts values from"
   type = string
 }
 
@@ -60,7 +55,7 @@ variable "helm_values_pat" {
 }
 
 variable "harbor_domain" {
-  description = "Harbor OCI repository domain"
+  description = "Harbor OCI registry domain"
   type        = string
 }
 

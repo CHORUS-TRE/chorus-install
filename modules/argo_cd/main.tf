@@ -59,7 +59,7 @@ resource "kubernetes_secret" "environments_repository_credentials" {
   }
 
   data = {
-    url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
+    url      = var.helm_values_url
     password = var.helm_values_pat
     type     = "git"
   }
