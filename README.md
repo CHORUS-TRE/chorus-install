@@ -72,7 +72,6 @@
     terraform init
     terraform plan -var-file="../terraform.tfvars" -out="stage_00.plan"
     terraform apply "stage_00.plan"
-    cd ..
     ```
 
 1. Initialize, plan and apply stage 1
