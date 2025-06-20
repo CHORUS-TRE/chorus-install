@@ -1,6 +1,0 @@
-{
-  "chart": "argo-workflows",
-  "version": "0.0.18",
-  "namespace": "kube-system",
-  "stepName": "infrastructure"
-}

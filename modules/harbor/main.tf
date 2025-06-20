@@ -1,12 +1,11 @@
 # Read values
 locals {
-  harbor_values = file("${path.module}/${var.harbor_helm_values_path}")
-  harbor_values_parsed = yamldecode(local.harbor_values)
+  harbor_values_parsed = yamldecode(var.harbor_helm_values)
   harbor_namespace = local.harbor_values_parsed.harbor.namespace
-  harbor_cache_values = file("${path.module}/${var.harbor_cache_helm_values_path}")
-  harbor_cache_values_parsed = yamldecode(local.harbor_cache_values)
-  harbor_db_values = file("${path.module}/${var.harbor_db_helm_values_path}")
-  harbor_db_values_parsed = yamldecode(local.harbor_db_values)
+
+  harbor_cache_values_parsed = yamldecode(var.harbor_cache_helm_values)
+
+  harbor_db_values_parsed = yamldecode(var.harbor_db_helm_values)
   harbor_db_existing_secret = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   harbor_db_postgres_password = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.postgresPassword
   harbor_db_user_password_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
@@ -24,6 +23,7 @@ locals {
   harbor_existing_registry_http_secret = local.harbor_values_parsed.harbor.registry.existingSecret
   harbor_existing_registry_http_secret_key = local.harbor_values_parsed.harbor.registry.existingSecretKey
   harbor_existing_registry_credentials_secret = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
+
   harbor_registry_admin_username = "admin"
 
   oidc_secret = [
@@ -174,10 +174,6 @@ resource "kubernetes_secret" "harbor_db_secret" {
     "${local.harbor_db_user_password_key}" = try(data.kubernetes_secret.existing_secret_harbor_db.data["${local.harbor_db_user_password_key}"],
                                                    random_password.harbor_db_password.result)
   }
-
-  lifecycle {
-    ignore_changes = [ data ]
-  }
 }
 
 resource "kubernetes_secret" "harbor_secret" {
@@ -191,10 +187,6 @@ resource "kubernetes_secret" "harbor_secret" {
   data = {
         "secret" = try(data.kubernetes_secret.existing_secret_harbor.data["secret"],
                        random_password.harbor_secret.result)
-  }
-
-  lifecycle {
-    ignore_changes = [ data ]
   }
 }
 
@@ -210,10 +202,6 @@ resource "kubernetes_secret" "harbor_secret_secret_key" {
         "secretKey" = try(data.kubernetes_secret.existing_secret_secret_key_harbor.data["secretKey"],
                           random_password.harbor_secret_secret_key.result)
   }
-
-  lifecycle {
-    ignore_changes = [ data ]
-  }
 }
 
 resource "kubernetes_secret" "harbor_xsrf_secret" {
@@ -225,10 +213,6 @@ resource "kubernetes_secret" "harbor_xsrf_secret" {
   data = {
         "${local.harbor_existing_xsrf_secret_key}" = try(data.kubernetes_secret.existing_xsrf_secret_harbor.data["${local.harbor_existing_xsrf_secret_key}"],
                                                          random_password.harbor_csrf_key.result)
-  }
-
-  lifecycle {
-    ignore_changes = [ data ]
   }
 }
 
@@ -242,10 +226,6 @@ resource "kubernetes_secret" "harbor_admin_password_secret" {
         "${local.harbor_existing_admin_password_secret_key}" = try(data.kubernetes_secret.existing_admin_password_secret_harbor.data["${local.harbor_existing_admin_password_secret_key}"],
                                       random_password.harbor_admin_password.result)
   }
-
-  lifecycle {
-    ignore_changes = [ data ]
-  }
 }
 
 resource "kubernetes_secret" "harbor_jobservice_secret" {
@@ -258,10 +238,6 @@ resource "kubernetes_secret" "harbor_jobservice_secret" {
         "${local.harbor_existing_jobservice_secret_key}" = try(data.kubernetes_secret.existing_jobservice_secret_harbor.data["${local.harbor_existing_jobservice_secret_key}"],
                                                                random_password.harbor_jobservice_secret.result)
   }
-
-  lifecycle {
-    ignore_changes = [ data ]
-  }
 }
 
 resource "kubernetes_secret" "harbor_registry_http_secret" {
@@ -273,10 +249,6 @@ resource "kubernetes_secret" "harbor_registry_http_secret" {
   data = {
         "${local.harbor_existing_registry_http_secret_key}"  = try(data.kubernetes_secret.existing_registry_http_secret_harbor.data["${local.harbor_existing_registry_http_secret_key}"],
                                       random_password.harbor_registry_http_secret.result)
-  }
-
-  lifecycle {
-    ignore_changes = [ data ]
   }
 }
 
@@ -300,10 +272,6 @@ resource "kubernetes_secret" "harbor_registry_credentials_secret" {
         "REGISTRY_HTPASSWD"     = try(data.kubernetes_secret.existing_registry_credentials_secret_harbor.data["REGISTRY_HTPASSWD"],
                                       "${local.harbor_registry_admin_username}:${htpasswd_password.harbor_registry.bcrypt}")
   }
-
-  lifecycle {
-    ignore_changes = [ data ]
-  }
 }
 
 resource "kubernetes_secret" "oidc_secret" {
@@ -325,14 +293,15 @@ resource "kubernetes_secret" "oidc_secret" {
 
 # Harbor Cache (Valkey)
 resource "helm_release" "harbor_cache" {
-  name       = "${var.cluster_name}-harbor-cache"
-  namespace  = local.harbor_namespace
-  chart      = "${path.module}/${var.harbor_cache_helm_chart_path}"
+  name       = "${var.cluster_name}-${var.harbor_chart_name}-cache"
+  repository = "oci://${var.helm_registry}"
+  chart      = "charts/${var.harbor_cache_chart_name}"
   version    = var.harbor_cache_chart_version
+  namespace  = local.harbor_namespace
   create_namespace = false
   wait       = true
 
-  values = [ local.harbor_cache_values ]
+  values = [ var.harbor_cache_helm_values ]
 
   set {
     name  = "valkey.metrics.enabled"
@@ -350,22 +319,19 @@ resource "helm_release" "harbor_cache" {
   depends_on = [
     kubernetes_namespace.harbor
   ]
-
-  lifecycle {
-    ignore_changes = [ values ]
-  }
 }
 
 # Harbor DB (PostgreSQL)
 resource "helm_release" "harbor_db" {
-  name       = "${var.cluster_name}-harbor-db"
-  namespace  = local.harbor_namespace
-  chart      = "${path.module}/${var.harbor_db_helm_chart_path}"
+  name       = "${var.cluster_name}-${var.harbor_chart_name}-db"
+  repository = "oci://${var.helm_registry}"
+  chart      = "charts/${var.harbor_db_chart_name}"
   version    = var.harbor_db_chart_version
+  namespace  = local.harbor_namespace
   create_namespace = false
   wait       = true
 
-  values = [ local.harbor_db_values ]
+  values = [ var.harbor_db_helm_values ]
 
   set {
     name = "postgresql.metrics.enabled"
@@ -379,14 +345,15 @@ resource "helm_release" "harbor_db" {
 
 # Harbor
 resource "helm_release" "harbor" {
-  name       = "${var.cluster_name}-harbor"
-  namespace  = local.harbor_namespace
-  chart      = "${path.module}/${var.harbor_helm_chart_path}"
+  name       = "${var.cluster_name}-${var.harbor_chart_name}"
+  repository = "oci://${var.helm_registry}"
+  chart      = "charts/${var.harbor_chart_name}"
   version    = var.harbor_chart_version
+  namespace  = local.harbor_namespace
   create_namespace = false
   wait       = true
 
-  values = [ local.harbor_values ]
+  values = [ var.harbor_helm_values ]
 
   set {
     name = "harbor.metrics.enabled"

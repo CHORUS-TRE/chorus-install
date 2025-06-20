@@ -3,48 +3,53 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "helm_registry" {
+  description = "Helm chart registry to get the chart from"
+  type = string
+}
+
+variable "harbor_chart_name" {
+  description = "Harbor Helm chart name"
+  type        = string
+}
+
 variable "harbor_chart_version" {
   description = "Harbor Helm chart version"
   type        = string
 }
 
-variable "harbor_db_chart_version" {
-  description = "Harbor DB Helm chart version (e.g. PostgreSQL)"
+variable "harbor_helm_values" {
+  description = "Harbor Helm chart values"
+  type        = string
+}
+
+variable "harbor_cache_chart_name" {
+  description = "Harbor cache (e.g. Valkey) Helm chart name"
   type        = string
 }
 
 variable "harbor_cache_chart_version" {
-  description = "Harbor cache Helm chart version (e.g. Valkey)"
+  description = "Harbor cache (e.g. Valkey) Helm chart version"
   type        = string
 }
 
-variable "harbor_helm_chart_path" {
-  description = "Path to the Harbor Helm chart"
+variable "harbor_cache_helm_values" {
+  description = "Harbor cache (e.g. Valkey) Helm chart values"
   type        = string
 }
 
-variable "harbor_db_helm_chart_path" {
-  description = "Path to the Harbor DB Helm chart (e.g. PostgreSQL)"
+variable "harbor_db_chart_name" {
+  description = "Harbor DB (e.g. PostgreSQL) Helm chart name"
   type        = string
 }
 
-variable "harbor_cache_helm_chart_path" {
-  description = "Path to the Harbor cache Helm chart (e.g. Valkey)"
+variable "harbor_db_chart_version" {
+  description = "Harbor DB (e.g. PostgreSQL) Helm chart version"
   type        = string
 }
 
-variable "harbor_helm_values_path" {
-  description = "Path to the Harbor Helm chart values"
-  type        = string
-}
-
-variable "harbor_db_helm_values_path" {
-  description = "Path to the Harbor DB Helm chart values (e.g. PostgreSQL)"
-  type        = string
-}
-
-variable "harbor_cache_helm_values_path" {
-  description = "Path to the Harbor cache Helm chart values (e.g. Valkey)"
+variable "harbor_db_helm_values" {
+  description = "Harbor DB Helm chart values (e.g. PostgreSQL)"
   type        = string
 }
 

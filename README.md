@@ -25,6 +25,7 @@
 | [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl)  | Kubernetes command-line tool kubectl is required to run commands against Kubernetes clusters                                                                                                                    |
 | [helm 3](https://github.com/helm/helm#install)                     | Helm Charts are used to package Kubernetes resources for each component |
 | [terraform](https://developer.hashicorp.com/terraform/install)                     | Terraform is used to automate the installation |
+| [yq](https://mikefarah.gitbook.io/yq#install)                     | yq is a lightweight and portable command-line YAML processor |
 <!--
 | [argocd cli](https://argo-cd.readthedocs.io/en/stable/cli_installation)                     | ArgoCD CLI is required to manage the CHORUS-TRE ArgoCD instance |
 | [argo cli](https://argo-workflows.readthedocs.io/en/stable/walk-through/argo-cli/)                            | Argo-Workflows CLI is required to manage CI jobs |
@@ -59,20 +60,24 @@
 
 1. Set sensitive variables for your usecase
     ```
-    export TF_VAR_github_environments_repository_pat=<github_pat_example>
+    export TF_VAR_helm_registry_username=<your-username>
+    export TF_VAR_helm_registry_password=<your-password>
+    export TF_VAR_helm_values_pat=<github_pat_example>
     ```
 
-1. Pull the necessary Helm charts dependencies
+1. Initialize, plan and apply stage 0
 
     ```
-    chmod +x ./scripts/pull_helm_charts_dependencies.sh && \
-    ./scripts/pull_helm_charts_dependencies.sh ./charts
+    cd stage_00
+    terraform init
+    terraform plan -var-file="../terraform.tfvars" -out="stage_00.plan"
+    terraform apply "stage_00.plan"
     ```
 
 1. Initialize, plan and apply stage 1
 
     ```
-    cd stage_01
+    cd ../stage_01
     terraform init
     terraform plan -var-file="../terraform.tfvars" -out="stage_01.plan"
     terraform apply "stage_01.plan"

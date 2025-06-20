@@ -1,6 +1,0 @@
-{
-  "chart": "valkey",
-  "version": "0.0.8",
-  "namespace": "keycloak",
-  "stepName": "database"
-}

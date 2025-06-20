@@ -1,13 +1,11 @@
 # Read values
 locals {
-    keycloak_values = file("${path.module}/${var.keycloak_helm_values_path}")
-    keycloak_values_parsed = yamldecode(local.keycloak_values)
+    keycloak_values_parsed = yamldecode(var.keycloak_helm_values)
     keycloak_namespace = local.keycloak_values_parsed.keycloak.namespaceOverride
     keycloak_existing_secret = local.keycloak_values_parsed.keycloak.auth.existingSecret
     keycloak_password_secret_key = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
 
-    keycloak_db_values = file("${path.module}/${var.keycloak_db_helm_values_path}")
-    keycloak_db_values_parsed = yamldecode(local.keycloak_db_values)
+    keycloak_db_values_parsed = yamldecode(var.keycloak_db_helm_values)
     keycloak_db_existing_secret = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
     keycloak_db_admin_password_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
     keycloak_db_postgres_password = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.postgresPassword
@@ -42,10 +40,6 @@ resource "kubernetes_secret" "keycloak_db_secret" {
     "${local.keycloak_db_user_password_key}" = try(data.kubernetes_secret.existing_secret_keycloak_db.data["${local.keycloak_db_user_password_key}"],
                                                    random_password.keycloak_db_password.result)
   }
-
-  lifecycle {
-    ignore_changes = [ data ]
-  }
 }
 
 data "kubernetes_secret" "existing_secret_keycloak" {
@@ -69,22 +63,19 @@ resource "kubernetes_secret" "keycloak_secret" {
     "${local.keycloak_password_secret_key}" = try(data.kubernetes_secret.existing_secret_keycloak.data["${local.keycloak_password_secret_key}"],
                                                   random_password.keycloak_password.result)
   }
-
-  lifecycle {
-    ignore_changes = [ data ]
-  }
 }
 
 # Keycloak DB (PostgreSQL) Deployment
 resource "helm_release" "keycloak_db" {
-  name       = "${var.cluster_name}-keycloak-db"
-  namespace  = local.keycloak_namespace
-  chart      = "${path.module}/${var.keycloak_db_helm_chart_path}"
+  name       = "${var.cluster_name}-${var.keycloak_chart_name}-db"
+  repository = "oci://${var.helm_registry}"
+  chart      = "charts/${var.keycloak_db_chart_name}"
   version    = var.keycloak_db_chart_version
+  namespace  = local.keycloak_namespace
   create_namespace = false
   wait       = true
 
-  values = [ local.keycloak_db_values ]
+  values = [ var.keycloak_db_helm_values ]
 
   set {
     name = "postgresql.metrics.enabled"
@@ -98,14 +89,15 @@ resource "helm_release" "keycloak_db" {
 
 # Keycloak Deployment
 resource "helm_release" "keycloak" {
-  name       = "${var.cluster_name}-keycloak"
+  name       = "${var.cluster_name}-${var.keycloak_chart_name}"
+  repository = "oci://${var.helm_registry}"
+  chart      = "charts/${var.keycloak_chart_name}"
+  version    = var.keycloak_chart_version
   namespace  = local.keycloak_namespace
-  chart      = "${path.module}/${var.keycloak_helm_chart_path}"
-  version    = var.keycloak_db_chart_version
   create_namespace = false
   wait       = true
 
-  values = [ local.keycloak_values ]
+  values = [ var.keycloak_helm_values ]
 
   set {
     name = "keycloak.metrics.enabled"

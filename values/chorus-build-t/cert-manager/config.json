@@ -1,6 +1,0 @@
-{
-  "chart": "cert-manager",
-  "version": "0.0.10",
-  "namespace": "cert-manager",
-  "stepName": "infrastructure"
-}
