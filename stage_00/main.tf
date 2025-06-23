@@ -1,6 +1,6 @@
 locals {
-    release_desc = yamldecode(data.external.charts_versions.result.versions)
-    cert_manager_chart_version = local.release_desc.charts["${var.cert_manager_chart_name}"].version
+  release_desc               = yamldecode(data.external.charts_versions.result.versions)
+  cert_manager_chart_version = local.release_desc.charts["${var.cert_manager_chart_name}"].version
 }
 
 resource "null_resource" "fetch_helm_charts_values" {
@@ -28,7 +28,7 @@ resource "null_resource" "fetch_helm_charts_values" {
 
 resource "null_resource" "fetch_helm_charts_versions" {
   provisioner "local-exec" {
-    quiet = true
+    quiet   = true
     command = <<EOT
       set -e
       helm_values_folder=${var.helm_values_path}/${var.cluster_name}
@@ -40,12 +40,12 @@ resource "null_resource" "fetch_helm_charts_versions" {
   triggers = {
     always_run = timestamp()
   }
-  depends_on = [ null_resource.fetch_helm_charts_values ]
+  depends_on = [null_resource.fetch_helm_charts_values]
 }
 
 data "external" "charts_versions" {
-  depends_on = [ null_resource.fetch_helm_charts_versions ]
-  program = ["bash", "-c", "cat ../values/${var.cluster_name}/charts_versions.yaml | yq -o json . | jq '{versions: tostring}'"]
+  depends_on = [null_resource.fetch_helm_charts_versions]
+  program    = ["bash", "-c", "cat ../values/${var.cluster_name}/charts_versions.yaml | yq -o json . | jq '{versions: tostring}'"]
 }
 
 resource "null_resource" "fetch_cert_manager_app_version" {
