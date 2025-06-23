@@ -10,10 +10,7 @@ cluster_name=chorus-build-t
 
 # ARGO-WORKFLOW
 kubie ns kube-system
-challenges=$(kubectl get challenges.acme.cert-manager.io -oname)
-for challenge in $challenges; do
-    kubectl patch $challenge --type=merge -p '{"metadata":{"finalizers":null}}'
-done
+kubectl patch $(kubectl get challenges.acme.cert-manager.io -oname) --type=merge -p '{"metadata":{"finalizers":null}}'
 
 # ARGO-EVENTS
 kubie ns argo-events
