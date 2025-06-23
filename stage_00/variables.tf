@@ -22,8 +22,8 @@ variable "helm_values_repo" {
   default     = "environment-template"
 }
 
-variable "helm_values_revision" {
-  description = "Helm charts values repository revision"
+variable "chorus_release" {
+  description = "CHORUS-TRE release to use"
   type        = string
   default     = "HEAD"
 }
@@ -43,4 +43,16 @@ variable "helm_values_path" {
 variable "cluster_name" {
   description = "The cluster name to be used as a prefix to release names"
   type        = string
+}
+
+variable "cert_manager_chart_name" {
+  description = "Cert-Manager Helm chart folder name"
+  type        = string
+  default     = "cert-manager"
+}
+
+variable "helm_registry" {
+  description = "CHORUS Helm chart registry"
+  type        = string
+  default     = "harbor.build.chorus-tre.ch"
 }
