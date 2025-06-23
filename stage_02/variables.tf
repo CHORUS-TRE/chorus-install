@@ -85,12 +85,6 @@ variable "helm_values_repo" {
   default     = "environment-template"
 }
 
-variable "helm_values_revision" {
-  description = "Helm charts values repository revision"
-  type        = string
-  default     = "HEAD"
-}
-
 variable "helm_values_credentials_secret" {
   description = "Secret to store the Helm charts values repository credentials in for ArgoCD"
   type        = string

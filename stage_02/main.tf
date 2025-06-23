@@ -1,5 +1,5 @@
 locals {
-  release_desc        = file("../charts/${var.chorus_release}.yaml")
+  release_desc        = file("../values/${var.cluster_name}/charts_versions.yaml")
   release_desc_parsed = yamldecode(local.release_desc)
 
   harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
@@ -228,7 +228,7 @@ module "argocd_config" {
   cluster_name         = var.cluster_name
   argocd_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
   helm_values_url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
-  helm_values_revision = var.helm_values_revision
+  helm_values_revision = var.chorus_release
   harbor_domain        = replace(local.harbor_url, "https://", "")
   oidc_endpoint        = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
   oidc_client_id       = var.argocd_keycloak_client_id
