@@ -53,16 +53,14 @@
 1. Set variables for your usecase
 
     ```
-    cp terraform.tfvars.example terraform.tfvars
+    cp .env.example .env
     ```
 
     Edit this file as needed.
 
-1. Set sensitive variables for your usecase
+1. Source your env file
     ```
-    export TF_VAR_helm_registry_username=<your-username>
-    export TF_VAR_helm_registry_password=<your-password>
-    export TF_VAR_helm_values_pat=<github_pat_example>
+    source .env
     ```
 
 1. Initialize, plan and apply stage 0
@@ -70,7 +68,7 @@
     ```
     cd stage_00
     terraform init
-    terraform plan -var-file="../terraform.tfvars" -out="stage_00.plan"
+    terraform plan -out="stage_00.plan"
     terraform apply "stage_00.plan"
     ```
 
@@ -79,7 +77,7 @@
     ```
     cd ../stage_01
     terraform init
-    terraform plan -var-file="../terraform.tfvars" -out="stage_01.plan"
+    terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
     cd ..
     ```
@@ -100,7 +98,7 @@
     ```
     cd ../stage_02
     terraform init
-    terraform plan -var-file="../terraform.tfvars" -out="stage_02.plan"
+    terraform plan -out="stage_02.plan"
     terraform apply "stage_02.plan"
     cd ..
     ```
@@ -115,9 +113,9 @@
 
     ```
     cd stage_02
-    terraform destroy -var-file="../terraform.tfvars"
+    terraform destroy
     cd ../stage_01
-    terraform destroy -var-file="../terraform.tfvars"
+    terraform destroy
     cd ..
     ```
 

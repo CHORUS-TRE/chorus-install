@@ -1,5 +1,0 @@
-kubeconfig_path = "~/.kube/config"
-kubeconfig_context = "chorus-build"
-
-cluster_name = "chorus-build"
-chorus_charts_release = "0.1.0-alpha"
