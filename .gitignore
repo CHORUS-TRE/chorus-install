@@ -12,3 +12,4 @@
 **/tmp
 **/.terraform.lock.hcl
 **/*.tfstate.lock.info
+.env
