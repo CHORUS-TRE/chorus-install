@@ -24,6 +24,18 @@ terraform {
       source  = "keycloak/keycloak"
       version = "5.2.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.4"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.13.1"
+    }
+    htpasswd = {
+      source  = "loafoe/htpasswd"
+      version = "1.2.1"
+    }
   }
   # Provider functions require Terraform 1.8 and later.
   required_version = ">= 1.8.0"
