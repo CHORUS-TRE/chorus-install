@@ -21,6 +21,7 @@ resource "random_password" "argocd_robot_password" {
   special = false
   upper   = true
   lower   = true
+  numeric = true
 }
 
 resource "harbor_robot_account" "argocd" {
@@ -111,6 +112,7 @@ resource "random_password" "argoci_robot_password" {
   special = false
   upper   = true
   lower   = true
+  numeric = true
 }
 
 resource "harbor_robot_account" "argoci" {
