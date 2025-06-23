@@ -47,9 +47,6 @@
 
 ## Install
 
-> **_NOTE:_** Currently, the Helm charts from [CHORUS-TRE/chorus-tre/tree/master/charts](https://github.com/CHORUS-TRE/chorus-tre/tree/master/charts) and the Helm charts values from [CHORUS-TRE/environment-template/tree/master/chorus-build](https://github.com/CHORUS-TRE/environment-template/tree/master/chorus-build) were copied manually into the current repo. Those data will be fetched dynamically as soon as possible instead.
-
-
 1. Set variables for your usecase
 
     ```
