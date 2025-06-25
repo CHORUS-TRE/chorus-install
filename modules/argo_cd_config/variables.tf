@@ -37,3 +37,13 @@ variable "harbor_domain" {
   description = "Harbor OCI registry domain"
   type        = string
 }
+
+variable "kubeconfig_path" {
+  description = "Path to the Kubernetes config file"
+  type        = string
+}
+
+variable "kubeconfig_context" {
+  description = "Kubernetes context to use"
+  type        = string
+}

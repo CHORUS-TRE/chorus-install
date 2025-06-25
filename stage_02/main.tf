@@ -233,6 +233,8 @@ module "argocd_config" {
   oidc_endpoint        = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
   oidc_client_id       = var.argocd_keycloak_client_id
   oidc_client_secret   = random_password.argocd_keycloak_client_secret.result
+  kubeconfig_path      = var.kubeconfig_path
+  kubeconfig_context   = var.kubeconfig_context
 
   depends_on = [
     module.argo_cd,

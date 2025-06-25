@@ -32,6 +32,8 @@ resource "null_resource" "wait_for_argocd_server" {
     quiet = true
     command = <<EOT
       set -e
+      export KUBECONFIG
+      kubectl config use-context ${var.kubeconfig_context}
       for i in {1..30}; do
         READY=$(kubectl get pods -n ${local.argocd_namespace} -l app.kubernetes.io/name=argocd-server -o jsonpath="{.items[0].status.containerStatuses[0].ready}")
         if [ "$READY" = "true" ]; then
@@ -44,6 +46,9 @@ resource "null_resource" "wait_for_argocd_server" {
       echo "Timed out waiting for ArgoCD gRPC API" >&2
       exit 1
     EOT
+    environment = {
+      KUBECONFIG = pathexpand(var.kubeconfig_path)
+    }
   }
   triggers = {
     always_run = timestamp()
