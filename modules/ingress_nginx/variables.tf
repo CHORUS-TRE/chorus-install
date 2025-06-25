@@ -22,3 +22,13 @@ variable "helm_values" {
   description = "Ingress-Nginx Helm chart values"
   type        = string
 }
+
+variable "kubeconfig_path" {
+  description = "Path to the Kubernetes config file"
+  type        = string
+}
+
+variable "kubeconfig_context" {
+  description = "Kubernetes context to use"
+  type        = string
+}

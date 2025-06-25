@@ -32,6 +32,9 @@ module "ingress_nginx" {
   chart_name    = var.ingress_nginx_chart_name
   chart_version = local.release_desc.charts["${var.ingress_nginx_chart_name}"].version
   helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/values.yaml")
+
+  kubeconfig_path      = var.kubeconfig_path
+  kubeconfig_context   = var.kubeconfig_context
 }
 
 module "certificate_authorities" {

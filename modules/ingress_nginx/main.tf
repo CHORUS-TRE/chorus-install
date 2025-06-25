@@ -35,6 +35,8 @@ resource "null_resource" "wait_for_lb_ip" {
     quiet = true
     command = <<EOT
     set -e
+    export KUBECONFIG
+    kubectl config use-context ${var.kubeconfig_context}
     for i in {1..30}; do
       IP=$(kubectl get svc ${var.cluster_name}-${var.chart_name}-controller -n ${local.ingress_nginx_namespace} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
       if [ ! -z $IP ]; then
@@ -46,6 +48,9 @@ resource "null_resource" "wait_for_lb_ip" {
     echo "Timed out waiting for LoadBalancer IP" >&2
     exit 1
     EOT
+    environment = {
+      KUBECONFIG = pathexpand(var.kubeconfig_path)
+    }
   }
 }
 
