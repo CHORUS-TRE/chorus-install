@@ -8,10 +8,6 @@ cluster_name=chorus-build-t
 # atm I manually edit each pending challenge to remove its 
 # finalizers
 
-# ARGO-WORKFLOW
-kubie ns kube-system
-kubectl patch $(kubectl get challenges.acme.cert-manager.io -oname) --type=merge -p '{"metadata":{"finalizers":null}}'
-
 # ARGO-EVENTS
 kubie ns argo-events
 kubectl delete deployment chorus-build-t-argo-events-controller-manager
@@ -23,10 +19,16 @@ kubectl delete deployment $cluster_name-prometheus-blackbox-exporter
 challenges=$(kubectl get challenges.acme.cert-manager.io -oname)
 for challenge in $challenges; do
     kubectl patch $challenge --type=merge -p '{"metadata":{"finalizers":null}}'
+    kubectl delete $challenge
 done
 kubectl delete ns prometheus
 kubectl delete $(kubectl get crds -oname | grep coreos.com)
 kubectl delete $(kubectl get crds -oname | grep aquasecurity.github.io)
+
+# ARGO-WORKFLOW
+kubie ns kube-system
+kubectl patch $(kubectl get challenges.acme.cert-manager.io -oname) --type=merge -p '{"metadata":{"finalizers":null}}'
+kubectl delete $(kubectl get challenges.acme.cert-manager.io -oname)
 
 # TRIVY
 kubie ns trivy-system
