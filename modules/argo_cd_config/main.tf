@@ -23,10 +23,6 @@ resource "kubernetes_secret" "argocd_secret" {
   }
 }
 
-# TODO: debug the following block
-# it seems kubectl does not use the correct kubeconfig
-# it does work when one run terraform apply
-# within a kubie session though
 resource "null_resource" "wait_for_argocd_server" {
   provisioner "local-exec" {
     quiet = true
