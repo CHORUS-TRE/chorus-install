@@ -104,6 +104,8 @@
 
 1. Find all the URLs, usernames and passwords needed in the ```output.yaml``` file
 
+    > **_NOTE:_** As ArgoCD takes over the responsibility for the components that were already deployed (e.g. Keycloak, Harbor), their related services will experience a short unavailability period.
+
 ## Uninstall
 
 1. Destroy the infrastructure
