@@ -4,9 +4,8 @@ cluster_name=chorus-build-t
 
 # TODO
 # sometimes the challenges.acme.cert-manager.io
-# is stalling because some challenges are in pending state
-# atm I manually edit each pending challenge to remove its 
-# finalizers
+# is stalling because some challenges in the kube-system namespace
+# are in pending state
 
 # ARGO-EVENTS
 kubie ns argo-events
