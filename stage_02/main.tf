@@ -39,10 +39,27 @@ locals {
   argo_workflows_existing_sso_server_client_secret_key  = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.key
   argo_workflows_workflow_namespace                     = local.argo_workflows_values_parsed.argo-workflows.controller.workflowNamespaces.0
 
-  oauth2_proxy_valkey_values              = file("${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_valkey_chart_name}/values.yaml")
-  oauth2_proxy_valkey_values_parsed       = yamldecode(local.oauth2_proxy_valkey_values)
-  oauth2_proxy_valkey_existing_secret     = local.oauth2_proxy_valkey_values_parsed.valkey.auth.existingSecret
-  oauth2_proxy_valkey_existing_secret_key = local.oauth2_proxy_valkey_values_parsed.valkey.auth.existingSecretPasswordKey
+  alertmanager_oauth2_proxy_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json")).namespace
+  alertmanager_oauth2_proxy_values              = file("${var.helm_values_path}/${var.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml")
+  alertmanager_oauth2_proxy_values_parsed       = yamldecode(local.alertmanager_oauth2_proxy_values)
+  alertmanager_oauth2_proxy_existing_secret     = local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.existingSecret
+  alertmanager_oauth2_proxy_existing_secret_key = local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.passwordKey
+  alertmanager_url                              = "https://${local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
+  alertmanager_existing_oidc_secret             = local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.config.existingSecret
+
+  prometheus_oauth2_proxy_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json")).namespace
+  prometheus_oauth2_proxy_values              = file("${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml")
+  prometheus_oauth2_proxy_values_parsed       = yamldecode(local.prometheus_oauth2_proxy_values)
+  prometheus_oauth2_proxy_existing_secret     = local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.existingSecret
+  prometheus_oauth2_proxy_existing_secret_key = local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.passwordKey
+  prometheus_url                              = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
+  prometheus_existing_oidc_secret             = local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.config.existingSecret
+
+  valkey_oauth2_proxy_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.valkey_oauth2_proxy_chart_name}/config.json")).namespace
+  valkey_oauth2_proxy_values              = file("${var.helm_values_path}/${var.cluster_name}/${var.valkey_oauth2_proxy_chart_name}/values.yaml")
+  valkey_oauth2_proxy_values_parsed       = yamldecode(local.valkey_oauth2_proxy_values)
+  valkey_oauth2_proxy_existing_secret     = local.valkey_oauth2_proxy_values_parsed.valkey.auth.existingSecret
+  valkey_oauth2_proxy_existing_secret_key = local.valkey_oauth2_proxy_values_parsed.valkey.auth.existingSecretPasswordKey
 
   harbor_keycloak_client_config = {
     "${var.harbor_keycloak_client_id}" = {
@@ -89,6 +106,30 @@ locals {
       web_origins         = [local.grafana_url]
       valid_redirect_uris = [join("/", [local.grafana_url, "login/generic_oauth"])]
       client_group        = var.grafana_keycloak_oidc_admin_group
+    }
+  }
+
+  alertmanager_keycloak_client_config = {
+    "${var.alertmanager_keycloak_client_id}" = {
+      client_secret       = random_password.alertmanager_keycloak_client_secret.result
+      root_url            = local.alertmanager_url
+      base_url            = var.alertmanager_keycloak_base_url
+      admin_url           = local.alertmanager_url
+      web_origins         = [local.alertmanager_url]
+      valid_redirect_uris = [join("/", [local.alertmanager_url, "*"])]
+      client_group        = var.alertmanager_keycloak_oidc_admin_group
+    }
+  }
+
+  prometheus_keycloak_client_config = {
+    "${var.prometheus_keycloak_client_id}" = {
+      client_secret       = random_password.prometheus_keycloak_client_secret.result
+      root_url            = local.prometheus_url
+      base_url            = var.prometheus_keycloak_base_url
+      admin_url           = local.prometheus_url
+      web_origins         = [local.prometheus_url]
+      valid_redirect_uris = [join("/", [local.prometheus_url, "*"]), join("/", [local.alertmanager_url, "*"])]
+      client_group        = var.prometheus_keycloak_oidc_admin_group
     }
   }
 }
@@ -152,12 +193,48 @@ resource "random_password" "grafana_keycloak_client_secret" {
   special = false
 }
 
+resource "random_password" "alertmanager_keycloak_client_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "prometheus_keycloak_client_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "alertmanager_cookie_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "prometheus_cookie_secret" {
+  length  = 32
+  special = false
+}
+
 resource "random_password" "grafana_admin_password" {
   length  = 32
   special = false
 }
 
-resource "random_password" "oauth2_proxy_valkey_secret" {
+# TODO: DEBUG
+# [2025/06/26 15:48:02] [main.go:53] invalid configuration:
+#  unable to set a redis initialization key: WRONGPASS invalid username-password pair or user is disabled.
+#  unable to delete the redis initialization key: WRONGPASS invalid username-password pair or user is disabled.
+# My guess: we need to feed the Valkey password instead of creating new ones
+
+resource "random_password" "valkey_oauth2_proxy_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "alertmanager_oauth2_proxy_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "prometheus_oauth2_proxy_secret" {
   length  = 32
   special = false
 }
@@ -257,15 +334,65 @@ resource "kubernetes_secret" "argo_workflows_oidc_client_secret" {
   count = local.argo_workflows_existing_sso_server_client_secret_name != local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
 }
 
-# Keycloak oauth2-proxy-valkey
-resource "kubernetes_secret" "oauth2_proxy_valkey_secret" {
+# Alertmanager-oauth2-proxy
+resource "kubernetes_secret" "alertmanager_oauth2_proxy_secret" {
   metadata {
-    name      = local.oauth2_proxy_valkey_existing_secret
-    namespace = local.keycloak_namespace
+    name      = local.alertmanager_oauth2_proxy_existing_secret
+    namespace = local.alertmanager_oauth2_proxy_namespace
   }
 
   data = {
-    "${local.oauth2_proxy_valkey_existing_secret_key}" = random_password.oauth2_proxy_valkey_secret.result
+    "${local.alertmanager_oauth2_proxy_existing_secret_key}" = random_password.alertmanager_oauth2_proxy_secret.result
+  }
+}
+
+resource "kubernetes_secret" "alertmanager_oidc_secret" {
+  metadata {
+    name      = local.alertmanager_existing_oidc_secret
+    namespace = local.alertmanager_oauth2_proxy_namespace
+  }
+
+  data = {
+    "cookie-secret" = random_password.alertmanager_cookie_secret.result
+    "client-id"     = var.alertmanager_keycloak_client_id
+    "client-secret" = random_password.alertmanager_keycloak_client_secret.result
+  }
+}
+
+# Prometheus oauth2 proxy
+resource "kubernetes_secret" "prometheus_oauth2_proxy_secret" {
+  metadata {
+    name      = local.prometheus_oauth2_proxy_existing_secret
+    namespace = local.prometheus_oauth2_proxy_namespace
+  }
+
+  data = {
+    "${local.prometheus_oauth2_proxy_existing_secret_key}" = random_password.prometheus_oauth2_proxy_secret.result
+  }
+}
+
+resource "kubernetes_secret" "prometheus_oidc_secret" {
+  metadata {
+    name      = local.prometheus_existing_oidc_secret
+    namespace = local.prometheus_oauth2_proxy_namespace
+  }
+
+  data = {
+    "cookie-secret" = random_password.prometheus_cookie_secret.result
+    "client-id"     = var.prometheus_keycloak_client_id
+    "client-secret" = random_password.prometheus_keycloak_client_secret.result
+  }
+}
+
+# Valkey oauth2 proxy
+resource "kubernetes_secret" "valkey_oauth2_proxy_secret" {
+  metadata {
+    name      = local.valkey_oauth2_proxy_existing_secret
+    namespace = local.valkey_oauth2_proxy_namespace
+  }
+
+  data = {
+    "${local.valkey_oauth2_proxy_existing_secret_key}" = random_password.valkey_oauth2_proxy_secret.result
   }
 }
 
@@ -284,7 +411,9 @@ module "keycloak_config" {
     local.harbor_keycloak_client_config,
     local.argocd_keycloak_client_config,
     local.argo_workflows_keycloak_client_config,
-    local.grafana_keycloak_client_config
+    local.grafana_keycloak_client_config,
+    local.alertmanager_keycloak_client_config,
+    local.prometheus_keycloak_client_config
   )
 }
 

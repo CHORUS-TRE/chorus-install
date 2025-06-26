@@ -79,10 +79,22 @@ variable "valkey_chart_name" {
   default     = "valkey"
 }
 
-variable "oauth2_proxy_valkey_chart_name" {
-  description = "OAuth2 Proxy Valkey Helm chart name"
+variable "valkey_oauth2_proxy_chart_name" {
+  description = "Valkey OAuth2 Proxy Helm chart name"
   type        = string
   default     = "oauth2-proxy-valkey"
+}
+
+variable "alertmanager_oauth2_proxy_chart_name" {
+  description = "Alertmanager OAuth2 Proxy Helm chart name"
+  type        = string
+  default     = "alertmanager-oauth2-proxy"
+}
+
+variable "prometheus_oauth2_proxy_chart_name" {
+  description = "Prometheus OAuth2 Proxy Helm chart name"
+  type        = string
+  default     = "prometheus-oauth2-proxy"
 }
 
 variable "harbor_chart_name" {
@@ -169,6 +181,18 @@ variable "grafana_keycloak_client_id" {
   default     = "grafana"
 }
 
+variable "alertmanager_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Alertmanager"
+  type        = string
+  default     = "alertmanager"
+}
+
+variable "prometheus_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Prometheus"
+  type        = string
+  default     = "prometheus"
+}
+
 variable "harbor_keycloak_oidc_admin_group" {
   description = "Keycloak OIDC admin group assigned to Harbor"
   type        = string
@@ -193,6 +217,18 @@ variable "grafana_keycloak_oidc_admin_group" {
   default     = "GrafanaAdmins"
 }
 
+variable "alertmanager_keycloak_oidc_admin_group" {
+  description = "Keycloak OIDC admin group assigned to Alertmanager"
+  type        = string
+  default     = "AlertmanagerAdmins"
+}
+
+variable "prometheus_keycloak_oidc_admin_group" {
+  description = "Keycloak OIDC admin group assigned to Prometheus"
+  type        = string
+  default     = "PrometheusAdmins"
+}
+
 variable "harbor_keycloak_base_url" {
   description = "Harbor base URL or home URL for the Keycloak auth server to redirect to"
   type        = string
@@ -213,6 +249,18 @@ variable "argo_workflows_keycloak_base_url" {
 
 variable "grafana_keycloak_base_url" {
   description = "Grafana base URL or home URL for the Keycloak auth server to redirect to"
+  type        = string
+  default     = "/"
+}
+
+variable "alertmanager_keycloak_base_url" {
+  description = "Alertmanager base URL or home URL for the Keycloak auth server to redirect to"
+  type        = string
+  default     = "/"
+}
+
+variable "prometheus_keycloak_base_url" {
+  description = "Prometheus base URL or home URL for the Keycloak auth server to redirect to"
   type        = string
   default     = "/"
 }
