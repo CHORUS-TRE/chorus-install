@@ -50,6 +50,7 @@ data "external" "charts_versions" {
 
 resource "null_resource" "fetch_cert_manager_app_version" {
   provisioner "local-exec" {
+    quiet   = true
     command = <<EOT
       set -ex
       mkdir -p ${path.module}/tmp
