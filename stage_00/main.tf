@@ -22,7 +22,7 @@ resource "null_resource" "fetch_helm_charts_values" {
     EOT
   }
   triggers = {
-    chart_release = var.chorus_release
+    always_run = timestamp()
   }
 }
 
