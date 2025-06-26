@@ -61,6 +61,12 @@ variable "argocd_chart_name" {
   default     = "argo-cd"
 }
 
+variable "argo_workflows_chart_name" {
+  description = "Argo Workflows Helm chart name"
+  type        = string
+  default     = "argo-workflows"
+}
+
 variable "argo_deploy_chart_name" {
   description = "Name of the Helm chart holding the CHORUS AppProject and ApplicationSet"
   type        = string
@@ -71,6 +77,12 @@ variable "valkey_chart_name" {
   description = "Valkey Helm chart name"
   type        = string
   default     = "valkey"
+}
+
+variable "oauth2_proxy_valkey_chart_name" {
+  description = "OAuth2 Proxy Valkey Helm chart name"
+  type        = string
+  default     = "oauth2-proxy-valkey"
 }
 
 variable "harbor_chart_name" {
@@ -145,6 +157,12 @@ variable "argocd_keycloak_client_id" {
   default     = "argocd"
 }
 
+variable "argo_workflows_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Argo Workflows"
+  type        = string
+  default     = "argo-wrokflows"
+}
+
 variable "grafana_keycloak_client_id" {
   description = "Keycloak client ID used assigned to Grafana"
   type        = string
@@ -163,10 +181,16 @@ variable "argocd_keycloak_oidc_admin_group" {
   default     = "ArgoCDAdmins"
 }
 
+variable "argo_workflows_keycloak_oidc_admin_group" {
+  description = "Keycloak OIDC admin group assigned to Argo Workflows"
+  type        = string
+  default     = "ArgoWorkflowsAdmins"
+}
+
 variable "grafana_keycloak_oidc_admin_group" {
   description = "Keycloak OIDC admin group assigned to Grafana"
   type        = string
-  default     = "Grafana"
+  default     = "GrafanaAdmins"
 }
 
 variable "harbor_keycloak_base_url" {
@@ -179,6 +203,12 @@ variable "argocd_keycloak_base_url" {
   description = "ArgoCD base URL or home URL for the Keycloak auth server to redirect to"
   type        = string
   default     = "/applications"
+}
+
+variable "argo_workflows_keycloak_base_url" {
+  description = "Argo Workflows base URL or home URL for the Keycloak auth server to redirect to"
+  type        = string
+  default     = "/workflows/argo"
 }
 
 variable "grafana_keycloak_base_url" {
