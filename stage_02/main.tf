@@ -28,6 +28,22 @@ locals {
   grafana_existing_oauth_client_secret     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
   grafana_existing_oauth_client_secret_key = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
 
+  argo_workflows_values                                 = file("${var.helm_values_path}/${var.cluster_name}/${var.argo_workflows_chart_name}/values.yaml")
+  argo_workflows_values_parsed                          = yamldecode(local.argo_workflows_values)
+  argo_workflows_url                                    = "https://${local.argo_workflows_values_parsed.argo-workflows.server.ingress.hosts.0}"
+  argo_workflows_redirect_uri                           = local.argo_workflows_values_parsed.argo-workflows.server.sso.redirectUrl
+  argo_workflows_namespace                              = "kube-system" # TODO: read all namespaces from the helm charts config.json
+  argo_workflows_existing_sso_server_client_id_name     = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.name
+  argo_workflows_existing_sso_server_client_id_key      = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.key
+  argo_workflows_existing_sso_server_client_secret_name = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.name
+  argo_workflows_existing_sso_server_client_secret_key  = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.key
+  argo_workflows_workflow_namespace                     = local.argo_workflows_values_parsed.argo-workflows.controller.workflowNamespaces.0
+
+  oauth2_proxy_valkey_values              = file("${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_valkey_chart_name}/values.yaml")
+  oauth2_proxy_valkey_values_parsed       = yamldecode(local.oauth2_proxy_valkey_values)
+  oauth2_proxy_valkey_existing_secret     = local.oauth2_proxy_valkey_values_parsed.valkey.auth.existingSecret
+  oauth2_proxy_valkey_existing_secret_key = local.oauth2_proxy_valkey_values_parsed.valkey.auth.existingSecretPasswordKey
+
   harbor_keycloak_client_config = {
     "${var.harbor_keycloak_client_id}" = {
       client_secret       = local.harbor_keycloak_client_secret
@@ -49,6 +65,18 @@ locals {
       web_origins         = [module.argo_cd.argocd_url]
       valid_redirect_uris = [join("/", [module.argo_cd.argocd_url, "auth/callback"])]
       client_group        = var.argocd_keycloak_oidc_admin_group
+    }
+  }
+
+  argo_workflows_keycloak_client_config = {
+    "${var.argo_workflows_keycloak_client_id}" = {
+      client_secret       = random_password.argo_workflows_keycloak_client_secret.result
+      root_url            = local.argo_workflows_url
+      base_url            = var.argo_workflows_keycloak_base_url
+      admin_url           = local.argo_workflows_url
+      web_origins         = [local.argo_workflows_url]
+      valid_redirect_uris = [local.argo_workflows_redirect_uri]
+      client_group        = var.argo_workflows_keycloak_oidc_admin_group
     }
   }
 
@@ -114,12 +142,22 @@ resource "random_password" "argocd_keycloak_client_secret" {
   special = false
 }
 
+resource "random_password" "argo_workflows_keycloak_client_secret" {
+  length  = 32
+  special = false
+}
+
 resource "random_password" "grafana_keycloak_client_secret" {
   length  = 32
   special = false
 }
 
 resource "random_password" "grafana_admin_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "oauth2_proxy_valkey_secret" {
   length  = 32
   special = false
 }
@@ -155,17 +193,80 @@ resource "kubernetes_namespace" "grafana" {
 
 resource "kubernetes_secret" "grafana_oauth_client_secret" {
   metadata {
-    name = local.grafana_existing_oauth_client_secret
+    name      = local.grafana_existing_oauth_client_secret
     namespace = local.grafana_namespace
   }
 
   data = {
-    "admin-password" = random_password.grafana_admin_password.result
-    "admin-user" = var.grafana_admin_username
+    "admin-password"                                    = random_password.grafana_admin_password.result
+    "admin-user"                                        = var.grafana_admin_username
     "${local.grafana_existing_oauth_client_secret_key}" = random_password.grafana_keycloak_client_secret.result
   }
 
-  depends_on = [ kubernetes_namespace.grafana ]
+  depends_on = [kubernetes_namespace.grafana]
+}
+
+# Argo Workflows
+
+# Given Argo Workflows values.yaml file,
+# the SSO server clientId and clientSecret
+# are potentially stored in two different secrets
+# we use Terraform's "count" with conditional check
+# to account for each case
+
+resource "kubernetes_namespace" "argo" {
+  metadata {
+    name = local.argo_workflows_workflow_namespace
+  }
+}
+
+resource "kubernetes_secret" "argo_workflows_oidc_client_id_and_secret" {
+  metadata {
+    name      = local.argo_workflows_existing_sso_server_client_id_name
+    namespace = local.argo_workflows_namespace
+  }
+
+  data = {
+    "${local.argo_workflows_existing_sso_server_client_id_key}"     = var.argo_workflows_keycloak_client_id
+    "${local.argo_workflows_existing_sso_server_client_secret_key}" = random_password.argo_workflows_keycloak_client_secret.result
+  }
+  count = local.argo_workflows_existing_sso_server_client_secret_name == local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
+}
+
+resource "kubernetes_secret" "argo_workflows_oidc_client_id" {
+  metadata {
+    name      = local.argo_workflows_existing_sso_server_client_id_name
+    namespace = local.argo_workflows_namespace
+  }
+
+  data = {
+    "${local.argo_workflows_existing_sso_server_client_id_key}" = var.argo_workflows_keycloak_client_id
+  }
+  count = local.argo_workflows_existing_sso_server_client_secret_name != local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
+}
+
+resource "kubernetes_secret" "argo_workflows_oidc_client_secret" {
+  metadata {
+    name      = local.argo_workflows_existing_sso_server_client_secret_name
+    namespace = local.argo_workflows_namespace
+  }
+
+  data = {
+    "${local.argo_workflows_existing_sso_server_client_secret_key}" = random_password.argo_workflows_keycloak_client_secret.result
+  }
+  count = local.argo_workflows_existing_sso_server_client_secret_name != local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
+}
+
+# Keycloak oauth2-proxy-valkey
+resource "kubernetes_secret" "oauth2_proxy_valkey_secret" {
+  metadata {
+    name      = local.oauth2_proxy_valkey_existing_secret
+    namespace = local.keycloak_namespace
+  }
+
+  data = {
+    "${local.oauth2_proxy_valkey_existing_secret_key}" = random_password.oauth2_proxy_valkey_secret.result
+  }
 }
 
 # Install charts
@@ -181,7 +282,9 @@ module "keycloak_config" {
   realm_name = var.keycloak_realm
   clients_config = merge(
     local.harbor_keycloak_client_config,
-    local.argocd_keycloak_client_config
+    local.argocd_keycloak_client_config,
+    local.argo_workflows_keycloak_client_config,
+    local.grafana_keycloak_client_config
   )
 }
 
