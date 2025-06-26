@@ -231,19 +231,6 @@ module "argo_cd" {
   harbor_robot_password                 = module.harbor_config.argocd_robot_password
 }
 
-
-provider "argocd" {
-  alias       = "argocdadmin_provider"
-  username    = module.argo_cd.argocd_username
-  password    = module.argo_cd.argocd_password
-  server_addr = join("", [replace(module.argo_cd.argocd_url, "https://", ""), ":443"])
-  # Ignoring certificate errors
-  # because it might take some times
-  # for certificates to be signed
-  # by a trusted authority
-  insecure = true
-}
-
 resource "null_resource" "wait_for_argocd" {
   provisioner "local-exec" {
     quiet   = true
@@ -271,10 +258,6 @@ resource "null_resource" "wait_for_argocd" {
 
 module "argocd_config" {
   source = "../modules/argo_cd_config"
-
-  providers = {
-    argocd = argocd.argocdadmin_provider
-  }
 
   cluster_name       = var.cluster_name
   kubeconfig_path    = var.kubeconfig_path
