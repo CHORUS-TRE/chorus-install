@@ -21,6 +21,13 @@ locals {
   keycloak_admin_password                     = data.kubernetes_secret.keycloak_existing_admin_password.data["${local.keycloak_existing_admin_password_secret_key}"]
   keycloak_url                                = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
+  kube_prometheus_stack_values             = file("${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
+  kube_prometheus_stack_values_parsed      = yamldecode(local.kube_prometheus_stack_values)
+  grafana_namespace                        = "prometheus" # TODO: read all namespaces from the helm charts config.json
+  grafana_url                              = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
+  grafana_existing_oauth_client_secret     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
+  grafana_existing_oauth_client_secret_key = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
+
   harbor_keycloak_client_config = {
     "${var.harbor_keycloak_client_id}" = {
       client_secret       = local.harbor_keycloak_client_secret
@@ -42,6 +49,18 @@ locals {
       web_origins         = [module.argo_cd.argocd_url]
       valid_redirect_uris = [join("/", [module.argo_cd.argocd_url, "auth/callback"])]
       client_group        = var.argocd_keycloak_oidc_admin_group
+    }
+  }
+
+  grafana_keycloak_client_config = {
+    "${var.grafana_keycloak_client_id}" = {
+      client_secret       = random_password.grafana_keycloak_client_secret.result
+      root_url            = local.grafana_url
+      base_url            = var.grafana_keycloak_base_url
+      admin_url           = local.grafana_url
+      web_origins         = [local.grafana_url]
+      valid_redirect_uris = [join("/", [local.grafana_url, "login/generic_oauth"])]
+      client_group        = var.grafana_keycloak_oidc_admin_group
     }
   }
 }
@@ -95,6 +114,16 @@ resource "random_password" "argocd_keycloak_client_secret" {
   special = false
 }
 
+resource "random_password" "grafana_keycloak_client_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "grafana_admin_password" {
+  length  = 32
+  special = false
+}
+
 data "kubernetes_secret" "harbor_existing_admin_password" {
   metadata {
     name      = local.harbor_existing_admin_password_secret
@@ -114,6 +143,29 @@ data "kubernetes_secret" "harbor_oidc" {
     name      = local.harbor_existing_oidc_secret
     namespace = local.harbor_namespace
   }
+}
+
+# Grafana
+
+resource "kubernetes_namespace" "grafana" {
+  metadata {
+    name = local.grafana_namespace
+  }
+}
+
+resource "kubernetes_secret" "grafana_oauth_client_secret" {
+  metadata {
+    name = local.grafana_existing_oauth_client_secret
+    namespace = local.grafana_namespace
+  }
+
+  data = {
+    "admin-password" = random_password.grafana_admin_password.result
+    "admin-user" = var.grafana_admin_username
+    "${local.grafana_existing_oauth_client_secret_key}" = random_password.grafana_keycloak_client_secret.result
+  }
+
+  depends_on = [ kubernetes_namespace.grafana ]
 }
 
 # Install charts
@@ -198,8 +250,7 @@ resource "null_resource" "wait_for_argocd" {
     command = <<EOT
       set -e
       for i in {1..30}; do
-        response_code=$(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz)
-        if [ "$response_code" -eq 200 ]; then
+        if [ $(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz) -eq 200 ]; then
           exit 0
         else
           echo "Waiting for ArgoCD... ($i)"
@@ -225,16 +276,23 @@ module "argocd_config" {
     argocd = argocd.argocdadmin_provider
   }
 
-  cluster_name         = var.cluster_name
+  cluster_name       = var.cluster_name
+  kubeconfig_path    = var.kubeconfig_path
+  kubeconfig_context = var.kubeconfig_context
+
   argocd_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
   helm_values_url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
   helm_values_revision = var.chorus_release
-  harbor_domain        = replace(local.harbor_url, "https://", "")
-  oidc_endpoint        = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
-  oidc_client_id       = var.argocd_keycloak_client_id
-  oidc_client_secret   = random_password.argocd_keycloak_client_secret.result
-  kubeconfig_path      = var.kubeconfig_path
-  kubeconfig_context   = var.kubeconfig_context
+  helm_registry        = var.helm_registry
+
+  argo_deploy_chart_name    = var.argo_deploy_chart_name
+  argo_deploy_chart_version = local.release_desc_parsed.charts["${var.argo_deploy_chart_name}"].version
+  argo_deploy_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/values.yaml")
+
+  harbor_domain      = replace(local.harbor_url, "https://", "")
+  oidc_endpoint      = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
+  oidc_client_id     = var.argocd_keycloak_client_id
+  oidc_client_secret = random_password.argocd_keycloak_client_secret.result
 
   depends_on = [
     module.argo_cd,

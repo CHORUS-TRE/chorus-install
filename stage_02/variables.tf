@@ -50,27 +50,39 @@ variable "helm_values_path" {
 }
 
 variable "helm_values_pat" {
-  description = "Fine-grained personal access token (PAT) to access the environments repository"
+  description = "Fine-grained personal access token (PAT) to access the Helm chart values repository (e.g. CHORUS-TRE/environment-template)"
   type        = string
   sensitive   = true
 }
 
 variable "argocd_chart_name" {
-  description = "ArgoCD Helm chart folder name"
+  description = "ArgoCD Helm chart name"
   type        = string
   default     = "argo-cd"
 }
 
+variable "argo_deploy_chart_name" {
+  description = "Name of the Helm chart holding the CHORUS AppProject and ApplicationSet"
+  type        = string
+  default     = "argo-deploy"
+}
+
 variable "valkey_chart_name" {
-  description = "Valkey Helm chart folder name"
+  description = "Valkey Helm chart name"
   type        = string
   default     = "valkey"
 }
 
 variable "harbor_chart_name" {
-  description = "Harbor Helm chart folder name"
+  description = "Harbor Helm chart name"
   type        = string
   default     = "harbor"
+}
+
+variable "kube_prometheus_stack_chart_name" {
+  description = "Kube Prometheus stack Helm chart name (i.e. Prometheus, Alertmanager, Grafana)"
+  type        = string
+  default     = "kube-prometheus-stack"
 }
 
 variable "github_orga" {
@@ -133,16 +145,28 @@ variable "argocd_keycloak_client_id" {
   default     = "argocd"
 }
 
+variable "grafana_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Grafana"
+  type        = string
+  default     = "grafana"
+}
+
 variable "harbor_keycloak_oidc_admin_group" {
-  description = "Keycloak client ID used assigned to Harbor"
+  description = "Keycloak OIDC admin group assigned to Harbor"
   type        = string
   default     = "HarborAdmins"
 }
 
 variable "argocd_keycloak_oidc_admin_group" {
-  description = "Keycloak client ID used assigned to ArgoCD"
+  description = "Keycloak OIDC admin group assigned to ArgoCD"
   type        = string
   default     = "ArgoCDAdmins"
+}
+
+variable "grafana_keycloak_oidc_admin_group" {
+  description = "Keycloak OIDC admin group assigned to Grafana"
+  type        = string
+  default     = "Grafana"
 }
 
 variable "harbor_keycloak_base_url" {
@@ -157,8 +181,20 @@ variable "argocd_keycloak_base_url" {
   default     = "/applications"
 }
 
+variable "grafana_keycloak_base_url" {
+  description = "Grafana base URL or home URL for the Keycloak auth server to redirect to"
+  type        = string
+  default     = "/"
+}
+
 variable "harbor_admin_username" {
   description = "Harbor admin username"
+  type        = string
+  default     = "admin"
+}
+
+variable "grafana_admin_username" {
+  description = "Grafana admin username"
   type        = string
   default     = "admin"
 }
