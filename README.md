@@ -25,6 +25,7 @@
 | [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl)  | Kubernetes command-line tool kubectl is required to run commands against Kubernetes clusters                                                                                                                    |
 | [helm 3](https://github.com/helm/helm#install)                     | Helm Charts are used to package Kubernetes resources for each component |
 | [terraform](https://developer.hashicorp.com/terraform/install)                     | Terraform is used to automate the installation |
+| [yq](https://mikefarah.gitbook.io/yq#install)                     | yq is a lightweight and portable command-line YAML processor |
 <!--
 | [argocd cli](https://argo-cd.readthedocs.io/en/stable/cli_installation)                     | ArgoCD CLI is required to manage the CHORUS-TRE ArgoCD instance |
 | [argo cli](https://argo-workflows.readthedocs.io/en/stable/walk-through/argo-cli/)                            | Argo-Workflows CLI is required to manage CI jobs |
@@ -46,35 +47,34 @@
 
 ## Install
 
-> **_NOTE:_** Currently, the Helm charts from [CHORUS-TRE/chorus-tre/tree/master/charts](https://github.com/CHORUS-TRE/chorus-tre/tree/master/charts) and the Helm charts values from [CHORUS-TRE/environment-template/tree/master/chorus-build](https://github.com/CHORUS-TRE/environment-template/tree/master/chorus-build) were copied manually into the current repo. Those data will be fetched dynamically as soon as possible instead.
-
-
 1. Set variables for your usecase
 
     ```
-    cp terraform.tfvars.example terraform.tfvars
+    cp .env.example .env
     ```
 
     Edit this file as needed.
 
-1. Set sensitive variables for your usecase
+1. Source your env file
     ```
-    export TF_VAR_github_environments_repository_pat=<github_pat_example>
+    source .env
     ```
 
-1. Pull the necessary Helm charts dependencies
+1. Initialize, plan and apply stage 0
 
     ```
-    chmod +x ./scripts/pull_helm_charts_dependencies.sh && \
-    ./scripts/pull_helm_charts_dependencies.sh ./charts
+    cd stage_00
+    terraform init
+    terraform plan -out="stage_00.plan"
+    terraform apply "stage_00.plan"
     ```
 
 1. Initialize, plan and apply stage 1
 
     ```
-    cd stage_01
+    cd ../stage_01
     terraform init
-    terraform plan -var-file="../terraform.tfvars" -out="stage_01.plan"
+    terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
     cd ..
     ```
@@ -95,7 +95,7 @@
     ```
     cd ../stage_02
     terraform init
-    terraform plan -var-file="../terraform.tfvars" -out="stage_02.plan"
+    terraform plan -out="stage_02.plan"
     terraform apply "stage_02.plan"
     cd ..
     ```
@@ -104,15 +104,17 @@
 
 1. Find all the URLs, usernames and passwords needed in the ```output.yaml``` file
 
+    > **_NOTE:_** As ArgoCD takes over the responsibility for the components that were already deployed (e.g. Keycloak, Harbor), their related services will experience a short unavailability period.
+
 ## Uninstall
 
 1. Destroy the infrastructure
 
     ```
     cd stage_02
-    terraform destroy -var-file="../terraform.tfvars"
+    terraform destroy
     cd ../stage_01
-    terraform destroy -var-file="../terraform.tfvars"
+    terraform destroy
     cd ..
     ```
 

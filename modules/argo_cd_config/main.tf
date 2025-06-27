@@ -1,7 +1,6 @@
 # Read values
 locals {
-  argocd_values = file("${path.module}/${var.argocd_helm_values_path}")
-  argocd_values_parsed = yamldecode(local.argocd_values)
+  argocd_values_parsed = yamldecode(var.argocd_helm_values)
   argocd_namespace = local.argocd_values_parsed.argo-cd.namespaceOverride
   argocd_oidc_config = yamldecode(local.argocd_values_parsed.argo-cd.configs.cm["oidc.config"])
   argocd_oidc_secret = regex("\\$(.*?):", local.argocd_oidc_config.clientSecret).0
@@ -24,20 +23,13 @@ resource "kubernetes_secret" "argocd_secret" {
   }
 }
 
-# TODO: debug the following block
-# it seems kubectl does not use the correct kubeconfig
-# it does work when one run terraform apply
-# within a kubie session though
 resource "null_resource" "wait_for_argocd_server" {
-
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     quiet = true
     command = <<EOT
       set -e
+      export KUBECONFIG
+      kubectl config use-context ${var.kubeconfig_context}
       for i in {1..30}; do
         READY=$(kubectl get pods -n ${local.argocd_namespace} -l app.kubernetes.io/name=argocd-server -o jsonpath="{.items[0].status.containerStatuses[0].ready}")
         if [ "$READY" = "true" ]; then
@@ -50,6 +42,12 @@ resource "null_resource" "wait_for_argocd_server" {
       echo "Timed out waiting for ArgoCD gRPC API" >&2
       exit 1
     EOT
+    environment = {
+      KUBECONFIG = pathexpand(var.kubeconfig_path)
+    }
+  }
+  triggers = {
+    always_run = timestamp()
   }
 }
 
@@ -98,8 +96,8 @@ resource "argocd_application_set" "chorus_build_test" {
     go_template_options = [ "missingkey=error" ]
     generator {
       git {
-        repo_url = var.github_environments_repository_url
-        revision = var.github_environments_repository_revision
+        repo_url = var.helm_values_url
+        revision = var.helm_values_revision
         file {
           path = "${var.cluster_name}/*/config.json"
         }
@@ -143,7 +141,7 @@ resource "argocd_application_set" "chorus_build_test" {
       spec {
         project = var.cluster_name
         source {
-          repo_url = var.helm_chart_repository_url
+          repo_url = var.harbor_domain
           chart = "charts/{{ trimPrefix \"charts/\" .chart }}"
           target_revision = "{{.version}}"
           helm {
@@ -151,8 +149,8 @@ resource "argocd_application_set" "chorus_build_test" {
           }
         }
         source {
-          repo_url = var.github_environments_repository_url
-          target_revision = var.github_environments_repository_revision
+          repo_url = var.helm_values_url
+          target_revision = var.helm_values_revision
           ref = "values"
         }
         destination {

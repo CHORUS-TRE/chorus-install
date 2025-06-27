@@ -20,22 +20,38 @@ variable "kubeconfig_context" {
   type        = string
 }
 
-variable "github_environments_repository_pat" {
-  description = "Fine-grained personal access token (PAT) to access the environments repository"
+variable "chorus_release" {
+  description = "CHORUS-TRE release to install"
   type        = string
-  sensitive   = true
+  default     = "v0.1.0-alpha"
 }
 
-variable "helm_chart_path" {
-  description = "Path to the repository storing the Helm charts"
+variable "helm_registry" {
+  description = "CHORUS Helm chart registry"
   type        = string
-  default     = "../charts"
+}
+
+variable "helm_registry_username" {
+  description = "Username to connect to the CHORUS Helm chart registry"
+  type        = string
+}
+
+variable "helm_registry_password" {
+  description = "Password to connect to the CHORUS Helm chart registry"
+  type        = string
+  sensitive   = true
 }
 
 variable "helm_values_path" {
   description = "Path to the repository storing the Helm chart values"
   type        = string
   default     = "../values"
+}
+
+variable "helm_values_pat" {
+  description = "Fine-grained personal access token (PAT) to access the environments repository"
+  type        = string
+  sensitive   = true
 }
 
 variable "argocd_chart_name" {
@@ -56,20 +72,20 @@ variable "harbor_chart_name" {
   default     = "harbor"
 }
 
-variable "github_environments_repository_url" {
-  description = "Environments repository URL"
+variable "github_orga" {
+  description = "GitHub organization to use repositories from"
   type        = string
-  default     = "https://github.com/CHORUS-TRE/environment-template"
+  default     = "CHORUS-TRE"
 }
 
-variable "github_environments_repository_revision" {
-  description = "Environments repository revision"
+variable "helm_values_repo" {
+  description = "GitHub repository to get the Helm charts values from"
   type        = string
-  default     = "HEAD"
+  default     = "environment-template"
 }
 
-variable "github_environments_repository_secret" {
-  description = "Secret to store the GitHub credentials in for ArgoCD"
+variable "helm_values_credentials_secret" {
+  description = "Secret to store the Helm charts values repository credentials in for ArgoCD"
   type        = string
   default     = "argo-cd-github-environments"
 }
@@ -101,6 +117,7 @@ variable "keycloak_realm" {
 variable "keycloak_admin_username" {
   description = "Keycloak admin username"
   type        = string
+  default     = "admin"
 }
 
 variable "harbor_keycloak_client_id" {
@@ -142,9 +159,5 @@ variable "argocd_keycloak_base_url" {
 variable "harbor_admin_username" {
   description = "Harbor admin username"
   type        = string
-}
-
-variable "chorus_charts_revision" {
-  description = "Revision of the CHORUS-TRE/chorus-tre repository to get the Helm charts to upload to Harbor"
-  type        = string
+  default     = "admin"
 }

@@ -1,11 +1,16 @@
-variable "argocd_helm_values_path" {
-  description = "Path to the ArgoCD Helm chart values"
-  type        = string
-}
-
 variable "cluster_name" {
   description = "The cluster name to be used as a prefix to release names"
   type        = string
+}
+
+variable "argocd_helm_values" {
+  description = "ArgoCD Helm chart values"
+  type        = string
+}
+
+variable "helm_values_url" {
+  description = "Repository where to get the Helm charts values from"
+  type = string
 }
 
 variable "oidc_endpoint" {
@@ -23,17 +28,22 @@ variable "oidc_client_secret" {
   type        = string
 }
 
-variable "github_environments_repository_url" {
-  description = "URL of the environments repository"
+variable "helm_values_revision" {
+  description = "Helm charts values repository revision"
   type        = string
 }
 
-variable "github_environments_repository_revision" {
-  description = "Revision of the environments repository"
+variable "harbor_domain" {
+  description = "Harbor OCI registry domain"
   type        = string
 }
 
-variable "helm_chart_repository_url" {
-  description = "URL of the Helm chart repository"
+variable "kubeconfig_path" {
+  description = "Path to the Kubernetes config file"
+  type        = string
+}
+
+variable "kubeconfig_context" {
+  description = "Kubernetes context to use"
   type        = string
 }

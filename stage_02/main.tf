@@ -1,25 +1,25 @@
 locals {
-  harbor_values = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
-  harbor_values_parsed = yamldecode(local.harbor_values)
-  harbor_namespace = local.harbor_values_parsed.harbor.namespace
-  harbor_existing_admin_password_secret = local.harbor_values_parsed.harbor.existingSecretAdminPassword
+  release_desc        = file("../values/${var.cluster_name}/charts_versions.yaml")
+  release_desc_parsed = yamldecode(local.release_desc)
+
+  harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
+  harbor_values_parsed                      = yamldecode(local.harbor_values)
+  harbor_namespace                          = local.harbor_values_parsed.harbor.namespace
+  harbor_existing_admin_password_secret     = local.harbor_values_parsed.harbor.existingSecretAdminPassword
   harbor_existing_admin_password_secret_key = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
-  harbor_admin_password = data.kubernetes_secret.harbor_existing_admin_password.data["${local.harbor_existing_admin_password_secret_key}"]
-  harbor_url = local.harbor_values_parsed.harbor.externalURL
-  harbor_existing_oidc_secret = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.name
-  harbor_existing_oidc_secret_key = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.key
-  harbor_keycloak_client_secret = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_existing_oidc_secret_key}"]).oidc_client_secret
+  harbor_admin_password                     = data.kubernetes_secret.harbor_existing_admin_password.data["${local.harbor_existing_admin_password_secret_key}"]
+  harbor_url                                = local.harbor_values_parsed.harbor.externalURL
+  harbor_existing_oidc_secret               = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.name
+  harbor_existing_oidc_secret_key           = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.key
+  harbor_keycloak_client_secret             = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_existing_oidc_secret_key}"]).oidc_client_secret
 
-  keycloak_values = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml")
-  keycloak_values_parsed = yamldecode(local.keycloak_values)
-  keycloak_namespace = local.keycloak_values_parsed.keycloak.namespaceOverride
-  keycloak_existing_admin_password_secret = local.keycloak_values_parsed.keycloak.auth.existingSecret
+  keycloak_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml")
+  keycloak_values_parsed                      = yamldecode(local.keycloak_values)
+  keycloak_namespace                          = local.keycloak_values_parsed.keycloak.namespaceOverride
+  keycloak_existing_admin_password_secret     = local.keycloak_values_parsed.keycloak.auth.existingSecret
   keycloak_existing_admin_password_secret_key = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
-  keycloak_admin_password = data.kubernetes_secret.keycloak_existing_admin_password.data["${local.keycloak_existing_admin_password_secret_key}"]
-  keycloak_url = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
-
-  argocd_chart_yaml = yamldecode(file("${var.helm_chart_path}/${var.argocd_chart_name}/Chart.yaml"))
-  valkey_chart_yaml = yamldecode(file("${var.helm_chart_path}/${var.valkey_chart_name}/Chart.yaml"))
+  keycloak_admin_password                     = data.kubernetes_secret.keycloak_existing_admin_password.data["${local.keycloak_existing_admin_password_secret_key}"]
+  keycloak_url                                = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
   harbor_keycloak_client_config = {
     "${var.harbor_keycloak_client_id}" = {
@@ -32,6 +32,7 @@ locals {
       client_group        = var.harbor_keycloak_oidc_admin_group
     }
   }
+
   argocd_keycloak_client_config = {
     "${var.argocd_keycloak_client_id}" = {
       client_secret       = random_password.argocd_keycloak_client_secret.result
@@ -45,29 +46,20 @@ locals {
   }
 }
 
-resource "random_password" "argocd_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
+# Providers
 
-data "kubernetes_secret" "harbor_existing_admin_password" {
-  metadata {
-    name = local.harbor_existing_admin_password_secret
-    namespace = local.harbor_namespace
+provider "helm" {
+  alias = "chorus_helm"
+
+  kubernetes {
+    config_path    = var.kubeconfig_path
+    config_context = var.kubeconfig_context
   }
-}
 
-data "kubernetes_secret" "keycloak_existing_admin_password" {
-  metadata {
-    name = local.keycloak_existing_admin_password_secret
-    namespace = local.keycloak_namespace
-  }
-}
-
-data "kubernetes_secret" "harbor_oidc" {
-  metadata {
-    name = local.harbor_existing_oidc_secret
-    namespace = local.harbor_namespace
+  registry {
+    url      = "oci://${var.helm_registry}"
+    username = var.helm_registry_username
+    password = var.helm_registry_password
   }
 }
 
@@ -84,6 +76,48 @@ provider "keycloak" {
   tls_insecure_skip_verify = true
 }
 
+provider "harbor" {
+  alias    = "harboradmin-provider"
+  url      = local.harbor_url
+  username = var.harbor_admin_username
+  password = local.harbor_admin_password
+  # Ignoring certificate errors
+  # because it might take some times
+  # for certificates to be signed
+  # by a trusted authority
+  insecure = true
+}
+
+# Random passwords
+
+resource "random_password" "argocd_keycloak_client_secret" {
+  length  = 32
+  special = false
+}
+
+data "kubernetes_secret" "harbor_existing_admin_password" {
+  metadata {
+    name      = local.harbor_existing_admin_password_secret
+    namespace = local.harbor_namespace
+  }
+}
+
+data "kubernetes_secret" "keycloak_existing_admin_password" {
+  metadata {
+    name      = local.keycloak_existing_admin_password_secret
+    namespace = local.keycloak_namespace
+  }
+}
+
+data "kubernetes_secret" "harbor_oidc" {
+  metadata {
+    name      = local.harbor_existing_oidc_secret
+    namespace = local.harbor_namespace
+  }
+}
+
+# Install charts
+
 module "keycloak_config" {
   source = "../modules/keycloak_config"
 
@@ -99,18 +133,6 @@ module "keycloak_config" {
   )
 }
 
-provider "harbor" {
-  alias    = "harboradmin-provider"
-  url      = local.harbor_url
-  username = var.harbor_admin_username
-  password = local.harbor_admin_password
-  # Ignoring certificate errors
-  # because it might take some times
-  # for certificates to be signed
-  # by a trusted authority
-  insecure = true
-}
-
 module "harbor_config" {
   source = "../modules/harbor_config"
 
@@ -118,31 +140,45 @@ module "harbor_config" {
     harbor = harbor.harboradmin-provider
   }
 
-  chorus_charts_revision    = var.chorus_charts_revision
-  harbor_admin_username     = var.harbor_admin_username
-  harbor_admin_password     = local.harbor_admin_password
-  helm_chart_path           = "../${var.helm_chart_path}"
-  harbor_helm_values_path   = "../${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml"
-  argocd_robot_username     = var.argocd_harbor_robot_username
-  argoci_robot_username     = var.argoci_harbor_robot_username
+  release_desc                  = local.release_desc
+  source_helm_registry          = var.helm_registry
+  source_helm_registry_username = var.helm_registry_username
+  source_helm_registry_password = var.helm_registry_password
+
+  harbor_admin_username = var.harbor_admin_username
+  harbor_admin_password = local.harbor_admin_password
+  harbor_helm_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
+
+  argocd_robot_username = var.argocd_harbor_robot_username
+  argoci_robot_username = var.argoci_harbor_robot_username
 }
 
 module "argo_cd" {
   source = "../modules/argo_cd"
 
-  cluster_name                          = var.cluster_name
-  argocd_chart_version                  = local.argocd_chart_yaml.version
-  argocd_cache_chart_version            = local.valkey_chart_yaml.version
-  argocd_helm_chart_path                = "../${var.helm_chart_path}/${var.argocd_chart_name}"
-  argocd_helm_values_path               = "../${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml"
-  argocd_cache_helm_chart_path          = "../${var.helm_chart_path}/${var.valkey_chart_name}"
-  argocd_cache_helm_values_path         = "../${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/values.yaml"
-  github_environments_repository_secret = var.github_environments_repository_secret
-  github_environments_repository_pat    = var.github_environments_repository_pat
-  github_environments_repository_url    = var.github_environments_repository_url
+  providers = {
+    helm = helm.chorus_helm
+  }
+
+  cluster_name  = var.cluster_name
+  helm_registry = var.helm_registry
+
+  argocd_chart_name    = var.argocd_chart_name
+  argocd_chart_version = local.release_desc_parsed.charts["${var.argocd_chart_name}"].version
+  argocd_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
+
+  argocd_cache_chart_name    = var.valkey_chart_name
+  argocd_cache_chart_version = local.release_desc_parsed.charts["${var.valkey_chart_name}"].version
+  argocd_cache_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/values.yaml")
+
+  helm_charts_values_credentials_secret = var.helm_values_credentials_secret
+  helm_values_url                       = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
+  helm_values_pat                       = var.helm_values_pat
+  harbor_domain                         = replace(local.harbor_url, "https://", "")
   harbor_robot_username                 = var.argocd_harbor_robot_username
   harbor_robot_password                 = module.harbor_config.argocd_robot_password
 }
+
 
 provider "argocd" {
   alias       = "argocdadmin_provider"
@@ -157,18 +193,13 @@ provider "argocd" {
 }
 
 resource "null_resource" "wait_for_argocd" {
-
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
-    quiet = true
+    quiet   = true
     command = <<EOT
       set -e
       for i in {1..30}; do
-        status=$(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz)
-        if [ "$status" -eq 200 ]; then
+        response_code=$(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz)
+        if [ "$response_code" -eq 200 ]; then
           exit 0
         else
           echo "Waiting for ArgoCD... ($i)"
@@ -180,7 +211,11 @@ resource "null_resource" "wait_for_argocd" {
     EOT
   }
 
-  depends_on = [ module.argo_cd ]
+  triggers = {
+    always_run = timestamp()
+  }
+
+  depends_on = [module.argo_cd]
 }
 
 module "argocd_config" {
@@ -190,14 +225,16 @@ module "argocd_config" {
     argocd = argocd.argocdadmin_provider
   }
 
-  argocd_helm_values_path                 = "../${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml"
-  cluster_name                            = var.cluster_name
-  oidc_endpoint                           = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
-  oidc_client_id                          = var.argocd_keycloak_client_id
-  oidc_client_secret                      = random_password.argocd_keycloak_client_secret.result
-  helm_chart_repository_url               = replace(local.harbor_url, "https://", "")
-  github_environments_repository_url      = var.github_environments_repository_url
-  github_environments_repository_revision = var.github_environments_repository_revision
+  cluster_name         = var.cluster_name
+  argocd_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
+  helm_values_url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
+  helm_values_revision = var.chorus_release
+  harbor_domain        = replace(local.harbor_url, "https://", "")
+  oidc_endpoint        = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
+  oidc_client_id       = var.argocd_keycloak_client_id
+  oidc_client_secret   = random_password.argocd_keycloak_client_secret.result
+  kubeconfig_path      = var.kubeconfig_path
+  kubeconfig_context   = var.kubeconfig_context
 
   depends_on = [
     module.argo_cd,
@@ -222,21 +259,18 @@ output "argocd_password" {
   sensitive = true
 }
 
-output "harbor_argoci_robot_password" {
-  value     = module.harbor_config.argoci_robot_password
-  sensitive = true
-}
-
 locals {
   output = {
     harbor_admin_username        = var.harbor_admin_username
     harbor_admin_password        = local.harbor_admin_password
     harbor_url                   = local.harbor_url
+    harbor_admin_url             = join("/", [local.harbor_url, "account", "sign-in"])
     harbor_argoci_robot_password = module.harbor_config.argoci_robot_password
+    harbor_argocd_robot_password = module.harbor_config.argocd_robot_password
 
-    keycloak_admin_username   = var.keycloak_admin_username
-    keycloak_admin_password   = local.keycloak_admin_password
-    keycloak_url              = local.keycloak_url
+    keycloak_admin_username = var.keycloak_admin_username
+    keycloak_admin_password = local.keycloak_admin_password
+    keycloak_url            = local.keycloak_url
 
     argocd_url      = module.argo_cd.argocd_url
     argocd_username = module.argo_cd.argocd_username

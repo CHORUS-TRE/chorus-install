@@ -1,5 +1,5 @@
 **/charts
-!/charts
+**/values
 **/*.tgz
 **/*.tfvars
 **/.terraform
@@ -10,3 +10,6 @@
 **/*_output.yaml
 **/*output.yaml
 **/tmp
+**/.terraform.lock.hcl
+**/*.tfstate.lock.info
+.env

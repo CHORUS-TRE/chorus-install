@@ -1,4 +1,0 @@
-valkey:
-  auth:
-    enabled: false
-    sentinel: false

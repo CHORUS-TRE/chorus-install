@@ -28,6 +28,14 @@ terraform {
       source  = "argoproj-labs/argocd"
       version = "7.8.2"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.4"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "2.5.3"
+    }
   }
   # Provider functions require Terraform 1.8 and later.
   required_version = ">= 1.8.0"

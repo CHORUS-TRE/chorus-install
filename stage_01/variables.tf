@@ -20,10 +20,26 @@ variable "kubeconfig_context" {
   type        = string
 }
 
-variable "helm_chart_path" {
-  description = "Path to the repository storing the Helm charts"
+variable "chorus_release" {
+  description = "CHORUS-TRE release to install"
   type        = string
-  default     = "../charts"
+  default     = "v0.1.0-alpha"
+}
+
+variable "helm_registry" {
+  description = "CHORUS Helm chart registry"
+  type        = string
+}
+
+variable "helm_registry_username" {
+  description = "Username to connect to the CHORUS Helm chart registry"
+  type        = string
+}
+
+variable "helm_registry_password" {
+  description = "Password to connect to the CHORUS Helm chart registry"
+  type        = string
+  sensitive   = true
 }
 
 variable "helm_values_path" {
@@ -95,4 +111,5 @@ variable "harbor_keycloak_oidc_admin_group" {
 variable "harbor_admin_username" {
   description = "Harbor admin username"
   type        = string
+  default     = "admin"
 }

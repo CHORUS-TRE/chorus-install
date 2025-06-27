@@ -1,8 +1,9 @@
 locals {
-  harbor_values = file("${path.module}/${var.harbor_helm_values_path}")
-  harbor_values_parsed = yamldecode(local.harbor_values)
+  harbor_values_parsed = yamldecode(var.harbor_helm_values)
   harbor_namespace = local.harbor_values_parsed.harbor.namespace
   harbor_url = local.harbor_values_parsed.harbor.externalURL
+  release_desc_parsed = yamldecode(var.release_desc)
+  charts = [ for k, v in local.release_desc_parsed.charts : k ]
 }
 
 resource "harbor_project" "projects" {
@@ -20,6 +21,7 @@ resource "random_password" "argocd_robot_password" {
   special = false
   upper   = true
   lower   = true
+  numeric = true
 }
 
 resource "harbor_robot_account" "argocd" {
@@ -110,6 +112,7 @@ resource "random_password" "argoci_robot_password" {
   special = false
   upper   = true
   lower   = true
+  numeric = true
 }
 
 resource "harbor_robot_account" "argoci" {
@@ -596,26 +599,57 @@ resource "harbor_registry" "docker_hub" {
   endpoint_url  = "https://hub.docker.com"
 }
 
-# Helm charts
+# Add Helm charts to Harbor registry
 
-resource "null_resource" "push_charts" {
+resource "null_resource" "pull_charts" {
   provisioner "local-exec" {
     quiet = true
     command = <<EOT
     set -e
-    chorus_charts_revision=${var.chorus_charts_revision}
-    harbor_url=${replace(local.harbor_url, "https://", "")}
-    harbor_admin_username=${var.harbor_admin_username}
-    harbor_admin_password=${var.harbor_admin_password}
-
-    chmod +x ${path.module}/scripts/push_release_helm_charts.sh && \
-    ${path.module}/scripts/push_release_helm_charts.sh $chorus_charts_revision $harbor_url $harbor_admin_username $harbor_admin_password
+    destination=${path.module}/charts
+    mkdir -p $destination
+    helm registry login ${var.source_helm_registry} --username=${var.source_helm_registry_username} --password=${var.source_helm_registry_password}
+    charts="${join(" ", local.charts)}"
+    for chart in $charts; do
+      version=$(echo "${var.release_desc}" | yq ".charts.$chart.version")
+      if [[ ! -f $destination/$chart-$version.tgz ]]; then
+        helm pull oci://${var.source_helm_registry}/charts/$chart --version $version --destination $destination
+      fi
+    done
     EOT
   }
   triggers = {
     always_run = timestamp()
   }
   depends_on = [ harbor_project.projects ]
+}
+
+resource "null_resource" "push_charts" {
+  provisioner "local-exec" {
+    quiet = true
+    command = <<EOT
+    set -e
+    source=${path.module}/charts
+    harbor_domain=${replace(local.harbor_url, "https://", "")}
+    helm registry login $harbor_domain --username=${var.harbor_admin_username} --password=${var.harbor_admin_password} --insecure
+    charts=$(find $source -type f | sort)
+    for chart in $charts; do
+      chart_name_version=$(basename $chart | awk -F. '{OFS="."; NF--; print}')
+      chart_name=$(echo "$chart_name_version" | awk -F'-' '{for (i=1; i<NF; i++) printf $i (i<NF-1?"-":"");}')
+      chart_version=$(echo "$chart_name_version" | awk -F'-' '{print $NF}')
+      if ! helm show chart oci://$harbor_domain/charts/$chart_name --version $chart_version --insecure-skip-tls-verify >/dev/null 2>&1; then
+        helm push $chart oci://$harbor_domain/charts --insecure-skip-tls-verify
+      fi
+    done
+    EOT
+  }
+  triggers = {
+    always_run = timestamp()
+  }
+  depends_on = [ 
+    harbor_project.projects,
+    null_resource.pull_charts
+ ]
 }
 
 # Container images
