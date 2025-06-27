@@ -36,5 +36,4 @@ variable "cert_manager_chart_name" {
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
   type        = string
-  default     = "harbor.build.chorus-tre.ch"
 }
