@@ -29,7 +29,6 @@ variable "chorus_release" {
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
   type        = string
-  default     = "harbor.build.chorus-tre.ch"
 }
 
 variable "helm_registry_username" {
