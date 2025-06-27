@@ -28,6 +28,7 @@ kubectl delete $(kubectl get crds -oname | grep aquasecurity.github.io)
 kubie ns kube-system
 kubectl patch $(kubectl get challenges.acme.cert-manager.io -oname) --type=merge -p '{"metadata":{"finalizers":null}}'
 kubectl delete $(kubectl get challenges.acme.cert-manager.io -oname)
+kubectl delete ns argo
 
 # TRIVY
 kubie ns trivy-system
@@ -37,6 +38,8 @@ kubectl delete ns trivy-system
 # ARGOCD
 kubie ns argocd
 helm uninstall $cluster_name-argo-cd $cluster_name-argo-cd-cache
+kubectl patch appprojects.argoproj.io $cluster_name --type=merge -p '{"metadata":{"finalizers":null}}'
+kubectl delete appprojects.argoproj.io $cluster_name
 kubectl delete ns argocd
 kubectl delete $(kubectl get crds -oname | grep argoproj.io)
 
