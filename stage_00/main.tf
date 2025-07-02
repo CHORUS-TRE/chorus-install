@@ -1,6 +1,5 @@
 locals {
-  release_desc               = yamldecode(data.external.charts_versions.result.versions)
-  cert_manager_chart_version = local.release_desc.charts["${var.cert_manager_chart_name}"].version
+  cert_manager_chart_version = data.external.cert_manager_config.result.version
 }
 
 resource "null_resource" "fetch_helm_charts_values" {
@@ -26,37 +25,21 @@ resource "null_resource" "fetch_helm_charts_values" {
   }
 }
 
-resource "null_resource" "fetch_helm_charts_versions" {
-  provisioner "local-exec" {
-    quiet   = true
-    command = <<EOT
-      set -e
-      helm_values_folder=${var.helm_values_path}/${var.cluster_name}
-      output_file=${var.helm_values_path}/${var.cluster_name}/charts_versions.yaml
-      chmod +x ./scripts/generate_release_desc.sh
-      ./scripts/generate_release_desc.sh $helm_values_folder $output_file
-    EOT
-  }
-  triggers = {
-    always_run = timestamp()
-  }
+data "external" "cert_manager_config" {
   depends_on = [null_resource.fetch_helm_charts_values]
-}
-
-data "external" "charts_versions" {
-  depends_on = [null_resource.fetch_helm_charts_versions]
-  program    = ["bash", "-c", "cat ../values/${var.cluster_name}/charts_versions.yaml | yq -o json . | jq '{versions: tostring}'"]
+  program    = ["bash", "-c", "cat ${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"]
 }
 
 resource "null_resource" "fetch_cert_manager_app_version" {
   provisioner "local-exec" {
     quiet   = true
     command = <<EOT
-      set -ex
+      set -e
       mkdir -p ${path.module}/tmp
       helm pull "oci://${var.helm_registry}/charts/${var.cert_manager_chart_name}" --version ${local.cert_manager_chart_version} --destination ${path.module}/tmp
       tar -xzf ${path.module}/tmp/cert-manager-*.tgz -C ${path.module}/tmp
-      yq -i ".charts.cert-manager.appVersion = \"$(yq '.dependencies[0].version' ${path.module}/tmp/${var.cert_manager_chart_name}/Chart.yaml)\"" ../values/${var.cluster_name}/charts_versions.yaml
+      touch ../values/${var.cluster_name}/${var.cert_manager_chart_name}/app_version
+      echo $(yq '.dependencies[0].version' ${path.module}/tmp/${var.cert_manager_chart_name}/Chart.yaml) > ../values/${var.cluster_name}/${var.cert_manager_chart_name}/app_version
       rm -r ${path.module}/tmp
     EOT
   }
