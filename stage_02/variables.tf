@@ -204,28 +204,10 @@ variable "argocd_keycloak_oidc_admin_group" {
   default     = "ArgoCDAdmins"
 }
 
-variable "argo_workflows_keycloak_oidc_admin_group" {
-  description = "Keycloak OIDC admin group assigned to Argo Workflows"
-  type        = string
-  default     = "ArgoWorkflowsAdmins"
-}
-
 variable "grafana_keycloak_oidc_admin_group" {
   description = "Keycloak OIDC admin group assigned to Grafana"
   type        = string
-  default     = "GrafanaAdmins"
-}
-
-variable "alertmanager_keycloak_oidc_admin_group" {
-  description = "Keycloak OIDC admin group assigned to Alertmanager"
-  type        = string
-  default     = "AlertmanagerAdmins"
-}
-
-variable "prometheus_keycloak_oidc_admin_group" {
-  description = "Keycloak OIDC admin group assigned to Prometheus"
-  type        = string
-  default     = "PrometheusAdmins"
+  default     = "Grafana"
 }
 
 variable "harbor_keycloak_base_url" {

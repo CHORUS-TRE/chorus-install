@@ -96,7 +96,6 @@ locals {
       admin_url           = local.argo_workflows_url
       web_origins         = [local.argo_workflows_url]
       valid_redirect_uris = [local.argo_workflows_redirect_uri]
-      client_group        = var.argo_workflows_keycloak_oidc_admin_group
     }
   }
 
@@ -120,7 +119,6 @@ locals {
       admin_url           = local.alertmanager_url
       web_origins         = [local.alertmanager_url]
       valid_redirect_uris = [join("/", [local.alertmanager_url, "*"])]
-      client_group        = var.alertmanager_keycloak_oidc_admin_group
     }
   }
 
@@ -132,7 +130,6 @@ locals {
       admin_url           = local.prometheus_url
       web_origins         = [local.prometheus_url]
       valid_redirect_uris = [join("/", [local.prometheus_url, "*"]), join("/", [local.alertmanager_url, "*"])]
-      client_group        = var.prometheus_keycloak_oidc_admin_group
     }
   }
 }

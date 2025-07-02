@@ -28,10 +28,30 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_group" "openid_client_group" {
-  for_each = var.clients_config
+  for_each = { for k, v in var.clients_config : k => v if can(v.client_group) && v.client_group != "" && v.client_group != null}
 
   realm_id = keycloak_realm.realm.id
   name     = each.value.client_group
+}
+
+# Special case for Grafana
+data "keycloak_group" "grafana_group" {
+    realm_id = keycloak_realm.realm.id
+    name     = "Grafana"
+
+    depends_on = [ keycloak_group.openid_client_group ]
+}
+
+resource "keycloak_group" "grafana_childgroup_0" {
+  realm_id = keycloak_realm.realm.id
+  parent_id = data.keycloak_group.grafana_group.id
+  name     = "Editors"
+}
+
+resource "keycloak_group" "grafana_childgroup_0_0" {
+  realm_id = keycloak_realm.realm.id
+  parent_id = keycloak_group.grafana_childgroup1.id
+  name     = "Administrators"
 }
 
 resource "keycloak_openid_client_scope" "openid_client_scope" {
