@@ -1,17 +1,16 @@
 locals {
   harbor_values_parsed = yamldecode(var.harbor_helm_values)
-  harbor_namespace = local.harbor_values_parsed.harbor.namespace
-  harbor_url = local.harbor_values_parsed.harbor.externalURL
-  release_desc_parsed = yamldecode(var.release_desc)
-  charts = [ for k, v in local.release_desc_parsed.charts : k ]
+  harbor_namespace     = local.harbor_values_parsed.harbor.namespace
+  harbor_url           = local.harbor_values_parsed.harbor.externalURL
+  charts               = [for k, v in var.charts_versions : k]
 }
 
 resource "harbor_project" "projects" {
-  for_each = toset([ "apps", "cache", "charts", "chorus", "docker_proxy", "services" ])
+  for_each = toset(["apps", "cache", "charts", "chorus", "docker_proxy", "services"])
 
   name                   = each.key
   vulnerability_scanning = "false"
-  force_destroy = true
+  force_destroy          = true
 }
 
 # ArgoCD robot account
@@ -31,78 +30,78 @@ resource "harbor_robot_account" "argocd" {
   secret      = random_password.argocd_robot_password.result
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "project"
     }
-    kind = "system"
+    kind      = "system"
     namespace = "/"
   }
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "tag"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "apps"
   }
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "artifact"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "artifact"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "project"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "charts"
   }
 
-  depends_on = [ harbor_project.projects ]
+  depends_on = [harbor_project.projects]
 }
 
 # ArgoCI robot account
@@ -122,473 +121,473 @@ resource "harbor_robot_account" "argoci" {
   secret      = random_password.argoci_robot_password.result
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "project"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "registry"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "registry"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "registry"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "registry"
     }
-    kind = "system"
+    kind      = "system"
     namespace = "/"
   }
   permissions {
     access {
-      action = "create"
+      action   = "create"
       resource = "artifact"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "artifact"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "artifact"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "artifact-label"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "project"
     }
     access {
-      action = "delete"
+      action   = "delete"
       resource = "repository"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "push"
+      action   = "push"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "repository"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "sbom"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "sbom"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "scan"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "scan"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "apps"
   }
 
   permissions {
     access {
-      action = "create"
+      action   = "create"
       resource = "artifact"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "artifact"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "artifact"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "artifact-label"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "project"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "push"
+      action   = "push"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "repository"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "sbom"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "sbom"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "scanner"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "scanner"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "tag"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "tag"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "docker_proxy"
   }
 
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "artifact"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "artifact"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "artifact-label"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "project"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "push"
+      action   = "push"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "repository"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "sbom"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "sbom"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "scan"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "scan"
     }
-        access {
-      action = "create"
+    access {
+      action   = "create"
       resource = "tag"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "tag"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "charts"
   }
 
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "artifact"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "artifact"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "artifact-label"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "project"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "push"
+      action   = "push"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "repository"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "sbom"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "sbom"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "scan"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "scan"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "tag"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "tag"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "cache"
   }
 
   permissions {
     access {
-      action = "create"
+      action   = "create"
       resource = "artifact"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "artifact"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "artifact"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "artifact-label"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "metadata"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "project"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "push"
+      action   = "push"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "repository"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "sbom"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "sbom"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "scan"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "scan"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "tag"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "tag"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "chorus"
   }
-  depends_on = [ harbor_project.projects ]
+  depends_on = [harbor_project.projects]
 }
 
 # Registries
@@ -603,53 +602,53 @@ resource "harbor_registry" "docker_hub" {
 
 resource "null_resource" "pull_charts" {
   provisioner "local-exec" {
-    quiet = true
+    quiet   = true
     command = <<EOT
     set -e
     destination=${path.module}/charts
+    chart=${each.key}
+    versions="${join(" ", each.value)}"
     mkdir -p $destination
-    helm registry login ${var.source_helm_registry} --username=${var.source_helm_registry_username} --password=${var.source_helm_registry_password}
-    charts="${join(" ", local.charts)}"
-    for chart in $charts; do
-      version=$(echo "${var.release_desc}" | yq ".charts.$chart.version")
+    for version in $versions; do
+      helm registry login ${var.source_helm_registry} --username=${var.source_helm_registry_username} --password=${var.source_helm_registry_password}
       if [[ ! -f $destination/$chart-$version.tgz ]]; then
         helm pull oci://${var.source_helm_registry}/charts/$chart --version $version --destination $destination
       fi
     done
     EOT
   }
+  for_each = var.charts_versions
   triggers = {
     always_run = timestamp()
   }
-  depends_on = [ harbor_project.projects ]
+  depends_on = [harbor_project.projects]
 }
 
 resource "null_resource" "push_charts" {
   provisioner "local-exec" {
-    quiet = true
+    quiet   = true
     command = <<EOT
     set -e
     source=${path.module}/charts
     harbor_domain=${replace(local.harbor_url, "https://", "")}
     helm registry login $harbor_domain --username=${var.harbor_admin_username} --password=${var.harbor_admin_password} --insecure
-    charts=$(find $source -type f | sort)
-    for chart in $charts; do
-      chart_name_version=$(basename $chart | awk -F. '{OFS="."; NF--; print}')
-      chart_name=$(echo "$chart_name_version" | awk -F'-' '{for (i=1; i<NF; i++) printf $i (i<NF-1?"-":"");}')
-      chart_version=$(echo "$chart_name_version" | awk -F'-' '{print $NF}')
-      if ! helm show chart oci://$harbor_domain/charts/$chart_name --version $chart_version --insecure-skip-tls-verify >/dev/null 2>&1; then
-        helm push $chart oci://$harbor_domain/charts --insecure-skip-tls-verify
+    chart=${each.key}
+    versions="${join(" ", each.value)}"
+    for version in $versions; do
+      if ! helm show chart oci://$harbor_domain/charts/$chart --version $version --insecure-skip-tls-verify >/dev/null 2>&1; then
+        helm push $source/$chart-$version.tgz oci://$harbor_domain/charts --insecure-skip-tls-verify
       fi
     done
     EOT
   }
+  for_each = var.charts_versions
   triggers = {
     always_run = timestamp()
   }
-  depends_on = [ 
+  depends_on = [
     harbor_project.projects,
     null_resource.pull_charts
- ]
+  ]
 }
 
 # Container images
@@ -678,13 +677,13 @@ resource "null_resource" "push_images" {
 # Outputs
 
 output "argocd_robot_password" {
-  value = random_password.argocd_robot_password.result
+  value       = random_password.argocd_robot_password.result
   description = "Password of the robot user used by ArgoCD"
-  sensitive = true
+  sensitive   = true
 }
 
 output "argoci_robot_password" {
-  value = random_password.argoci_robot_password.result
+  value       = random_password.argoci_robot_password.result
   description = "Password of the robot user used by ArgoCI"
-  sensitive = true
+  sensitive   = true
 }
