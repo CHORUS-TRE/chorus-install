@@ -1,3 +1,12 @@
+data "keycloak_realm" "master_realm" {
+    realm = "master"
+}
+
+resource "keycloak_group" "chorus_admin" {
+  realm_id = data.keycloak_realm.master_realm.id
+  name     = "CHORUS-admin"
+}
+
 resource "keycloak_realm" "realm" {
   realm                       = var.realm_name
   organizations_enabled       = true
@@ -42,16 +51,44 @@ data "keycloak_group" "grafana_group" {
     depends_on = [ keycloak_group.openid_client_group ]
 }
 
-resource "keycloak_group" "grafana_childgroup_0" {
+resource "keycloak_group" "grafana_editors_group" {
   realm_id = keycloak_realm.realm.id
   parent_id = data.keycloak_group.grafana_group.id
   name     = "Editors"
 }
 
-resource "keycloak_group" "grafana_childgroup_0_0" {
+resource "keycloak_group" "grafana_admins_group" {
   realm_id = keycloak_realm.realm.id
-  parent_id = keycloak_group.grafana_childgroup1.id
+  parent_id = keycloak_group.grafana_editors_group.id
   name     = "Administrators"
+}
+
+resource "keycloak_role" "grafana_admin" {
+  realm_id    = keycloak_realm.realm.id
+  name        = "grafana-admin"
+}
+
+resource "keycloak_role" "grafana_editor" {
+  realm_id    = keycloak_realm.realm.id
+  name        = "grafana-editor"
+}
+
+resource "keycloak_group_roles" "grafana_editors_group_roles" {
+  realm_id = keycloak_realm.realm.id
+  group_id = keycloak_group.grafana_editors_group.id
+
+  role_ids = [
+    keycloak_role.grafana_editor.id
+  ]
+}
+
+resource "keycloak_group_roles" "grafana_admins_group_roles" {
+  realm_id = keycloak_realm.realm.id
+  group_id = keycloak_group.grafana_admins_group.id
+
+  role_ids = [
+    keycloak_role.grafana_admin.id
+  ]
 }
 
 resource "keycloak_openid_client_scope" "openid_client_scope" {
