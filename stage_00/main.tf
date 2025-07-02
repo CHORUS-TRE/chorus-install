@@ -39,7 +39,7 @@ resource "null_resource" "fetch_cert_manager_app_version" {
       helm pull "oci://${var.helm_registry}/charts/${var.cert_manager_chart_name}" --version ${local.cert_manager_chart_version} --destination ${path.module}/tmp
       tar -xzf ${path.module}/tmp/cert-manager-*.tgz -C ${path.module}/tmp
       touch ../values/${var.cluster_name}/${var.cert_manager_chart_name}/app_version
-      echo $(yq '.dependencies[0].version' ${path.module}/tmp/${var.cert_manager_chart_name}/Chart.yaml) > ../values/${var.cluster_name}/${var.cert_manager_chart_name}/app_version
+      printf '%s' $(yq '.dependencies[0].version' ${path.module}/tmp/${var.cert_manager_chart_name}/Chart.yaml) > ../values/${var.cluster_name}/${var.cert_manager_chart_name}/app_version
       rm -r ${path.module}/tmp
     EOT
   }
