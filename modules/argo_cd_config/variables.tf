@@ -8,6 +8,11 @@ variable "argocd_helm_values" {
   type        = string
 }
 
+variable "argocd_namespace" {
+  description = "Namespace to deploy ArgoCD Helm chart into"
+  type        = string
+}
+
 variable "helm_values_url" {
   description = "Repository where to get the Helm charts values from"
   type        = string

@@ -9,12 +9,12 @@ cluster_name=chorus-build-t
 
 # ARGO-EVENTS
 kubie ns argo-events
-kubectl delete deployment chorus-build-t-argo-events-controller-manager
+kubectl delete $(kubectl get deployment -oname)
 kubectl delete ns argo-events
 
 # PROMETHEUS
 kubie ns prometheus
-kubectl delete deployment $cluster_name-prometheus-blackbox-exporter
+kubectl delete $(kubectl get deployment -oname)
 challenges=$(kubectl get challenges.acme.cert-manager.io -oname)
 for challenge in $challenges; do
     kubectl patch $challenge --type=merge -p '{"metadata":{"finalizers":null}}'
@@ -28,6 +28,7 @@ kubectl delete $(kubectl get crds -oname | grep aquasecurity.github.io)
 kubie ns kube-system
 kubectl patch $(kubectl get challenges.acme.cert-manager.io -oname) --type=merge -p '{"metadata":{"finalizers":null}}'
 kubectl delete $(kubectl get challenges.acme.cert-manager.io -oname)
+kubectl delete secret argo-workflows-oidc argo-workflows-tls
 kubectl delete ns argo
 
 # TRIVY

@@ -37,10 +37,10 @@ module "ingress_nginx" {
   cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
-  chart_name    = var.ingress_nginx_chart_name
-  chart_version = local.ingress_nginx_chart_version
-  helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/values.yaml")
-
+  chart_name         = var.ingress_nginx_chart_name
+  chart_version      = local.ingress_nginx_chart_version
+  helm_values        = file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/values.yaml")
+  namespace          = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json")).namespace
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
 }
@@ -59,6 +59,7 @@ module "certificate_authorities" {
   cert_manager_chart_version = local.cert_manager_chart_version
   cert_manager_app_version   = local.cert_manager_app_version
   cert_manager_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/values.yaml")
+  cert_manager_namespace     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json")).namespace
 
   selfsigned_chart_name    = var.selfsigned_chart_name
   selfsigned_chart_version = local.selfsigned_chart_version
@@ -78,6 +79,7 @@ module "keycloak" {
   keycloak_chart_name    = var.keycloak_chart_name
   keycloak_chart_version = local.keycloak_chart_version
   keycloak_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml")
+  keycloak_namespace     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
 
   keycloak_db_chart_name    = var.postgresql_chart_name
   keycloak_db_chart_version = local.keycloak_db_chart_version
@@ -108,6 +110,7 @@ module "harbor" {
   harbor_chart_name    = var.harbor_chart_name
   harbor_chart_version = local.harbor_chart_version
   harbor_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
+  harbor_namespace     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json")).namespace
 
   harbor_cache_chart_name    = var.valkey_chart_name
   harbor_cache_chart_version = local.harbor_cache_chart_version

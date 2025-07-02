@@ -5,7 +5,7 @@ variable "cluster_name" {
 
 variable "helm_registry" {
   description = "Helm chart registry to get the chart from"
-  type = string
+  type        = string
 }
 
 variable "keycloak_chart_name" {
@@ -20,6 +20,11 @@ variable "keycloak_chart_version" {
 
 variable "keycloak_helm_values" {
   description = "Keycloak Helm chart values"
+  type        = string
+}
+
+variable "keycloak_namespace" {
+  description = "Namespace to deploy Keycloak Helm chart into"
   type        = string
 }
 

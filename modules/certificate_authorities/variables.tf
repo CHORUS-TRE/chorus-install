@@ -5,7 +5,7 @@ variable "cluster_name" {
 
 variable "helm_registry" {
   description = "Helm chart registry to get the chart from"
-  type = string
+  type        = string
 }
 
 variable "cert_manager_chart_name" {
@@ -25,6 +25,11 @@ variable "cert_manager_app_version" {
 
 variable "cert_manager_helm_values" {
   description = "Cert-Manager Helm chart values"
+  type        = string
+}
+
+variable "cert_manager_namespace" {
+  description = "Namespace to deploy Cert-Manager Helm chart into"
   type        = string
 }
 

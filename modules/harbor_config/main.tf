@@ -1,6 +1,5 @@
 locals {
   harbor_values_parsed = yamldecode(var.harbor_helm_values)
-  harbor_namespace     = local.harbor_values_parsed.harbor.namespace
   harbor_url           = local.harbor_values_parsed.harbor.externalURL
   charts               = [for k, v in var.charts_versions : k]
 }

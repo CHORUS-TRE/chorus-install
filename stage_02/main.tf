@@ -1,10 +1,13 @@
 locals {
-  release_desc        = file("../values/${var.cluster_name}/charts_versions.yaml")
-  release_desc_parsed = yamldecode(local.release_desc)
+  helm_values_folders        = toset([for x in fileset("${path.module}/${var.helm_values_path}/${var.cluster_name}", "**") : dirname(x)])
+  charts_versions            = { for x in local.helm_values_folders : jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).chart => jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).version... }
+  argo_deploy_chart_version  = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/config.json")).version
+  argocd_chart_version       = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).version
+  argocd_cache_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json")).version
 
   harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed                      = yamldecode(local.harbor_values)
-  harbor_namespace                          = local.harbor_values_parsed.harbor.namespace
+  harbor_namespace                          = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json")).namespace
   harbor_existing_admin_password_secret     = local.harbor_values_parsed.harbor.existingSecretAdminPassword
   harbor_existing_admin_password_secret_key = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
   harbor_admin_password                     = data.kubernetes_secret.harbor_existing_admin_password.data["${local.harbor_existing_admin_password_secret_key}"]
@@ -15,7 +18,7 @@ locals {
 
   keycloak_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml")
   keycloak_values_parsed                      = yamldecode(local.keycloak_values)
-  keycloak_namespace                          = local.keycloak_values_parsed.keycloak.namespaceOverride
+  keycloak_namespace                          = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
   keycloak_existing_admin_password_secret     = local.keycloak_values_parsed.keycloak.auth.existingSecret
   keycloak_existing_admin_password_secret_key = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_admin_password                     = data.kubernetes_secret.keycloak_existing_admin_password.data["${local.keycloak_existing_admin_password_secret_key}"]
@@ -23,7 +26,7 @@ locals {
 
   kube_prometheus_stack_values             = file("${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
   kube_prometheus_stack_values_parsed      = yamldecode(local.kube_prometheus_stack_values)
-  grafana_namespace                        = "prometheus" # TODO: read all namespaces from the helm charts config.json
+  grafana_namespace                        = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
   grafana_url                              = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
   grafana_existing_oauth_client_secret     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
   grafana_existing_oauth_client_secret_key = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
@@ -32,7 +35,7 @@ locals {
   argo_workflows_values_parsed                          = yamldecode(local.argo_workflows_values)
   argo_workflows_url                                    = "https://${local.argo_workflows_values_parsed.argo-workflows.server.ingress.hosts.0}"
   argo_workflows_redirect_uri                           = local.argo_workflows_values_parsed.argo-workflows.server.sso.redirectUrl
-  argo_workflows_namespace                              = "kube-system" # TODO: read all namespaces from the helm charts config.json
+  argo_workflows_namespace                              = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argo_workflows_chart_name}/config.json")).namespace
   argo_workflows_existing_sso_server_client_id_name     = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.name
   argo_workflows_existing_sso_server_client_id_key      = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.key
   argo_workflows_existing_sso_server_client_secret_name = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.name
@@ -335,6 +338,7 @@ resource "kubernetes_secret" "argo_workflows_oidc_client_secret" {
 }
 
 # Alertmanager-oauth2-proxy
+
 resource "kubernetes_secret" "alertmanager_oauth2_proxy_secret" {
   metadata {
     name      = local.alertmanager_oauth2_proxy_existing_secret
@@ -360,6 +364,7 @@ resource "kubernetes_secret" "alertmanager_oidc_secret" {
 }
 
 # Prometheus oauth2 proxy
+
 resource "kubernetes_secret" "prometheus_oauth2_proxy_secret" {
   metadata {
     name      = local.prometheus_oauth2_proxy_existing_secret
@@ -385,6 +390,7 @@ resource "kubernetes_secret" "prometheus_oidc_secret" {
 }
 
 # Valkey oauth2 proxy
+
 resource "kubernetes_secret" "valkey_oauth2_proxy_secret" {
   metadata {
     name      = local.valkey_oauth2_proxy_existing_secret
@@ -424,7 +430,7 @@ module "harbor_config" {
     harbor = harbor.harboradmin-provider
   }
 
-  release_desc                  = local.release_desc
+  charts_versions               = local.charts_versions
   source_helm_registry          = var.helm_registry
   source_helm_registry_username = var.helm_registry_username
   source_helm_registry_password = var.helm_registry_password
@@ -448,11 +454,12 @@ module "argo_cd" {
   helm_registry = var.helm_registry
 
   argocd_chart_name    = var.argocd_chart_name
-  argocd_chart_version = local.release_desc_parsed.charts["${var.argocd_chart_name}"].version
+  argocd_chart_version = local.argocd_chart_version
   argocd_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
+  argocd_namespace     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
 
   argocd_cache_chart_name    = var.valkey_chart_name
-  argocd_cache_chart_version = local.release_desc_parsed.charts["${var.valkey_chart_name}"].version
+  argocd_cache_chart_version = local.argocd_cache_chart_version
   argocd_cache_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/values.yaml")
 
   helm_charts_values_credentials_secret = var.helm_values_credentials_secret
@@ -495,13 +502,15 @@ module "argocd_config" {
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
 
-  argocd_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
+  argocd_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
+  argocd_namespace   = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
+
   helm_values_url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
   helm_values_revision = var.chorus_release
   helm_registry        = var.helm_registry
 
   argo_deploy_chart_name    = var.argo_deploy_chart_name
-  argo_deploy_chart_version = local.release_desc_parsed.charts["${var.argo_deploy_chart_name}"].version
+  argo_deploy_chart_version = local.argo_deploy_chart_version
   argo_deploy_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/values.yaml")
 
   harbor_domain      = replace(local.harbor_url, "https://", "")

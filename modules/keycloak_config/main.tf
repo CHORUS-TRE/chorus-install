@@ -9,22 +9,22 @@ resource "keycloak_realm" "realm" {
 resource "keycloak_openid_client" "openid_client" {
   for_each = var.clients_config
 
-  realm_id            = keycloak_realm.realm.id
-  client_id           = each.key
-  client_secret       = each.value.client_secret
-  enabled             = true
-  access_type         = "CONFIDENTIAL"
+  realm_id      = keycloak_realm.realm.id
+  client_id     = each.key
+  client_secret = each.value.client_secret
+  enabled       = true
+  access_type   = "CONFIDENTIAL"
 
-  root_url = each.value.root_url
-  base_url = each.value.base_url
-  admin_url = each.value.admin_url
-  web_origins = each.value.web_origins
-  valid_redirect_uris =each.value.valid_redirect_uris
+  root_url            = each.value.root_url
+  base_url            = each.value.base_url
+  admin_url           = each.value.admin_url
+  web_origins         = each.value.web_origins
+  valid_redirect_uris = each.value.valid_redirect_uris
 
-  standard_flow_enabled = true
-  implicit_flow_enabled = true
+  standard_flow_enabled        = true
+  implicit_flow_enabled        = true
   direct_access_grants_enabled = true
-  frontchannel_logout_enabled = true
+  frontchannel_logout_enabled  = true
 }
 
 resource "keycloak_group" "openid_client_group" {
