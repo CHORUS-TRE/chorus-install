@@ -1,19 +1,19 @@
 terraform {
   required_providers {
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
       version = "2.36.0"
     }
     helm = {
-      source = "hashicorp/helm"
+      source  = "hashicorp/helm"
       version = "2.17.0"
     }
     random = {
-      source = "registry.terraform.io/hashicorp/random"
+      source  = "registry.terraform.io/hashicorp/random"
       version = "3.7.2"
     }
     htpasswd = {
-      source = "loafoe/htpasswd"
+      source  = "loafoe/htpasswd"
       version = "1.2.1"
     }
   }

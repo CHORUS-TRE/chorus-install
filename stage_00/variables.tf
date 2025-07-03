@@ -28,7 +28,7 @@ variable "cluster_name" {
 }
 
 variable "cert_manager_chart_name" {
-  description = "Cert-Manager Helm chart folder name"
+  description = "Cert-Manager Helm chart name"
   type        = string
   default     = "cert-manager"
 }
