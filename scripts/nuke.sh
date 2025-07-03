@@ -2,10 +2,13 @@
 
 cluster_name=chorus-build-t
 
-# TODO
-# sometimes the challenges.acme.cert-manager.io
-# is stalling because some challenges in the kube-system namespace
-# are in pending state
+# ARGOCD
+kubie ns argocd
+helm uninstall $cluster_name-argo-cd $cluster_name-argo-cd-cache
+kubectl patch appprojects.argoproj.io $cluster_name --type=merge -p '{"metadata":{"finalizers":null}}'
+kubectl delete appprojects.argoproj.io $cluster_name
+kubectl delete ns argocd
+kubectl delete $(kubectl get crds -oname | grep argoproj.io)
 
 # ARGO-EVENTS
 kubie ns argo-events
@@ -35,14 +38,6 @@ kubectl delete ns argo
 kubie ns trivy-system
 kubectl delete deployment $cluster_name-trivy-operator
 kubectl delete ns trivy-system
-
-# ARGOCD
-kubie ns argocd
-helm uninstall $cluster_name-argo-cd $cluster_name-argo-cd-cache
-kubectl patch appprojects.argoproj.io $cluster_name --type=merge -p '{"metadata":{"finalizers":null}}'
-kubectl delete appprojects.argoproj.io $cluster_name
-kubectl delete ns argocd
-kubectl delete $(kubectl get crds -oname | grep argoproj.io)
 
 # HARBOR
 kubie ns harbor
