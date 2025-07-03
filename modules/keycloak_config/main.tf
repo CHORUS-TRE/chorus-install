@@ -1,5 +1,5 @@
 data "keycloak_realm" "master" {
-    realm = "master"
+  realm = "master"
 }
 
 resource "keycloak_group" "chorus_admin" {
@@ -51,7 +51,7 @@ resource "keycloak_openid_client" "openid_client" {
 }
 
 resource "keycloak_group" "openid_client_group" {
-  for_each = { for k, v in var.clients_config : k => v if can(v.client_group) && v.client_group != "" && v.client_group != null}
+  for_each = { for k, v in var.clients_config : k => v if can(v.client_group) && v.client_group != "" && v.client_group != null }
 
   realm_id = keycloak_realm.build.id
   name     = each.value.client_group
@@ -59,32 +59,32 @@ resource "keycloak_group" "openid_client_group" {
 
 # Special case for Grafana
 data "keycloak_group" "grafana_group" {
-    realm_id = keycloak_realm.build.id
-    name     = "Grafana"
+  realm_id = keycloak_realm.build.id
+  name     = "Grafana"
 
-    depends_on = [ keycloak_group.openid_client_group ]
+  depends_on = [keycloak_group.openid_client_group]
 }
 
 resource "keycloak_group" "grafana_editors_group" {
-  realm_id = keycloak_realm.build.id
+  realm_id  = keycloak_realm.build.id
   parent_id = data.keycloak_group.grafana_group.id
-  name     = "Editors"
+  name      = "Editors"
 }
 
 resource "keycloak_group" "grafana_admins_group" {
-  realm_id = keycloak_realm.build.id
+  realm_id  = keycloak_realm.build.id
   parent_id = keycloak_group.grafana_editors_group.id
-  name     = "Administrators"
+  name      = "Administrators"
 }
 
 resource "keycloak_role" "grafana_admin" {
-  realm_id    = keycloak_realm.build.id
-  name        = "grafana-admin"
+  realm_id = keycloak_realm.build.id
+  name     = "grafana-admin"
 }
 
 resource "keycloak_role" "grafana_editor" {
-  realm_id    = keycloak_realm.build.id
-  name        = "grafana-editor"
+  realm_id = keycloak_realm.build.id
+  name     = "grafana-editor"
 }
 
 resource "keycloak_group_roles" "grafana_editors_group_roles" {
