@@ -147,7 +147,7 @@ variable "keycloak_chart_name" {
 variable "keycloak_realm" {
   description = "Keycloak realm name"
   type        = string
-  default     = "build"
+  default     = "infra"
 }
 
 variable "keycloak_admin_username" {
