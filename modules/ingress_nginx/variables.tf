@@ -5,7 +5,7 @@ variable "cluster_name" {
 
 variable "helm_registry" {
   description = "Helm chart registry to get the chart from"
-  type = string
+  type        = string
 }
 
 variable "chart_name" {
@@ -20,6 +20,11 @@ variable "chart_version" {
 
 variable "helm_values" {
   description = "Ingress-Nginx Helm chart values"
+  type        = string
+}
+
+variable "namespace" {
+  description = "Namespace to deploy Ingress-Nginx Helm chart into"
   type        = string
 }
 

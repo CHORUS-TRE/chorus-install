@@ -5,7 +5,7 @@ variable "cluster_name" {
 
 variable "helm_registry" {
   description = "Helm chart registry to get the chart from"
-  type = string
+  type        = string
 }
 
 variable "harbor_chart_name" {
@@ -20,6 +20,11 @@ variable "harbor_chart_version" {
 
 variable "harbor_helm_values" {
   description = "Harbor Helm chart values"
+  type        = string
+}
+
+variable "harbor_namespace" {
+  description = "Namespace to deploy Harbor Helm chart into"
   type        = string
 }
 

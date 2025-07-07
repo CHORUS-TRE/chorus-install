@@ -24,10 +24,6 @@ terraform {
       source  = "keycloak/keycloak"
       version = "5.2.0"
     }
-    argocd = {
-      source  = "argoproj-labs/argocd"
-      version = "7.8.2"
-    }
     null = {
       source  = "hashicorp/null"
       version = "3.2.4"
