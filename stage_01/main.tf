@@ -37,7 +37,7 @@ module "ingress_nginx" {
   cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
-  chart_name         = var.ingress_nginx_chart_name
+  chart_name    = var.ingress_nginx_chart_name
   chart_version      = local.ingress_nginx_chart_version
   helm_values        = file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/values.yaml")
   namespace          = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json")).namespace
