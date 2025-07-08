@@ -21,7 +21,7 @@ resource "keycloak_group_roles" "chorus_admins_group_roles" {
   ]
 }
 
-resource "keycloak_realm" "build" {
+resource "keycloak_realm" "infra" {
   realm                       = var.realm_name
   organizations_enabled       = true
   default_signature_algorithm = "RS256"
@@ -32,7 +32,7 @@ resource "keycloak_realm" "build" {
 resource "keycloak_openid_client" "openid_client" {
   for_each = var.clients_config
 
-  realm_id      = keycloak_realm.build.id
+  realm_id      = keycloak_realm.infra.id
   client_id     = each.key
   client_secret = each.value.client_secret
   enabled       = true
@@ -53,42 +53,42 @@ resource "keycloak_openid_client" "openid_client" {
 resource "keycloak_group" "openid_client_group" {
   for_each = { for k, v in var.clients_config : k => v if can(v.client_group) && v.client_group != "" && v.client_group != null }
 
-  realm_id = keycloak_realm.build.id
+  realm_id = keycloak_realm.infra.id
   name     = each.value.client_group
 }
 
 # Special case for Grafana
 data "keycloak_group" "grafana_group" {
-  realm_id = keycloak_realm.build.id
+  realm_id = keycloak_realm.infra.id
   name     = "Grafana"
 
   depends_on = [keycloak_group.openid_client_group]
 }
 
 resource "keycloak_group" "grafana_editors_group" {
-  realm_id  = keycloak_realm.build.id
+  realm_id  = keycloak_realm.infra.id
   parent_id = data.keycloak_group.grafana_group.id
   name      = "Editors"
 }
 
 resource "keycloak_group" "grafana_admins_group" {
-  realm_id  = keycloak_realm.build.id
+  realm_id  = keycloak_realm.infra.id
   parent_id = keycloak_group.grafana_editors_group.id
   name      = "Administrators"
 }
 
 resource "keycloak_role" "grafana_admin" {
-  realm_id = keycloak_realm.build.id
+  realm_id = keycloak_realm.infra.id
   name     = "grafana-admin"
 }
 
 resource "keycloak_role" "grafana_editor" {
-  realm_id = keycloak_realm.build.id
+  realm_id = keycloak_realm.infra.id
   name     = "grafana-editor"
 }
 
 resource "keycloak_group_roles" "grafana_editors_group_roles" {
-  realm_id = keycloak_realm.build.id
+  realm_id = keycloak_realm.infra.id
   group_id = keycloak_group.grafana_editors_group.id
 
   role_ids = [
@@ -97,7 +97,7 @@ resource "keycloak_group_roles" "grafana_editors_group_roles" {
 }
 
 resource "keycloak_group_roles" "grafana_admins_group_roles" {
-  realm_id = keycloak_realm.build.id
+  realm_id = keycloak_realm.infra.id
   group_id = keycloak_group.grafana_admins_group.id
 
   role_ids = [
@@ -106,7 +106,7 @@ resource "keycloak_group_roles" "grafana_admins_group_roles" {
 }
 
 resource "keycloak_openid_client_scope" "openid_client_scope" {
-  realm_id               = keycloak_realm.build.id
+  realm_id               = keycloak_realm.infra.id
   name                   = "groups"
   description            = "When requested, this scope will map a user's group memberships to a claim"
   include_in_token_scope = true
@@ -115,7 +115,7 @@ resource "keycloak_openid_client_scope" "openid_client_scope" {
 resource "keycloak_openid_client_optional_scopes" "client_optional_scopes" {
   for_each = keycloak_openid_client.openid_client
 
-  realm_id  = keycloak_realm.build.id
+  realm_id  = keycloak_realm.infra.id
   client_id = each.value.id
 
   optional_scopes = [

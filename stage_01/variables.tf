@@ -93,7 +93,7 @@ variable "harbor_chart_name" {
 variable "keycloak_realm" {
   description = "Keycloak realm name"
   type        = string
-  default     = "build"
+  default     = "infra"
 }
 
 variable "harbor_keycloak_client_id" {
