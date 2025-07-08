@@ -15,11 +15,11 @@ resource "harbor_project" "projects" {
 # ArgoCD robot account
 
 resource "random_password" "argocd_robot_password" {
-  length  = 12
-  special = false
-  upper   = true
-  lower   = true
-  numeric = true
+  length      = 12
+  special     = false
+  upper       = true
+  lower       = true
+  numeric     = true
   min_upper   = 1
   min_lower   = 1
   min_numeric = 1
@@ -109,11 +109,11 @@ resource "harbor_robot_account" "argocd" {
 # ArgoCI robot account
 
 resource "random_password" "argoci_robot_password" {
-  length  = 12
-  special = false
-  upper   = true
-  lower   = true
-  numeric = true
+  length      = 12
+  special     = false
+  upper       = true
+  lower       = true
+  numeric     = true
   min_upper   = 1
   min_lower   = 1
   min_numeric = 1
