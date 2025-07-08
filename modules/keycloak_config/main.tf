@@ -105,6 +105,39 @@ resource "keycloak_group_roles" "grafana_admins_group_roles" {
   ]
 }
 
+# Special case for Prometheus
+data "keycloak_openid_client" "prometheus" {
+  realm_id  = keycloak_realm.infra.id
+  client_id = "prometheus"
+
+  depends_on = [keycloak_openid_client.openid_client]
+}
+
+resource "keycloak_openid_audience_protocol_mapper" "prometheus" {
+  realm_id  = keycloak_realm.infra.id
+  client_id = data.keycloak_openid_client.prometheus.id
+  name      = "aud-mapper-prometheus"
+
+  included_client_audience = "prometheus"
+}
+
+# Special case for Alertmanager
+data "keycloak_openid_client" "alertmanager" {
+  realm_id  = keycloak_realm.infra.id
+  client_id = "alertmanager"
+
+  depends_on = [keycloak_openid_client.openid_client]
+}
+
+resource "keycloak_openid_audience_protocol_mapper" "alertmanager" {
+  realm_id  = keycloak_realm.infra.id
+  client_id = data.keycloak_openid_client.alertmanager.id
+  name      = "aud-mapper-alertmanager"
+
+  included_client_audience = "alertmanager"
+}
+
+# Client scope
 resource "keycloak_openid_client_scope" "openid_client_scope" {
   realm_id               = keycloak_realm.infra.id
   name                   = "groups"

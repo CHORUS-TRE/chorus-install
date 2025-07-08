@@ -22,12 +22,17 @@ resource "random_password" "prometheus_cookie_secret" {
   special = false
 }
 
+resource "random_password" "alertmanager_cookie_secret" {
+  length  = 32
+  special = false
+}
+
 resource "random_password" "session_storage_secret" {
   length  = 32
   special = false
 }
 
-# Alertmanager and Prometheus OAUTH2 proxy OIDC secret
+# Prometheus OAUTH2 proxy OIDC secret
 
 resource "kubernetes_secret" "prometheus_oidc_secret" {
   metadata {
@@ -40,21 +45,24 @@ resource "kubernetes_secret" "prometheus_oidc_secret" {
     "client-id"     = var.prometheus_keycloak_client_id
     "client-secret" = var.prometheus_keycloak_client_secret
   }
+}
 
-  lifecycle {
-    precondition {
-      condition = (
-        local.prometheus_existing_session_storage_secret == local.alertmanager_existing_session_storage_secret &&
-        local.prometheus_existing_session_storage_secret_key == local.alertmanager_existing_session_storage_secret_key &&
-        local.prometheus_existing_oidc_secret == local.alertmanager_existing_oidc_secret &&
-        var.prometheus_oauth2_proxy_namespace == var.alertmanager_oauth2_proxy_namespace
-      )
-      error_message = "Secrets used by Alertmanager and Prometheus OAUTH2 proxy must correspond. Please correct your Helm charts values."
-    }
+# Alertmanager OAUTH2 proxy OIDC secret
+
+resource "kubernetes_secret" "alertmanager_oidc_secret" {
+  metadata {
+    name      = local.alertmanager_existing_oidc_secret
+    namespace = var.alertmanager_oauth2_proxy_namespace
+  }
+
+  data = {
+    "cookie-secret" = random_password.alertmanager_cookie_secret.result
+    "client-id"     = var.alertmanager_keycloak_client_id
+    "client-secret" = var.alertmanager_keycloak_client_secret
   }
 }
 
-# Alertmanager and Prometheus session storage secret
+# Prometheus session storage secret
 
 resource "kubernetes_secret" "prometheus_session_storage_secret" {
   metadata {
@@ -65,17 +73,18 @@ resource "kubernetes_secret" "prometheus_session_storage_secret" {
   data = {
     "${local.prometheus_existing_session_storage_secret_key}" = random_password.session_storage_secret.result
   }
+}
 
-  lifecycle {
-    precondition {
-      condition = (
-        local.prometheus_existing_session_storage_secret == local.alertmanager_existing_session_storage_secret &&
-        local.prometheus_existing_session_storage_secret_key == local.alertmanager_existing_session_storage_secret_key &&
-        local.prometheus_existing_oidc_secret == local.alertmanager_existing_oidc_secret &&
-        var.prometheus_oauth2_proxy_namespace == var.alertmanager_oauth2_proxy_namespace
-      )
-      error_message = "Secrets used by Alertmanager and Prometheus OAUTH2 proxy must correspond. Please correct your Helm charts values."
-    }
+# Alertmanager session storage secret
+
+resource "kubernetes_secret" "alertmanager_session_storage_secret" {
+  metadata {
+    name      = local.alertmanager_existing_session_storage_secret
+    namespace = var.alertmanager_oauth2_proxy_namespace
+  }
+
+  data = {
+    "${local.alertmanager_existing_session_storage_secret_key}" = random_password.session_storage_secret.result
   }
 }
 

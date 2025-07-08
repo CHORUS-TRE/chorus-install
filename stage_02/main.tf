@@ -305,6 +305,8 @@ module "oauth2_proxy" {
   valkey_namespace                    = local.valkey_oauth2_proxy_namespace
   prometheus_keycloak_client_id       = var.prometheus_keycloak_client_id
   prometheus_keycloak_client_secret   = random_password.prometheus_keycloak_client_secret.result
+  alertmanager_keycloak_client_id     = var.alertmanager_keycloak_client_id
+  alertmanager_keycloak_client_secret = random_password.alertmanager_keycloak_client_secret.result
 }
 
 # Install charts
