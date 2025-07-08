@@ -1,5 +1,4 @@
 locals {
-
   alertmanager_oauth2_proxy_values_parsed          = yamldecode(var.alertmanager_oauth2_proxy_values)
   alertmanager_existing_session_storage_secret     = local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.existingSecret
   alertmanager_existing_session_storage_secret_key = local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.passwordKey
