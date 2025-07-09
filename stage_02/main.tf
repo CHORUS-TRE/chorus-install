@@ -295,7 +295,7 @@ resource "kubernetes_secret" "argo_workflows_oidc_client_secret" {
 }
 
 module "oauth2_proxy" {
-  source = "../modules/oauth2_proxy"
+  source = "${var.modules_path}/oauth2_proxy"
 
   alertmanager_oauth2_proxy_values    = local.alertmanager_oauth2_proxy_values
   prometheus_oauth2_proxy_values      = local.prometheus_oauth2_proxy_values
@@ -312,7 +312,7 @@ module "oauth2_proxy" {
 # Install charts
 
 module "keycloak_config" {
-  source = "../modules/keycloak_config"
+  source = "${var.modules_path}/keycloak_config"
 
   providers = {
     keycloak = keycloak.kcadmin-provider
@@ -331,7 +331,7 @@ module "keycloak_config" {
 }
 
 module "harbor_config" {
-  source = "../modules/harbor_config"
+  source = "${var.modules_path}/harbor_config"
 
   providers = {
     harbor = harbor.harboradmin-provider
@@ -351,7 +351,7 @@ module "harbor_config" {
 }
 
 module "argo_cd" {
-  source = "../modules/argo_cd"
+  source = "${var.modules_path}/argo_cd"
 
   providers = {
     helm = helm.chorus_helm
@@ -403,7 +403,7 @@ resource "null_resource" "wait_for_argocd" {
 }
 
 module "argocd_config" {
-  source = "../modules/argo_cd_config"
+  source = "${var.modules_path}/argo_cd_config"
 
   cluster_name = var.cluster_name
 

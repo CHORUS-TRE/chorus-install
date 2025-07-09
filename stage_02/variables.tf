@@ -5,6 +5,12 @@ https://github.com/CHORUS-TRE/environment-template
 and reference it using the "helm_values_path" variable below
 */
 
+variable "modules_path" {
+  description = "Path to the Terraform modules"
+  type        = string
+  default     = "../modules"
+}
+
 variable "cluster_name" {
   description = "The cluster name to be used as a prefix to release names"
   type        = string

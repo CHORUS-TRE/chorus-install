@@ -31,6 +31,7 @@ kubectl delete $(kubectl get crds -oname | grep aquasecurity.github.io)
 kubie ns kube-system
 kubectl patch $(kubectl get challenges.acme.cert-manager.io -oname) --type=merge -p '{"metadata":{"finalizers":null}}'
 kubectl delete $(kubectl get challenges.acme.cert-manager.io -oname)
+kubectl delete $(kubectl get deployments.apps -oname | grep "argo-workflows")
 kubectl delete secret argo-workflows-oidc argo-workflows-tls
 kubectl delete ns argo
 

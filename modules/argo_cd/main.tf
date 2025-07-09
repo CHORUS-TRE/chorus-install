@@ -3,7 +3,6 @@ locals {
   argocd_cache_values_parsed       = yamldecode(var.argocd_cache_helm_values)
   argocd_cache_existing_secret     = local.argocd_cache_values_parsed.valkey.auth.existingSecret
   argocd_cache_existing_secret_key = local.argocd_cache_values_parsed.valkey.auth.existingSecretPasswordKey
-  argocd_cache_existing_user_key   = "redis-username"
 }
 
 # Namespace
@@ -29,7 +28,7 @@ resource "kubernetes_secret" "argocd_cache" {
 
   data = {
     # TODO: double check why user is empty string (copied from chorus-build)
-    "${local.argocd_cache_existing_user_key}"   = ""
+    "redis-username" = ""
     "${local.argocd_cache_existing_secret_key}" = random_password.redis_password.result
   }
 
@@ -53,6 +52,9 @@ resource "kubernetes_secret" "environments_repository_credentials" {
 
   depends_on = [kubernetes_namespace.argocd]
 }
+
+# The following secret name is hardcoded 
+# because ArgoCD relies only on the labels
 
 resource "kubernetes_secret" "oci-build" {
   metadata {
