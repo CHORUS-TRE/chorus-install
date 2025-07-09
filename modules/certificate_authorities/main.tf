@@ -67,6 +67,10 @@ resource "null_resource" "wait_for_cert_manager_webhook" {
     }
   }
 
+  triggers = {
+    always_run = timestamp()
+  }
+
   depends_on = [helm_release.cert_manager]
 }
 
