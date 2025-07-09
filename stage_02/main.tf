@@ -406,8 +406,6 @@ module "argocd_config" {
   source = "../modules/argo_cd_config"
 
   cluster_name       = var.cluster_name
-  kubeconfig_path    = var.kubeconfig_path
-  kubeconfig_context = var.kubeconfig_context
 
   argocd_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
   argocd_namespace   = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace

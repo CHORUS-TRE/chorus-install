@@ -43,16 +43,6 @@ variable "harbor_domain" {
   type        = string
 }
 
-variable "kubeconfig_path" {
-  description = "Path to the Kubernetes config file"
-  type        = string
-}
-
-variable "kubeconfig_context" {
-  description = "Kubernetes context to use"
-  type        = string
-}
-
 variable "helm_registry" {
   description = "Helm chart registry to get the chart from"
   type        = string
