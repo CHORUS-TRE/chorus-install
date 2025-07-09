@@ -50,7 +50,7 @@ resource "helm_release" "cert_manager" {
 
 resource "null_resource" "wait_for_cert_manager_webhook" {
   provisioner "local-exec" {
-    quiet = true
+    quiet   = true
     command = <<EOT
       set -e
       export KUBECONFIG
@@ -87,5 +87,5 @@ resource "helm_release" "selfsigned" {
 
   values = [var.selfsigned_helm_values]
 
-  depends_on = [ null_resource.wait_for_cert_manager_webhook ]
+  depends_on = [null_resource.wait_for_cert_manager_webhook]
 }
