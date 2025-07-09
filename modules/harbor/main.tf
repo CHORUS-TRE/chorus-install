@@ -1,4 +1,3 @@
-# Read values
 locals {
   harbor_values_parsed = yamldecode(var.harbor_helm_values)
 
@@ -47,71 +46,16 @@ locals {
   EOT
 } #TODO: set oidc_verify_cert to "true"
 
+# Namespace
+
 resource "kubernetes_namespace" "harbor" {
   metadata {
     name = var.harbor_namespace
   }
 }
 
-# Secret Definitions
-# Check if the Kubernetes secret already exists
-data "kubernetes_secret" "existing_secret_harbor_db" {
-  metadata {
-    name      = local.harbor_db_existing_secret
-    namespace = var.harbor_namespace
-  }
-}
+# Secrets
 
-data "kubernetes_secret" "existing_secret_harbor" {
-  metadata {
-    name      = local.harbor_existing_secret
-    namespace = var.harbor_namespace
-  }
-}
-
-data "kubernetes_secret" "existing_secret_secret_key_harbor" {
-  metadata {
-    name      = local.harbor_existing_secret_secret_key
-    namespace = var.harbor_namespace
-  }
-}
-
-data "kubernetes_secret" "existing_xsrf_secret_harbor" {
-  metadata {
-    name      = local.harbor_existing_xsrf_secret
-    namespace = var.harbor_namespace
-  }
-}
-
-data "kubernetes_secret" "existing_admin_password_secret_harbor" {
-  metadata {
-    name      = local.harbor_existing_admin_password_secret
-    namespace = var.harbor_namespace
-  }
-}
-
-data "kubernetes_secret" "existing_jobservice_secret_harbor" {
-  metadata {
-    name      = local.harbor_existing_jobservice_secret
-    namespace = var.harbor_namespace
-  }
-}
-
-data "kubernetes_secret" "existing_registry_http_secret_harbor" {
-  metadata {
-    name      = local.harbor_existing_registry_http_secret
-    namespace = var.harbor_namespace
-  }
-}
-
-data "kubernetes_secret" "existing_registry_credentials_secret_harbor" {
-  metadata {
-    name      = local.harbor_existing_registry_credentials_secret
-    namespace = var.harbor_namespace
-  }
-}
-
-# Generate random password
 resource "random_password" "harbor_db_password" {
   length  = 32
   special = false
@@ -161,7 +105,6 @@ resource "random_password" "salt" {
   special = false
 }
 
-# Create Kubernetes secret using existing password (if found) or using randomly generated one
 resource "kubernetes_secret" "harbor_db_secret" {
   metadata {
     name      = local.harbor_db_existing_secret
@@ -170,9 +113,10 @@ resource "kubernetes_secret" "harbor_db_secret" {
 
   data = {
     "${local.harbor_db_admin_password_key}" = local.harbor_db_postgres_password
-    "${local.harbor_db_user_password_key}" = try(data.kubernetes_secret.existing_secret_harbor_db.data["${local.harbor_db_user_password_key}"],
-    random_password.harbor_db_password.result)
+    "${local.harbor_db_user_password_key}"  = random_password.harbor_db_password.result
   }
+
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 resource "kubernetes_secret" "harbor_secret" {
@@ -181,12 +125,13 @@ resource "kubernetes_secret" "harbor_secret" {
     namespace = var.harbor_namespace
   }
 
-  # Helm chart does not allow to change the secret key
+  # Harbor Helm chart does not allow to change the secret key
   # which is why "secret" is hardoced here
   data = {
-    "secret" = try(data.kubernetes_secret.existing_secret_harbor.data["secret"],
-    random_password.harbor_secret.result)
+    "secret" = random_password.harbor_secret.result
   }
+
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 resource "kubernetes_secret" "harbor_secret_secret_key" {
@@ -195,12 +140,13 @@ resource "kubernetes_secret" "harbor_secret_secret_key" {
     namespace = var.harbor_namespace
   }
 
-  # Helm chart does not allow to change the secret key
+  # Harbor Helm chart does not allow to change the secret key
   # which is why "secretKey" is hardoced here
   data = {
-    "secretKey" = try(data.kubernetes_secret.existing_secret_secret_key_harbor.data["secretKey"],
-    random_password.harbor_secret_secret_key.result)
+    "secretKey" = random_password.harbor_secret_secret_key.result
   }
+
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 resource "kubernetes_secret" "harbor_xsrf_secret" {
@@ -210,9 +156,10 @@ resource "kubernetes_secret" "harbor_xsrf_secret" {
   }
 
   data = {
-    "${local.harbor_existing_xsrf_secret_key}" = try(data.kubernetes_secret.existing_xsrf_secret_harbor.data["${local.harbor_existing_xsrf_secret_key}"],
-    random_password.harbor_csrf_key.result)
+    "${local.harbor_existing_xsrf_secret_key}" = random_password.harbor_csrf_key.result
   }
+
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 resource "kubernetes_secret" "harbor_admin_password_secret" {
@@ -222,9 +169,10 @@ resource "kubernetes_secret" "harbor_admin_password_secret" {
   }
 
   data = {
-    "${local.harbor_existing_admin_password_secret_key}" = try(data.kubernetes_secret.existing_admin_password_secret_harbor.data["${local.harbor_existing_admin_password_secret_key}"],
-    random_password.harbor_admin_password.result)
+    "${local.harbor_existing_admin_password_secret_key}" = random_password.harbor_admin_password.result
   }
+
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 resource "kubernetes_secret" "harbor_jobservice_secret" {
@@ -234,9 +182,10 @@ resource "kubernetes_secret" "harbor_jobservice_secret" {
   }
 
   data = {
-    "${local.harbor_existing_jobservice_secret_key}" = try(data.kubernetes_secret.existing_jobservice_secret_harbor.data["${local.harbor_existing_jobservice_secret_key}"],
-    random_password.harbor_jobservice_secret.result)
+    "${local.harbor_existing_jobservice_secret_key}" = random_password.harbor_jobservice_secret.result
   }
+
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 resource "kubernetes_secret" "harbor_registry_http_secret" {
@@ -246,9 +195,10 @@ resource "kubernetes_secret" "harbor_registry_http_secret" {
   }
 
   data = {
-    "${local.harbor_existing_registry_http_secret_key}" = try(data.kubernetes_secret.existing_registry_http_secret_harbor.data["${local.harbor_existing_registry_http_secret_key}"],
-    random_password.harbor_registry_http_secret.result)
+    "${local.harbor_existing_registry_http_secret_key}" = random_password.harbor_registry_http_secret.result
   }
+
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 resource "htpasswd_password" "harbor_registry" {
@@ -262,15 +212,15 @@ resource "kubernetes_secret" "harbor_registry_credentials_secret" {
     namespace = var.harbor_namespace
   }
 
-  # Helm chart does not allow to change the secret key
+  # Harbor Helm chart does not allow to change the secret key
   # which is why "REGISTRY_PASSWD" and
   # "REGISTRY_HTPASSWD" are hardoced here
   data = {
-    "REGISTRY_PASSWD" = try(data.kubernetes_secret.existing_registry_credentials_secret_harbor.data["REGISTRY_PASSWD"],
-    random_password.harbor_registry_passwd.result)
-    "REGISTRY_HTPASSWD" = try(data.kubernetes_secret.existing_registry_credentials_secret_harbor.data["REGISTRY_HTPASSWD"],
-    "${local.harbor_registry_admin_username}:${htpasswd_password.harbor_registry.bcrypt}")
+    "REGISTRY_PASSWD"   = random_password.harbor_registry_passwd.result
+    "REGISTRY_HTPASSWD" = "${local.harbor_registry_admin_username}:${htpasswd_password.harbor_registry.bcrypt}"
   }
+
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 resource "kubernetes_secret" "oidc_secret" {
@@ -283,14 +233,11 @@ resource "kubernetes_secret" "oidc_secret" {
     "${local.oidc_secret.key}" = local.oidc_config
   }
 
-  lifecycle {
-    ignore_changes = [data]
-  }
-
   depends_on = [kubernetes_namespace.harbor]
 }
 
 # Harbor Cache (Valkey)
+
 resource "helm_release" "harbor_cache" {
   name             = "${var.cluster_name}-${var.harbor_chart_name}-cache"
   repository       = "oci://${var.helm_registry}"
@@ -315,12 +262,11 @@ resource "helm_release" "harbor_cache" {
     value = "false"
   }
 
-  depends_on = [
-    kubernetes_namespace.harbor
-  ]
+  depends_on = [kubernetes_namespace.harbor]
 }
 
 # Harbor DB (PostgreSQL)
+
 resource "helm_release" "harbor_db" {
   name             = "${var.cluster_name}-${var.harbor_chart_name}-db"
   repository       = "oci://${var.helm_registry}"
@@ -343,6 +289,7 @@ resource "helm_release" "harbor_db" {
 }
 
 # Harbor
+
 resource "helm_release" "harbor" {
   name             = "${var.cluster_name}-${var.harbor_chart_name}"
   repository       = "oci://${var.helm_registry}"
@@ -363,6 +310,8 @@ resource "helm_release" "harbor" {
     value = "false"
   }
 }
+
+# Retrieve data for outputs
 
 data "kubernetes_secret" "harbor_admin_password" {
   metadata {

@@ -17,9 +17,6 @@ resource "harbor_project" "projects" {
 resource "random_password" "argocd_robot_password" {
   length      = 12
   special     = false
-  upper       = true
-  lower       = true
-  numeric     = true
   min_upper   = 1
   min_lower   = 1
   min_numeric = 1
@@ -111,9 +108,6 @@ resource "harbor_robot_account" "argocd" {
 resource "random_password" "argoci_robot_password" {
   length      = 12
   special     = false
-  upper       = true
-  lower       = true
-  numeric     = true
   min_upper   = 1
   min_lower   = 1
   min_numeric = 1
@@ -623,9 +617,11 @@ resource "null_resource" "pull_charts" {
     EOT
   }
   for_each = var.charts_versions
+
   triggers = {
     always_run = timestamp()
   }
+
   depends_on = [harbor_project.projects]
 }
 
@@ -647,9 +643,11 @@ resource "null_resource" "push_charts" {
     EOT
   }
   for_each = var.charts_versions
+
   triggers = {
     always_run = timestamp()
   }
+
   depends_on = [
     harbor_project.projects,
     null_resource.pull_charts

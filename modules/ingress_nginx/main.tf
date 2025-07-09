@@ -1,11 +1,13 @@
-# Namespace Definitions
+# Namespace
+
 resource "kubernetes_namespace" "ingress_nginx" {
   metadata {
     name = var.namespace
   }
 }
 
-# Ingress-Nginx Deployment
+# Ingress-Nginx
+
 resource "helm_release" "ingress_nginx" {
   name             = "${var.cluster_name}-${var.chart_name}"
   repository       = "oci://${var.helm_registry}"
@@ -19,13 +21,9 @@ resource "helm_release" "ingress_nginx" {
   depends_on = [kubernetes_namespace.ingress_nginx]
 }
 
+# Load Balancer
+
 resource "null_resource" "wait_for_lb_ip" {
-  depends_on = [helm_release.ingress_nginx]
-
-  triggers = {
-    always_run = timestamp()
-  }
-
   provisioner "local-exec" {
     quiet   = true
     command = <<EOT
@@ -47,6 +45,12 @@ resource "null_resource" "wait_for_lb_ip" {
       KUBECONFIG = pathexpand(var.kubeconfig_path)
     }
   }
+
+  triggers = {
+    always_run = timestamp()
+  }
+
+  depends_on = [helm_release.ingress_nginx]
 }
 
 data "kubernetes_service" "loadbalancer" {
