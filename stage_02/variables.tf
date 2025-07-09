@@ -171,7 +171,7 @@ variable "argocd_keycloak_client_id" {
 variable "argo_workflows_keycloak_client_id" {
   description = "Keycloak client ID used assigned to Argo Workflows"
   type        = string
-  default     = "argo-wrokflows"
+  default     = "argo-workflows"
 }
 
 variable "grafana_keycloak_client_id" {
