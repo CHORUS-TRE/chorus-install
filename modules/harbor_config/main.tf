@@ -15,11 +15,14 @@ resource "harbor_project" "projects" {
 # ArgoCD robot account
 
 resource "random_password" "argocd_robot_password" {
-  length  = 12
-  special = false
-  upper   = true
-  lower   = true
-  numeric = true
+  length      = 12
+  special     = false
+  upper       = true
+  lower       = true
+  numeric     = true
+  min_upper   = 1
+  min_lower   = 1
+  min_numeric = 1
 }
 
 resource "harbor_robot_account" "argocd" {
@@ -106,11 +109,14 @@ resource "harbor_robot_account" "argocd" {
 # ArgoCI robot account
 
 resource "random_password" "argoci_robot_password" {
-  length  = 12
-  special = false
-  upper   = true
-  lower   = true
-  numeric = true
+  length      = 12
+  special     = false
+  upper       = true
+  lower       = true
+  numeric     = true
+  min_upper   = 1
+  min_lower   = 1
+  min_numeric = 1
 }
 
 resource "harbor_robot_account" "argoci" {
@@ -648,41 +654,4 @@ resource "null_resource" "push_charts" {
     harbor_project.projects,
     null_resource.pull_charts
   ]
-}
-
-# Container images
-
-# TODO: discuss whether images should be built from scratch
-# or if we can previously add (some of) them to a public registry
-
-/*
-resource "null_resource" "push_images" {
-  provisioner "local-exec" {
-    #quiet = true
-    command = <<EOT
-    set -e
-
-    chmod +x ${path.module}/scripts/push_container_images.sh && \
-    ${path.module}/scripts/push_container_images.sh --debug $chorus_images_revision $harbor_url $harbor_admin_username $harbor_admin_password
-    EOT
-  }
-  triggers = {
-    always_run = timestamp()
-  }
-  depends_on = [ harbor_project.projects ]
-}
-*/
-
-# Outputs
-
-output "argocd_robot_password" {
-  value       = random_password.argocd_robot_password.result
-  description = "Password of the robot user used by ArgoCD"
-  sensitive   = true
-}
-
-output "argoci_robot_password" {
-  value       = random_password.argoci_robot_password.result
-  description = "Password of the robot user used by ArgoCI"
-  sensitive   = true
 }

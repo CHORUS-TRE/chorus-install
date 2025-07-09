@@ -39,3 +39,13 @@ variable "prometheus_keycloak_client_secret" {
   sensitive   = true
 }
 
+variable "alertmanager_keycloak_client_id" {
+  description = "Alertmanager client ID used assigned to Prometheus"
+  type        = string
+}
+
+variable "alertmanager_keycloak_client_secret" {
+  description = "Alertmanager client secret used assigned to Prometheus"
+  type        = string
+  sensitive   = true
+}

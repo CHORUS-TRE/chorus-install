@@ -305,6 +305,8 @@ module "oauth2_proxy" {
   valkey_namespace                    = local.valkey_oauth2_proxy_namespace
   prometheus_keycloak_client_id       = var.prometheus_keycloak_client_id
   prometheus_keycloak_client_secret   = random_password.prometheus_keycloak_client_secret.result
+  alertmanager_keycloak_client_id     = var.alertmanager_keycloak_client_id
+  alertmanager_keycloak_client_secret = random_password.alertmanager_keycloak_client_secret.result
 }
 
 # Install charts
@@ -427,23 +429,6 @@ module "argocd_config" {
     module.argo_cd,
     null_resource.wait_for_argocd
   ]
-}
-
-# Outputs
-
-output "argocd_url" {
-  value = try(module.argo_cd.argocd_url,
-  "Failed to retrieve ArgoCD URL")
-}
-
-output "argocd_username" {
-  value = try(module.argo_cd.argocd_username,
-  "Failed to retrieve ArgoCD admin username ")
-}
-
-output "argocd_password" {
-  value     = module.argo_cd.argocd_password
-  sensitive = true
 }
 
 locals {

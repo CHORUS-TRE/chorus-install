@@ -76,7 +76,6 @@
     terraform init
     terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
-    cd ..
     ```
 
     > **_NOTE:_** The ```terraform apply``` command can take several minutes to complete
