@@ -1,10 +1,13 @@
+# Namespace
+
 resource "kubernetes_namespace" "cert_manager" {
   metadata {
     name = var.cert_manager_namespace
   }
 }
 
-# Cert-Manager CRDs installation
+# Cert-Manager CRDs
+
 data "http" "cert_manager_crds" {
   url = "https://github.com/cert-manager/cert-manager/releases/download/${var.cert_manager_app_version}/cert-manager.crds.yaml"
 
@@ -25,7 +28,8 @@ resource "kubernetes_manifest" "cert_manager_crds" {
   ]
 }
 
-# Cert-Manager deployment
+# Cert-Manager
+
 resource "helm_release" "cert_manager" {
   name             = "${var.cluster_name}-${var.cert_manager_chart_name}"
   repository       = "oci://${var.helm_registry}"
@@ -44,13 +48,30 @@ resource "helm_release" "cert_manager" {
   ]
 }
 
-resource "time_sleep" "wait_for_webhook" {
-  depends_on = [helm_release.cert_manager]
+resource "null_resource" "wait_for_cert_manager_webhook" {
+  provisioner "local-exec" {
+    quiet = true
+    command = <<EOT
+      set -e
+      export KUBECONFIG
+      kubectl config use-context ${var.kubeconfig_context}
+      for i in {1..30}; do
+        kubectl -n ${var.cert_manager_namespace} get pod -l app.kubernetes.io/name=webhook -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null | grep -q true && exit 0
+        sleep 5
+      done
+      echo "Timeout waiting for cert-manager webhook" >&2
+      exit 1
+    EOT
+    environment = {
+      KUBECONFIG = pathexpand(var.kubeconfig_path)
+    }
+  }
 
-  create_duration = "60s"
+  depends_on = [helm_release.cert_manager]
 }
 
 # Self-Signed Issuer (e.g. for PostgreSQL)
+
 resource "helm_release" "selfsigned" {
   name             = "${var.cluster_name}-${var.selfsigned_chart_name}"
   repository       = "oci://${var.helm_registry}"
@@ -62,5 +83,5 @@ resource "helm_release" "selfsigned" {
 
   values = [var.selfsigned_helm_values]
 
-  depends_on = [time_sleep.wait_for_webhook]
+  depends_on = [ null_resource.wait_for_cert_manager_webhook ]
 }

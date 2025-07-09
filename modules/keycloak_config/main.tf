@@ -16,9 +16,7 @@ resource "keycloak_group_roles" "chorus_admins_group_roles" {
   realm_id = data.keycloak_realm.master.id
   group_id = keycloak_group.chorus_admin.id
 
-  role_ids = [
-    data.keycloak_role.admin.id
-  ]
+  role_ids = [data.keycloak_role.admin.id]
 }
 
 resource "keycloak_realm" "infra" {

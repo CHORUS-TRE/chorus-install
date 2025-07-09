@@ -1,9 +1,10 @@
-# Read values
 locals {
   argocd_values_parsed = yamldecode(var.argocd_helm_values)
   argocd_oidc_config   = yamldecode(local.argocd_values_parsed.argo-cd.configs.cm["oidc.config"])
   argocd_oidc_secret   = regex("\\$(.*?):", local.argocd_oidc_config.clientSecret).0
 }
+
+# Secrets
 
 resource "kubernetes_secret" "argocd_secret" {
   metadata {
@@ -22,6 +23,8 @@ resource "kubernetes_secret" "argocd_secret" {
   }
 }
 
+/*
+TODO: CHECK IF WAIT IS STILL NEEDED
 resource "null_resource" "wait_for_argocd_server" {
   provisioner "local-exec" {
     quiet   = true
@@ -49,6 +52,9 @@ resource "null_resource" "wait_for_argocd_server" {
     always_run = timestamp()
   }
 }
+*/
+
+# AppProject and ApplicationSet
 
 resource "helm_release" "argo_deploy" {
   name             = "${var.cluster_name}-${var.argo_deploy_chart_name}"

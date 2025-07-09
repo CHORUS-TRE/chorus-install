@@ -1,4 +1,3 @@
-# Read values
 locals {
   argocd_values_parsed             = yamldecode(var.argocd_helm_values)
   argocd_cache_values_parsed       = yamldecode(var.argocd_cache_helm_values)
@@ -7,29 +6,21 @@ locals {
   argocd_cache_existing_user_key   = "redis-username"
 }
 
+# Namespace
+
 resource "kubernetes_namespace" "argocd" {
   metadata {
     name = var.argocd_namespace
   }
 }
 
-# Secret Definitions
-# Check if the Kubernetes secret already exists
-data "kubernetes_secret" "existing_secret_argocd_cache" {
-  metadata {
-    name      = local.argocd_cache_existing_secret
-    namespace = var.argocd_namespace
-  }
-
-  depends_on = [kubernetes_namespace.argocd]
-}
+# Secrets
 
 resource "random_password" "redis_password" {
   length  = 32
   special = false
 }
 
-# Create Kubernetes secret using existing password (if found) or using the randomly generated one
 resource "kubernetes_secret" "argocd_cache" {
   metadata {
     name      = local.argocd_cache_existing_secret
@@ -38,14 +29,11 @@ resource "kubernetes_secret" "argocd_cache" {
 
   data = {
     # TODO: double check why user is empty string (copied from chorus-build)
-    "${local.argocd_cache_existing_user_key}" = ""
-    "${local.argocd_cache_existing_secret_key}" = try(data.kubernetes_secret.existing_secret_argocd_cache.data["${local.argocd_cache_existing_secret_key}"],
-    random_password.redis_password.result)
+    "${local.argocd_cache_existing_user_key}"   = ""
+    "${local.argocd_cache_existing_secret_key}" = random_password.redis_password.result
   }
 
-  lifecycle {
-    ignore_changes = [data]
-  }
+  depends_on = [kubernetes_namespace.argocd]
 }
 
 resource "kubernetes_secret" "environments_repository_credentials" {
@@ -87,7 +75,6 @@ resource "kubernetes_secret" "oci-build" {
   depends_on = [kubernetes_namespace.argocd]
 }
 
-
 /*
 # Note: in-cluster is created by default in ArgoCD
 Remote cluster configuration will be done in a second development round
@@ -121,7 +108,8 @@ inject it in the secret
 
 */
 
-# ArgoCD Cache (Valkey) Deployment
+# ArgoCD Cache (Valkey)
+
 resource "helm_release" "argocd_cache" {
   name             = "${var.cluster_name}-${var.argocd_chart_name}-cache"
   repository       = "oci://${var.helm_registry}"
@@ -151,7 +139,8 @@ resource "helm_release" "argocd_cache" {
   ]
 }
 
-# ArgoCD Deployment
+# ArgoCD
+
 resource "helm_release" "argocd" {
   name             = "${var.cluster_name}-${var.argocd_chart_name}"
   repository       = "oci://${var.helm_registry}"
@@ -169,7 +158,8 @@ resource "helm_release" "argocd" {
   ]
 }
 
-# ArgoCD initial credentials
+# Retrieve data for outputs
+
 data "kubernetes_secret" "argocd_admin_password" {
   metadata {
     name      = "argocd-initial-admin-secret"

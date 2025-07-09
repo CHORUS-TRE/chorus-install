@@ -1,4 +1,3 @@
-# Read values
 locals {
   keycloak_values_parsed       = yamldecode(var.keycloak_helm_values)
   keycloak_existing_secret     = local.keycloak_values_parsed.keycloak.auth.existingSecret
@@ -11,18 +10,15 @@ locals {
   keycloak_db_user_password_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 }
 
+# Namespace
+
 resource "kubernetes_namespace" "keycloak" {
   metadata {
     name = var.keycloak_namespace
   }
 }
 
-data "kubernetes_secret" "existing_secret_keycloak_db" {
-  metadata {
-    name      = local.keycloak_db_existing_secret
-    namespace = var.keycloak_namespace
-  }
-}
+# Secrets
 
 resource "random_password" "keycloak_db_password" {
   length  = 32
@@ -34,18 +30,13 @@ resource "kubernetes_secret" "keycloak_db_secret" {
     name      = local.keycloak_db_existing_secret
     namespace = var.keycloak_namespace
   }
+
   data = {
     "${local.keycloak_db_admin_password_key}" = local.keycloak_db_postgres_password
-    "${local.keycloak_db_user_password_key}" = try(data.kubernetes_secret.existing_secret_keycloak_db.data["${local.keycloak_db_user_password_key}"],
-    random_password.keycloak_db_password.result)
+    "${local.keycloak_db_user_password_key}"  = random_password.keycloak_db_password.result
   }
-}
 
-data "kubernetes_secret" "existing_secret_keycloak" {
-  metadata {
-    name      = local.keycloak_existing_secret
-    namespace = var.keycloak_namespace
-  }
+  depends_on = [kubernetes_namespace.keycloak]
 }
 
 resource "random_password" "keycloak_password" {
@@ -58,13 +49,16 @@ resource "kubernetes_secret" "keycloak_secret" {
     name      = local.keycloak_existing_secret
     namespace = var.keycloak_namespace
   }
+
   data = {
-    "${local.keycloak_password_secret_key}" = try(data.kubernetes_secret.existing_secret_keycloak.data["${local.keycloak_password_secret_key}"],
-    random_password.keycloak_password.result)
+    "${local.keycloak_password_secret_key}" = random_password.keycloak_password.result
   }
+
+  depends_on = [kubernetes_namespace.keycloak]
 }
 
-# Keycloak DB (PostgreSQL) Deployment
+# Keycloak DB (PostgreSQL)
+
 resource "helm_release" "keycloak_db" {
   name             = "${var.cluster_name}-${var.keycloak_chart_name}-db"
   repository       = "oci://${var.helm_registry}"
@@ -84,9 +78,12 @@ resource "helm_release" "keycloak_db" {
     name  = "postgresql.metrics.serviceMonitor.enabled"
     value = "false"
   }
+
+  depends_on = [kubernetes_namespace.keycloak]
 }
 
 # Keycloak Deployment
+
 resource "helm_release" "keycloak" {
   name             = "${var.cluster_name}-${var.keycloak_chart_name}"
   repository       = "oci://${var.helm_registry}"
@@ -106,7 +103,11 @@ resource "helm_release" "keycloak" {
     name  = "keycloak.metrics.serviceMonitor.enabled"
     value = "false"
   }
+
+  depends_on = [kubernetes_namespace.keycloak]
 }
+
+# Retrieve data for outputs
 
 data "kubernetes_secret" "keycloak_admin_password" {
   metadata {

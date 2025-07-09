@@ -64,6 +64,9 @@ module "certificate_authorities" {
   selfsigned_chart_name    = var.selfsigned_chart_name
   selfsigned_chart_version = local.selfsigned_chart_version
   selfsigned_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/values.yaml")
+
+  kubeconfig_path    = var.kubeconfig_path
+  kubeconfig_context = var.kubeconfig_context
 }
 
 module "keycloak" {
