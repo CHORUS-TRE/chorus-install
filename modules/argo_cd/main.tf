@@ -28,7 +28,7 @@ resource "kubernetes_secret" "argocd_cache" {
 
   data = {
     # TODO: double check why user is empty string (copied from chorus-build)
-    "redis-username" = ""
+    "redis-username"                            = ""
     "${local.argocd_cache_existing_secret_key}" = random_password.redis_password.result
   }
 
