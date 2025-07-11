@@ -28,7 +28,7 @@ provider "helm" {
 }
 
 module "ingress_nginx" {
-  source = "${var.modules_path}/ingress_nginx"
+  source = "../modules/ingress_nginx"
 
   providers = {
     helm = helm.chorus_helm
@@ -46,7 +46,7 @@ module "ingress_nginx" {
 }
 
 module "certificate_authorities" {
-  source = "${var.modules_path}/certificate_authorities"
+  source = "../modules/certificate_authorities"
 
   providers = {
     helm = helm.chorus_helm
@@ -70,7 +70,7 @@ module "certificate_authorities" {
 }
 
 module "keycloak" {
-  source = "${var.modules_path}/keycloak"
+  source = "../modules/keycloak"
 
   providers = {
     helm = helm.chorus_helm
@@ -105,7 +105,7 @@ resource "random_password" "argocd_keycloak_client_secret" {
 }
 
 module "harbor" {
-  source = "${var.modules_path}/harbor"
+  source = "../modules/harbor"
 
   cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
