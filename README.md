@@ -103,6 +103,8 @@
 
 1. Find all the URLs, usernames and passwords needed in the ```output.yaml``` file
 
+    > **_NOTE:_** The applications' sync status might be in an unkown state for a few minutes because ArgoCD fails to connect to the Harbor Helm registry. This is caused by the fact that Harbor initially serves an invalid certificate, and it takes some time for the correct certificate to be provisioned. Also, you might be hitting Let's Encrypt rate limit if you've reinstalled the services too many times lately.
+
     > **_NOTE:_** As ArgoCD takes over the responsibility for the components that were already deployed (e.g. Keycloak, Harbor), their related services will experience a short unavailability period.
 
 ## Uninstall

@@ -22,8 +22,6 @@ locals {
   harbor_existing_registry_http_secret_key    = local.harbor_values_parsed.harbor.registry.existingSecretKey
   harbor_existing_registry_credentials_secret = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
 
-  harbor_registry_admin_username = "admin"
-
   oidc_secret = [
     for env in local.harbor_values_parsed.harbor.core.extraEnvVars : env
     if env.name == "CONFIG_OVERWRITE_JSON"
@@ -217,7 +215,7 @@ resource "kubernetes_secret" "harbor_registry_credentials_secret" {
   # "REGISTRY_HTPASSWD" are hardoced here
   data = {
     "REGISTRY_PASSWD"   = random_password.harbor_registry_passwd.result
-    "REGISTRY_HTPASSWD" = "${local.harbor_registry_admin_username}:${htpasswd_password.harbor_registry.bcrypt}"
+    "REGISTRY_HTPASSWD" = "admin:${htpasswd_password.harbor_registry.bcrypt}"
   }
 
   depends_on = [kubernetes_namespace.harbor]
