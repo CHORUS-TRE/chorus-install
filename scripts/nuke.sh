@@ -1,8 +1,6 @@
 #!/bin/bash
 
 nuke() {
-    cluster_name=chorus-build-t
-
     # ARGOCD
     kubie ns argocd
     helm uninstall $cluster_name-argo-cd $cluster_name-argo-cd-cache
@@ -69,9 +67,25 @@ nuke() {
 
 kubie ctx chorus-build-test 2> /dev/null
 
-echo "You are about to nuke the $(tput bold) $(kubectl config current-context) $(tput sgr0) cluster"
-read -p "Do you want to proceed? [y/N] " yn
-case $yn in
-    [yY]* ) nuke;;
-    * ) echo "Canceling."; exit 0;;
-esac
+current_context=$(kubectl config current-context)
+cat << EOF
+########################################################################
+#  _____                                     ______                    #
+# |  __ \                                   |___  /                    #
+# | |  | |  __ _  _ __    __ _   ___  _ __     / /  ___   _ __    ___  #
+# | |  | | / _  ||  _ \  / _  | / _ \|  __|   / /  / _ \ |  _ \  / _ \\ #
+# | |__| || (_| || | | || (_| ||  __/| |     / /__| (_) || | | ||  __/ #
+# |_____/  \__,_||_| |_| \__, | \___||_|    /_____|\___/ |_| |_| \___| #
+#                         __/ |                                        #
+#                        |___/                                         #
+########################################################################
+EOF
+
+echo -e "\nYou are about to destroy the $(tput bold) $current_context $(tput sgr0) cluster\n"
+read -p "Please type the cluster name to confirm: " cluster_name
+if [[ "$cluster_name" == "$current_context" ]]; then
+    nuke
+else
+    echo "Canceling"
+    exit 0
+fi
