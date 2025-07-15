@@ -92,7 +92,7 @@ module "keycloak" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx
+    #module.ingress_nginx
   ]
 }
 
@@ -134,6 +134,6 @@ module "harbor" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx
+    #module.ingress_nginx
   ]
 }
