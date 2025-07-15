@@ -35,7 +35,26 @@ resource "kubernetes_secret" "argocd_cache" {
   depends_on = [kubernetes_namespace.argocd]
 }
 
-resource "kubernetes_secret" "environments_repository_credentials" {
+resource "kubernetes_secret" "public_environments_repository_credentials" {
+  metadata {
+    name      = var.helm_charts_values_credentials_secret
+    namespace = var.argocd_namespace
+    labels = {
+      "argocd.argoproj.io/secret-type" = "repository"
+    }
+  }
+
+  data = {
+    url  = var.helm_values_url
+    type = "git"
+  }
+
+  depends_on = [kubernetes_namespace.argocd]
+
+  count = coalesce(var.helm_values_pat, "public") == "public" ? 1 : 0
+}
+
+resource "kubernetes_secret" "private_environments_repository_credentials" {
   metadata {
     name      = var.helm_charts_values_credentials_secret
     namespace = var.argocd_namespace
@@ -51,6 +70,8 @@ resource "kubernetes_secret" "environments_repository_credentials" {
   }
 
   depends_on = [kubernetes_namespace.argocd]
+
+  count = coalesce(var.helm_values_pat, "public") == "public" ? 0 : 1
 }
 
 # The following secret name is hardcoded 
