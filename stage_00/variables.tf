@@ -44,3 +44,14 @@ variable "helm_registry" {
   description = "CHORUS Helm chart registry"
   type        = string
 }
+
+variable "helm_registry_username" {
+  description = "Username to connect to the CHORUS Helm chart registry"
+  type        = string
+}
+
+variable "helm_registry_password" {
+  description = "Password to connect to the CHORUS Helm chart registry"
+  type        = string
+  sensitive   = true
+}
