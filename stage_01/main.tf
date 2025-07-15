@@ -27,6 +27,7 @@ provider "helm" {
   }
 }
 
+/*
 module "ingress_nginx" {
   source = "../modules/ingress_nginx"
 
@@ -44,6 +45,7 @@ module "ingress_nginx" {
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
 }
+*/
 
 module "certificate_authorities" {
   source = "../modules/certificate_authorities"

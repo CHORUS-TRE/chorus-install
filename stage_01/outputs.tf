@@ -1,7 +1,9 @@
+/*
 output "loadbalancer_ip" {
   value = try(module.ingress_nginx.loadbalancer_ip,
   "Failed to retrieve loadbalancer IP address")
 }
+*/
 
 output "harbor_url" {
   value = try(module.harbor.harbor_url,

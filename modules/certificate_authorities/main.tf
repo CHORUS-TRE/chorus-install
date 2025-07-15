@@ -1,13 +1,16 @@
 # Namespace
 
+/*
 resource "kubernetes_namespace" "cert_manager" {
   metadata {
     name = var.cert_manager_namespace
   }
 }
+*/
 
 # Cert-Manager CRDs
 
+/*
 data "http" "cert_manager_crds" {
   url = "https://github.com/cert-manager/cert-manager/releases/download/${var.cert_manager_app_version}/cert-manager.crds.yaml"
 
@@ -27,9 +30,11 @@ resource "kubernetes_manifest" "cert_manager_crds" {
     data.http.cert_manager_crds
   ]
 }
+*/
 
 # Cert-Manager
 
+/*
 resource "helm_release" "cert_manager" {
   name             = "${var.cluster_name}-${var.cert_manager_chart_name}"
   repository       = "oci://${var.helm_registry}"
@@ -47,7 +52,9 @@ resource "helm_release" "cert_manager" {
     kubernetes_manifest.cert_manager_crds
   ]
 }
+*/
 
+/*
 resource "null_resource" "wait_for_cert_manager_webhook" {
   provisioner "local-exec" {
     quiet   = true
@@ -73,6 +80,7 @@ resource "null_resource" "wait_for_cert_manager_webhook" {
 
   depends_on = [helm_release.cert_manager]
 }
+*/
 
 # Self-Signed Issuer (e.g. for PostgreSQL)
 
