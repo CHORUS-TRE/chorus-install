@@ -52,6 +52,7 @@ variable "helm_values_pat" {
   description = "Fine-grained personal access token (PAT) to access the Helm chart values repository (e.g. CHORUS-TRE/environment-template)"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "argocd_chart_name" {
@@ -256,4 +257,28 @@ variable "grafana_admin_username" {
   description = "Grafana admin username"
   type        = string
   default     = "admin"
+}
+
+variable "argoci_github_workbench_operator_token" {
+  description = "GitHub token for the Workbench Operator repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "argoci_github_chorus_web_ui_token" {
+  description = "GitHub token for the Chorus Web UI repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "argoci_github_images_token" {
+  description = "GitHub token for the Images repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "argoci_github_chorus_backend_token" {
+  description = "GitHub token for the Chorus Backend repository"
+  type        = string
+  sensitive   = true
 }
