@@ -1,9 +1,12 @@
 locals {
-  helm_values_folders        = toset([for x in fileset("${path.module}/${var.helm_values_path}/${var.cluster_name}", "**") : dirname(x)])
-  charts_versions            = { for x in local.helm_values_folders : jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).chart => jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).version... }
-  argo_deploy_chart_version  = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/config.json")).version
+  helm_values_folders = toset([for x in fileset("${path.module}/${var.helm_values_path}/${var.cluster_name}", "**") : dirname(x)])
+  charts_versions     = { for x in local.helm_values_folders : jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).chart => jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).version... }
+
+  argo_deploy_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/config.json")).version
+
   argocd_chart_version       = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).version
   argocd_cache_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json")).version
+  argocd_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
 
   harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed                      = yamldecode(local.harbor_values)
@@ -391,7 +394,7 @@ module "argo_cd" {
   argocd_chart_name    = var.argocd_chart_name
   argocd_chart_version = local.argocd_chart_version
   argocd_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
-  argocd_namespace     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
+  argocd_namespace     = local.argocd_namespace
 
   argocd_cache_chart_name    = var.valkey_chart_name
   argocd_cache_chart_version = local.argocd_cache_chart_version
@@ -436,7 +439,7 @@ module "argocd_config" {
   cluster_name = var.cluster_name
 
   argocd_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
-  argocd_namespace   = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
+  argocd_namespace   = local.argocd_namespace
 
   helm_values_url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
   helm_values_revision = var.chorus_release
@@ -455,6 +458,17 @@ module "argocd_config" {
     module.argo_cd,
     null_resource.wait_for_argocd
   ]
+}
+
+module "argoci_config" {
+  source = "../modules/argo_ci_config"
+
+  argocd_namespace = local.argocd_namespace
+
+  argoci_github_chorus_web_ui_token      = var.argoci_github_chorus_web_ui_token
+  argoci_github_images_token             = var.argoci_github_images_token
+  argoci_github_chorus_backend_token     = var.argoci_github_chorus_backend_token
+  argoci_github_workbench_operator_token = var.argoci_github_workbench_operator_token
 }
 
 locals {
