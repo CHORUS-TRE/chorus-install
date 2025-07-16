@@ -79,10 +79,10 @@ variable "valkey_chart_name" {
   default     = "valkey"
 }
 
-variable "valkey_oauth2_proxy_chart_name" {
-  description = "Valkey OAuth2 Proxy Helm chart name"
+variable "oauth2_proxy_cache_chart_name" {
+  description = "OAuth2 Proxy cache Helm chart name"
   type        = string
-  default     = "oauth2-proxy-valkey"
+  default     = "oauth2-proxy-cache"
 }
 
 variable "alertmanager_oauth2_proxy_chart_name" {

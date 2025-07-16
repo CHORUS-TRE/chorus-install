@@ -8,8 +8,8 @@ variable "prometheus_oauth2_proxy_values" {
   type        = string
 }
 
-variable "valkey_values" {
-  description = "Valkey Helm chart values"
+variable "oauth2_proxy_cache_values" {
+  description = "OAuth2 Proxy cache Helm chart values (e.g. Valkey)"
   type        = string
 }
 
@@ -23,8 +23,8 @@ variable "prometheus_oauth2_proxy_namespace" {
   type        = string
 }
 
-variable "valkey_namespace" {
-  description = "Namespace to deploy Valkey Helm chart into"
+variable "oauth2_proxy_cache_namespace" {
+  description = "Namespace to deploy the OAuth2 Proxy cache Helm chart into (e.g. Valkey)"
   type        = string
 }
 

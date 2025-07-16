@@ -55,8 +55,8 @@ locals {
   prometheus_oauth2_proxy_values_parsed = yamldecode(local.prometheus_oauth2_proxy_values)
   prometheus_url                        = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
 
-  valkey_oauth2_proxy_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.valkey_oauth2_proxy_chart_name}/config.json")).namespace
-  valkey_oauth2_proxy_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.valkey_oauth2_proxy_chart_name}/values.yaml")
+  oauth2_proxy_cache_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json")).namespace
+  oauth2_proxy_cache_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml")
 }
 
 # Providers
@@ -233,10 +233,10 @@ module "oauth2_proxy" {
 
   alertmanager_oauth2_proxy_values    = local.alertmanager_oauth2_proxy_values
   prometheus_oauth2_proxy_values      = local.prometheus_oauth2_proxy_values
-  valkey_values                       = local.valkey_oauth2_proxy_values
+  oauth2_proxy_cache_values           = local.oauth2_proxy_cache_values
   alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
   prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
-  valkey_namespace                    = local.valkey_oauth2_proxy_namespace
+  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
   prometheus_keycloak_client_id       = var.prometheus_keycloak_client_id
   prometheus_keycloak_client_secret   = random_password.prometheus_keycloak_client_secret.result
   alertmanager_keycloak_client_id     = var.alertmanager_keycloak_client_id
