@@ -2,9 +2,6 @@ locals {
   cert_manager_chart_version = data.external.cert_manager_config.result.version
 }
 
-# TODO: do a check on var.helm_values_pat
-# to see if we are checking a public or private repo
-# and act accordingly
 resource "null_resource" "fetch_helm_charts_values" {
   provisioner "local-exec" {
     quiet   = true
@@ -13,7 +10,12 @@ resource "null_resource" "fetch_helm_charts_values" {
         mkdir -p ${var.helm_values_path}/${var.helm_values_repo}
         cd ${var.helm_values_path}/${var.helm_values_repo}
         git init -q
-        git remote add origin https://${var.github_orga}:${var.helm_values_pat}@github.com/${var.github_orga}/${var.helm_values_repo}.git
+        pat=${coalesce(var.helm_values_pat, "public")}
+        if [[  "$pat" == "public" ]]; then
+          git remote add origin https://github.com/${var.github_orga}/${var.helm_values_repo}.git
+        else
+          git remote add origin https://${var.github_orga}:$pat@github.com/${var.github_orga}/${var.helm_values_repo}.git
+        fi
         git fetch -q origin ${var.chorus_release}
         git sparse-checkout set ${var.cluster_name}
         git checkout -q ${var.chorus_release}
