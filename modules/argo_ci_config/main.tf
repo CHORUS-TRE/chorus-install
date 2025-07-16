@@ -56,7 +56,7 @@ resource "random_password" "argoci_github_chorus_backend_secret" {
 
 resource "kubernetes_secret" "argoci_github_chorus_backend" {
   metadata {
-    name      = "argo-ci-github-images-secret"
+    name      = "argo-ci-github-chorus-backend-secret"
     namespace = var.argocd_namespace
   }
 
