@@ -8,6 +8,7 @@ resource "kubernetes_namespace" "cert_manager" {
 
 # Cert-Manager CRDs
 
+/*
 data "http" "cert_manager_crds" {
   url = "https://github.com/cert-manager/cert-manager/releases/download/${var.cert_manager_app_version}/cert-manager.crds.yaml"
 
@@ -27,6 +28,7 @@ resource "kubernetes_manifest" "cert_manager_crds" {
     data.http.cert_manager_crds
   ]
 }
+*/
 
 # Cert-Manager
 
@@ -38,7 +40,6 @@ resource "helm_release" "cert_manager" {
   namespace        = var.cert_manager_namespace
   create_namespace = false
   wait             = true
-  skip_crds        = true
 
   values = [var.cert_manager_helm_values]
 
