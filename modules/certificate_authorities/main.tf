@@ -8,7 +8,6 @@ resource "kubernetes_namespace" "cert_manager" {
 
 # Cert-Manager CRDs
 
-/*
 data "http" "cert_manager_crds" {
   url = "https://github.com/cert-manager/cert-manager/releases/download/${var.cert_manager_app_version}/cert-manager.crds.yaml"
 
@@ -28,7 +27,6 @@ resource "kubernetes_manifest" "cert_manager_crds" {
     data.http.cert_manager_crds
   ]
 }
-*/
 
 # Cert-Manager
 
@@ -45,7 +43,7 @@ resource "helm_release" "cert_manager" {
 
   depends_on = [
     kubernetes_namespace.cert_manager,
-    #kubernetes_manifest.cert_manager_crds
+    kubernetes_manifest.cert_manager_crds
   ]
 }
 
