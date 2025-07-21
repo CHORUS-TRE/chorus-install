@@ -598,6 +598,7 @@ resource "harbor_registry" "docker_hub" {
 }
 
 # Add Helm charts to Harbor registry
+# TODO: CHECK COMPATIBILITY WITH SH !!
 
 resource "null_resource" "pull_charts" {
   provisioner "local-exec" {
@@ -610,7 +611,7 @@ resource "null_resource" "pull_charts" {
     mkdir -p $destination
     for version in $versions; do
       helm registry login ${var.source_helm_registry} --username=${var.source_helm_registry_username} --password=${var.source_helm_registry_password}
-      if [[ ! -f $destination/$chart-$version.tgz ]]; then
+      if [ ! -f "$destination/$chart-$version.tgz" ]; then
         helm pull oci://${var.source_helm_registry}/charts/$chart --version $version --destination $destination
       fi
     done
