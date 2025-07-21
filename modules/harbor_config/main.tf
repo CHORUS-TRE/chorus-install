@@ -598,7 +598,6 @@ resource "harbor_registry" "docker_hub" {
 }
 
 # Add Helm charts to Harbor registry
-# TODO: CHECK COMPATIBILITY WITH SH !!
 
 resource "null_resource" "pull_charts" {
   provisioner "local-exec" {
