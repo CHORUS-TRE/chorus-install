@@ -589,6 +589,9 @@ resource "harbor_robot_account" "argoci" {
   depends_on = [harbor_project.projects]
 }
 
+# TODO: ADD ROBOT ACCOUNT FOR GITHUB ACTIONS TO BE ALLOWED TO PUSH CHARTS TO HARBOR
+
+
 # Registries
 
 resource "harbor_registry" "docker_hub" {
