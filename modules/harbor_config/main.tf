@@ -674,6 +674,99 @@ resource "harbor_robot_account" "argoci" {
   depends_on = [harbor_project.projects]
 }
 
+# ArgoCI robot account
+
+resource "random_password" "renovate_robot_password" {
+  length      = 12
+  special     = false
+  min_upper   = 1
+  min_lower   = 1
+  min_numeric = 1
+}
+
+resource "harbor_robot_account" "renovate" {
+  name        = var.renovate_robot_username
+  description = "Renovate robot account"
+  level       = "system"
+  secret      = random_password.renovate_robot_password.result
+  permissions {
+    access {
+      action = "list"
+      resource = "project"
+    }
+    access {
+      action = "list"
+      resource = "registry"
+    }
+    access {
+      action = "read"
+      resource = "registry"
+    }
+    kind = "system"
+    namespace = "/"
+  }
+  permissions {
+    access {
+      action = "list"
+      resource = "label"
+    }
+    access {
+      action = "read"
+      resource = "label"
+    }
+    access {
+      action = "list"
+      resource = "repository"
+    }
+    access {
+      action = "pull"
+      resource = "repository"
+    }
+    access {
+      action = "read"
+      resource = "repository"
+    }
+    access {
+      action = "list"
+      resource = "tag"
+    }
+    kind = "project"
+    namespace = "charts"
+  }
+  permissions {
+    access {
+      action = "list"
+      resource = "label"
+    }
+    access {
+      action = "read"
+      resource = "label"
+    }
+    access {
+      action = "list"
+      resource = "repository"
+    }
+    access {
+      action = "pull"
+      resource = "repository"
+    }
+    access {
+      action = "read"
+      resource = "repository"
+    }
+    access {
+      action = "list"
+      resource = "tag"
+    }
+    kind = "project"
+    namespace = "docker_proxy"
+  }
+  depends_on = [
+    harbor_project.projects,
+    harbor_project.proxy_cache
+  ]
+}
+
 # Add Helm charts to Harbor registry
 
 resource "null_resource" "pull_charts" {

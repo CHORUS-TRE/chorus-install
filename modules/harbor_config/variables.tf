@@ -39,6 +39,11 @@ variable "argoci_robot_username" {
   type        = string
 }
 
+variable "renovate_robot_username" {
+  description = "Username of the robot to be used by Renovate"
+  type        = string
+}
+
 variable "harbor_admin_username" {
   description = "Harbor admin username"
   type        = string

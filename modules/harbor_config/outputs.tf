@@ -15,3 +15,9 @@ output "argoci_robot_password" {
   description = "Password of the robot user used by ArgoCI"
   sensitive   = true
 }
+
+output "renovate_robot_password" {
+  value       = random_password.renovate_robot_password.result
+  description = "Password of the robot user used by Renovate"
+  sensitive   = true
+}

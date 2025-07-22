@@ -380,6 +380,7 @@ module "harbor_config" {
   github_actions_robot_username = var.github_actions_harbor_robot_username
   argocd_robot_username = var.argocd_harbor_robot_username
   argoci_robot_username = var.argoci_harbor_robot_username
+  renovate_robot_username = var.renovate_harbor_robot_username
 }
 
 module "argo_cd" {

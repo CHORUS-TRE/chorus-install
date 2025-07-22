@@ -145,6 +145,12 @@ variable "argoci_harbor_robot_username" {
   default     = "argo-ci"
 }
 
+variable "renovate_harbor_robot_username" {
+  description = "Harbor robot username used by Renovate"
+  type        = string
+  default     = "renovate"
+}
+
 variable "keycloak_chart_name" {
   description = "Keycloak Helm chart folder name"
   type        = string
