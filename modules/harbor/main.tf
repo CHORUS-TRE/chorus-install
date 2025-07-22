@@ -36,7 +36,7 @@ locals {
   "oidc_client_secret": "${var.oidc_client_secret}",
   "oidc_groups_claim": "groups",
   "oidc_admin_group": "${var.oidc_admin_group}",
-  "oidc_scope": "openid,profile,offline_access,email",
+  "oidc_scope": "openid,profile,offline_access,email,groups",
   "oidc_verify_cert": "false",
   "oidc_auto_onboard": "true",
   "oidc_user_claim": "name"
