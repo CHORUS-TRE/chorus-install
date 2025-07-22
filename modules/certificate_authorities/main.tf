@@ -27,6 +27,12 @@ resource "kubernetes_manifest" "cert_manager_crds" {
     data.http.cert_manager_crds
   ]
 }
+# TODO: check if crds install can be simplified
+# kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/vX.Y.Z/cert-manager.crds.yaml
+
+# TODO: add instructions for destroying crds
+# when=destroy
+# kubectl delete -f https://github.com/cert-manager/cert-manager/releases/download/vX.Y.Z/cert-manager.crds.yaml
 
 # Cert-Manager
 
