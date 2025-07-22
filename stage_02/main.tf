@@ -7,6 +7,7 @@ locals {
   argocd_chart_version       = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).version
   argocd_cache_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json")).version
   argocd_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
+  argoci_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argoci_chart_name}/config.json")).namespace
 
   harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed                      = yamldecode(local.harbor_values)
@@ -465,7 +466,7 @@ module "argocd_config" {
 module "argoci_config" {
   source = "../modules/argo_ci_config"
 
-  argocd_namespace = local.argocd_namespace
+  argoci_namespace = local.argoci_namespace
 
   argoci_github_chorus_web_ui_token      = var.argoci_github_chorus_web_ui_token
   argoci_github_images_token             = var.argoci_github_images_token

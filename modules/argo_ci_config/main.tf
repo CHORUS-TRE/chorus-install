@@ -6,7 +6,7 @@ resource "random_password" "argoci_github_workbench_operator_secret" {
 resource "kubernetes_secret" "argoci_github_workbench_operator" {
   metadata {
     name      = "argo-ci-github-workbench-operator"
-    namespace = var.argocd_namespace
+    namespace = var.argoci_namespace
   }
 
   data = {
@@ -23,7 +23,7 @@ resource "random_password" "argoci_github_chorus_web_ui_secret" {
 resource "kubernetes_secret" "argoci_github_chorus_web_ui" {
   metadata {
     name      = "argo-ci-github-chorus-web-ui"
-    namespace = var.argocd_namespace
+    namespace = var.argoci_namespace
   }
 
   data = {
@@ -39,8 +39,8 @@ resource "random_password" "argoci_github_images_secret" {
 
 resource "kubernetes_secret" "argoci_github_images" {
   metadata {
-    name      = "argo-ci-github-images-secret"
-    namespace = var.argocd_namespace
+    name      = "argo-ci-github-images"
+    namespace = var.argoci_namespace
   }
 
   data = {
@@ -56,8 +56,8 @@ resource "random_password" "argoci_github_chorus_backend_secret" {
 
 resource "kubernetes_secret" "argoci_github_chorus_backend" {
   metadata {
-    name      = "argo-ci-github-chorus-backend-secret"
-    namespace = var.argocd_namespace
+    name      = "argo-ci-github-chorus-backend"
+    namespace = var.argoci_namespace
   }
 
   data = {

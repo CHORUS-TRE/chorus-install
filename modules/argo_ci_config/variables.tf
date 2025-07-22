@@ -1,5 +1,5 @@
-variable "argocd_namespace" {
-  description = "Namespace where ArgoCD is deployed"
+variable "argoci_namespace" {
+  description = "Namespace where ArgoCI is deployed"
   type        = string
 }
 
