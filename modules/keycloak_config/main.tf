@@ -28,9 +28,21 @@ resource "keycloak_realm" "infra" {
 }
 
 # Client scope
-resource "keycloak_openid_client_scope" "openid_client_scope" {
+
+resource "keycloak_openid_client_scope" "groups_client_scope" {
   realm_id               = keycloak_realm.infra.id
   name                   = "groups"
   description            = "When requested, this scope will map a user's group memberships to a claim"
   include_in_token_scope = true
+}
+
+# Group membership mapper
+
+resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {
+  realm_id  = keycloak_realm.infra.id
+  client_scope_id = keycloak_openid_client_scope.groups_client_scope.id
+  name      = "groups"
+
+  claim_name = "groups"
+  full_path = false
 }
