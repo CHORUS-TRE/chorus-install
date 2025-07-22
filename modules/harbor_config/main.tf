@@ -4,12 +4,97 @@ locals {
   charts               = [for k, v in var.charts_versions : k]
 }
 
+# Registries
+
+resource "harbor_registry" "docker_hub" {
+  provider_name = "docker-hub"
+  name          = "Docker Hub"
+  endpoint_url  = "https://hub.docker.com"
+}
+
+# Projects
+
 resource "harbor_project" "projects" {
   for_each = toset(["apps", "cache", "charts", "chorus", "docker_proxy", "services"])
 
   name                   = each.key
   vulnerability_scanning = "false"
   force_destroy          = true
+}
+
+# Proxy cache projects
+
+resource "harbor_project" "proxy_cache" {
+  name = "docker_proxy"
+  registry_id = harbor_registry.docker_hub.id
+}
+
+# GitHub Actions robot account
+
+resource "random_password" "github_actions_robot_password" {
+  length      = 12
+  special     = false
+  min_upper   = 1
+  min_lower   = 1
+  min_numeric = 1
+}
+
+resource "harbor_robot_account" "github_actions" {
+  name        = var.github_actions_robot_username
+  description = "Robot used by GitHub Actions to automatically publish new Helm charts"
+  level       = "project"
+  secret      = random_password.github_actions_robot_password.result
+  permissions {
+    access {
+      action = "create"
+      resource = "label"
+    }
+    access {
+      action = "list"
+      resource = "label"
+    }
+    access {
+      action = "read"
+      resource = "label"
+    }
+    access {
+      action = "update"
+      resource = "label"
+    }
+    access {
+      action = "list"
+      resource = "repository"
+    }
+    access {
+      action = "pull"
+      resource = "repository"
+    }
+    access {
+      action = "push"
+      resource = "repository"
+    }
+    access {
+      action = "read"
+      resource = "repository"
+    }
+    access {
+      action = "update"
+      resource = "repository"
+    }
+    access {
+      action = "create"
+      resource = "tag"
+    }
+    access {
+      action = "list"
+      resource = "tag"
+    }
+
+    kind = "project"
+    namespace = "charts"
+  }
+
+  depends_on = [harbor_project.projects]
 }
 
 # ArgoCD robot account
@@ -587,17 +672,6 @@ resource "harbor_robot_account" "argoci" {
     namespace = "chorus"
   }
   depends_on = [harbor_project.projects]
-}
-
-# TODO: ADD ROBOT ACCOUNT FOR GITHUB ACTIONS TO BE ALLOWED TO PUSH CHARTS TO HARBOR
-
-
-# Registries
-
-resource "harbor_registry" "docker_hub" {
-  provider_name = "docker-hub"
-  name          = "Docker Hub"
-  endpoint_url  = "https://hub.docker.com"
 }
 
 # Add Helm charts to Harbor registry

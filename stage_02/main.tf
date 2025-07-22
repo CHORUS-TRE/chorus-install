@@ -377,6 +377,7 @@ module "harbor_config" {
   harbor_admin_password = local.harbor_admin_password
   harbor_helm_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
 
+  github_actions_robot_username = var.github_actions_harbor_robot_username
   argocd_robot_username = var.argocd_harbor_robot_username
   argoci_robot_username = var.argoci_harbor_robot_username
 }

@@ -127,6 +127,12 @@ variable "helm_values_credentials_secret" {
   default     = "argo-cd-github-environments"
 }
 
+variable "github_actions_harbor_robot_username" {
+  description = "Harbor robot username used by GitHub Actions"
+  type        = string
+  default     = "chorus-tre"
+}
+
 variable "argocd_harbor_robot_username" {
   description = "Harbor robot username used by ArgoCD"
   type        = string

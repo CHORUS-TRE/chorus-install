@@ -24,6 +24,11 @@ variable "source_helm_registry_password" {
   sensitive   = true
 }
 
+variable "github_actions_robot_username" {
+  description = "Username of the robot to be used by GitHub Actions"
+  type        = string
+}
+
 variable "argocd_robot_username" {
   description = "Username of the robot to be used by ArgoCD"
   type        = string
