@@ -60,9 +60,11 @@ resource "null_resource" "wait_for_cert_manager_webhook" {
       set -e
       export KUBECONFIG
       kubectl config use-context ${var.kubeconfig_context}
-      for i in {1..30}; do
+      i=0
+      while [ $i -lt 30 ]; do
         kubectl -n ${var.cert_manager_namespace} get pod -l app.kubernetes.io/name=webhook -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null | grep -q true && exit 0
         sleep 5
+        i=$((i+1))
       done
       echo "Timeout waiting for cert-manager webhook" >&2
       exit 1
