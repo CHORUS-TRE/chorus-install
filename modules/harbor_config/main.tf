@@ -32,7 +32,7 @@ resource "harbor_project" "proxy_cache" {
 # GitHub Actions robot account
 
 resource "random_password" "github_actions_robot_password" {
-  length      = 12
+  length      = 32
   special     = false
   min_upper   = 1
   min_lower   = 1
@@ -100,7 +100,7 @@ resource "harbor_robot_account" "github_actions" {
 # ArgoCD robot account
 
 resource "random_password" "argocd_robot_password" {
-  length      = 12
+  length      = 32
   special     = false
   min_upper   = 1
   min_lower   = 1
@@ -191,7 +191,7 @@ resource "harbor_robot_account" "argocd" {
 # ArgoCI robot account
 
 resource "random_password" "argoci_robot_password" {
-  length      = 12
+  length      = 32
   special     = false
   min_upper   = 1
   min_lower   = 1
@@ -677,7 +677,7 @@ resource "harbor_robot_account" "argoci" {
 # ArgoCI robot account
 
 resource "random_password" "renovate_robot_password" {
-  length      = 12
+  length      = 32
   special     = false
   min_upper   = 1
   min_lower   = 1
