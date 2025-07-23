@@ -11,7 +11,7 @@ resource "null_resource" "fetch_helm_charts_values" {
         cd ${var.helm_values_path}/${var.helm_values_repo}
         git init -q
         pat=${coalesce(var.helm_values_pat, "public")}
-        if [[  "$pat" == "public" ]]; then
+        if [ "$pat" = "public" ]; then
           git remote add origin https://github.com/${var.github_orga}/${var.helm_values_repo}.git
         else
           git remote add origin https://${var.github_orga}:$pat@github.com/${var.github_orga}/${var.helm_values_repo}.git
