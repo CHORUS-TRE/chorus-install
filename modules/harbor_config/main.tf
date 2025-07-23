@@ -15,7 +15,7 @@ resource "harbor_registry" "docker_hub" {
 # Projects
 
 resource "harbor_project" "projects" {
-  for_each = toset(["apps", "cache", "charts", "chorus", "docker_proxy", "services"])
+  for_each = toset(["apps", "cache", "charts", "chorus", "services"])
 
   name                   = each.key
   vulnerability_scanning = "false"
@@ -26,7 +26,9 @@ resource "harbor_project" "projects" {
 
 resource "harbor_project" "proxy_cache" {
   name        = "docker_proxy"
-  registry_id = harbor_registry.docker_hub.id
+  registry_id = harbor_registry.docker_hub.registry_id
+  vulnerability_scanning = "false"
+  force_destroy          = true
 }
 
 # GitHub Actions robot account
@@ -777,11 +779,11 @@ resource "null_resource" "pull_charts" {
     destination=${path.module}/charts
     chart=${each.key}
     versions="${join(" ", each.value)}"
-    mkdir -p $destination
+    mkdir -p "$destination"
     for version in $versions; do
-      helm registry login ${var.source_helm_registry} --username=${var.source_helm_registry_username} --password=${var.source_helm_registry_password}
+      helm registry login "${var.source_helm_registry}" --username="${var.source_helm_registry_username}" --password="${var.source_helm_registry_password}"
       if [ ! -f "$destination/$chart-$version.tgz" ]; then
-        helm pull oci://${var.source_helm_registry}/charts/$chart --version $version --destination $destination
+        helm pull "oci://${var.source_helm_registry}/charts/$chart" --version "$version" --destination "$destination"
       fi
     done
     EOT
@@ -802,12 +804,12 @@ resource "null_resource" "push_charts" {
     set -e
     source=${path.module}/charts
     harbor_domain=${replace(local.harbor_url, "https://", "")}
-    helm registry login $harbor_domain --username=${var.harbor_admin_username} --password=${var.harbor_admin_password} --insecure
+    helm registry login "$harbor_domain" --username="${var.harbor_admin_username}" --password="${var.harbor_admin_password}" --insecure
     chart=${each.key}
     versions="${join(" ", each.value)}"
     for version in $versions; do
-      if ! helm show chart oci://$harbor_domain/charts/$chart --version $version --insecure-skip-tls-verify >/dev/null 2>&1; then
-        helm push $source/$chart-$version.tgz oci://$harbor_domain/charts --insecure-skip-tls-verify
+      if ! helm show chart "oci://$harbor_domain/charts/$chart" --version "$version" --insecure-skip-tls-verify >/dev/null 2>&1; then
+        helm push "$source/$chart-$version.tgz" "oci://$harbor_domain/charts" --insecure-skip-tls-verify
       fi
     done
     EOT
