@@ -223,6 +223,12 @@ variable "argocd_keycloak_oidc_admin_group" {
   default     = "ArgoCDAdmins"
 }
 
+variable "argo_workflows_keycloak_oidc_admin_group" {
+  description = "Keycloak OIDC admin group assigned to Argo Workflows"
+  type        = string
+  default     = "ArgoWorkflowsAdmins"
+}
+
 variable "grafana_keycloak_oidc_admin_group" {
   description = "Keycloak OIDC admin group assigned to Grafana"
   type        = string

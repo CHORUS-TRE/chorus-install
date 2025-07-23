@@ -25,7 +25,7 @@ resource "harbor_project" "projects" {
 # Proxy cache projects
 
 resource "harbor_project" "proxy_cache" {
-  name = "docker_proxy"
+  name        = "docker_proxy"
   registry_id = harbor_registry.docker_hub.id
 }
 
@@ -46,51 +46,51 @@ resource "harbor_robot_account" "github_actions" {
   secret      = random_password.github_actions_robot_password.result
   permissions {
     access {
-      action = "create"
+      action   = "create"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "push"
+      action   = "push"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
     access {
-      action = "update"
+      action   = "update"
       resource = "repository"
     }
     access {
-      action = "create"
+      action   = "create"
       resource = "tag"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "tag"
     }
 
-    kind = "project"
+    kind      = "project"
     namespace = "charts"
   }
 
@@ -691,74 +691,74 @@ resource "harbor_robot_account" "renovate" {
   secret      = random_password.renovate_robot_password.result
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "project"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "registry"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "registry"
     }
-    kind = "system"
+    kind      = "system"
     namespace = "/"
   }
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "tag"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "charts"
   }
   permissions {
     access {
-      action = "list"
+      action   = "list"
       resource = "label"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "label"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "repository"
     }
     access {
-      action = "pull"
+      action   = "pull"
       resource = "repository"
     }
     access {
-      action = "read"
+      action   = "read"
       resource = "repository"
     }
     access {
-      action = "list"
+      action   = "list"
       resource = "tag"
     }
-    kind = "project"
+    kind      = "project"
     namespace = "docker_proxy"
   }
   depends_on = [

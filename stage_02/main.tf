@@ -308,6 +308,7 @@ module "keycloak_argo_workflows_client_config" {
   admin_url           = local.argo_workflows_url
   web_origins         = [local.argo_workflows_url]
   valid_redirect_uris = [local.argo_workflows_redirect_uri]
+  client_group        = var.argo_workflows_keycloak_oidc_admin_group
 }
 
 module "keycloak_grafana_client_config" {
@@ -379,9 +380,9 @@ module "harbor_config" {
   harbor_helm_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
 
   github_actions_robot_username = var.github_actions_harbor_robot_username
-  argocd_robot_username = var.argocd_harbor_robot_username
-  argoci_robot_username = var.argoci_harbor_robot_username
-  renovate_robot_username = var.renovate_harbor_robot_username
+  argocd_robot_username         = var.argocd_harbor_robot_username
+  argoci_robot_username         = var.argoci_harbor_robot_username
+  renovate_robot_username       = var.renovate_harbor_robot_username
 }
 
 module "argo_cd" {
