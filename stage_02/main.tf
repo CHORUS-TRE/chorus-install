@@ -417,13 +417,15 @@ resource "null_resource" "wait_for_argocd" {
     quiet   = true
     command = <<EOT
       set -e
-      for i in {1..30}; do
-        if [ $(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz) -eq 200 ]; then
+      i=0
+      while [ $i -lt 30 ]; do
+        if [ "$(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz)" -eq 200 ]; then
           exit 0
         else
           echo "Waiting for ArgoCD... ($i)"
           sleep 10
         fi
+        i=$((i+1))
       done
       echo "Timed out waiting for ArgoCD" >&2
       exit 1
