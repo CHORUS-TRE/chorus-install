@@ -39,10 +39,10 @@ resource "keycloak_openid_client_scope" "groups_client_scope" {
 # Group membership mapper
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {
-  realm_id  = keycloak_realm.infra.id
+  realm_id        = keycloak_realm.infra.id
   client_scope_id = keycloak_openid_client_scope.groups_client_scope.id
-  name      = "groups"
+  name            = "groups"
 
   claim_name = "groups"
-  full_path = false
+  full_path  = false
 }
