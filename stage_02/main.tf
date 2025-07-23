@@ -470,10 +470,12 @@ module "argoci_config" {
   argoci_namespace   = local.argoci_namespace
   argoci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.argoci_chart_name}/values.yaml")
 
-  argoci_github_chorus_web_ui_token      = var.argoci_github_chorus_web_ui_token
-  argoci_github_images_token             = var.argoci_github_images_token
-  argoci_github_chorus_backend_token     = var.argoci_github_chorus_backend_token
-  argoci_github_workbench_operator_token = var.argoci_github_workbench_operator_token
+  github_chorus_web_ui_token      = var.github_chorus_web_ui_token
+  github_images_token             = var.github_images_token
+  github_chorus_backend_token     = var.github_chorus_backend_token
+  github_workbench_operator_token = var.github_workbench_operator_token
+
+  github_username = var.github_username
 
   registry_server   = local.harbor_url
   registry_username = var.argoci_harbor_robot_username
