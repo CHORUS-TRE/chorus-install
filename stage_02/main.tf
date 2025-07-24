@@ -486,12 +486,14 @@ module "argoci_config" {
 
 locals {
   output = {
-    harbor_admin_username        = var.harbor_admin_username
-    harbor_admin_password        = local.harbor_admin_password
-    harbor_url                   = local.harbor_url
-    harbor_admin_url             = join("/", [local.harbor_url, "account", "sign-in"])
-    harbor_argoci_robot_password = module.harbor_config.argoci_robot_password
-    harbor_argocd_robot_password = module.harbor_config.argocd_robot_password
+    harbor_admin_username = var.harbor_admin_username
+    harbor_admin_password = local.harbor_admin_password
+    harbor_url            = local.harbor_url
+    harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
+
+    harbor_argoci_robot_password   = module.harbor_config.argoci_robot_password
+    harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
+    harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
 
     keycloak_admin_username = var.keycloak_admin_username
     keycloak_admin_password = local.keycloak_admin_password
