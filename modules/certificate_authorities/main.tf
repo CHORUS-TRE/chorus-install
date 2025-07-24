@@ -27,12 +27,6 @@ resource "kubernetes_manifest" "cert_manager_crds" {
     data.http.cert_manager_crds
   ]
 }
-# TODO: check if crds install can be simplified
-# kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/vX.Y.Z/cert-manager.crds.yaml
-
-# TODO: add instructions for destroying crds
-# when=destroy
-# kubectl delete -f https://github.com/cert-manager/cert-manager/releases/download/vX.Y.Z/cert-manager.crds.yaml
 
 # Cert-Manager
 
@@ -46,6 +40,11 @@ resource "helm_release" "cert_manager" {
   wait             = true
 
   values = [var.cert_manager_helm_values]
+
+  set {
+    name  = "cert-manager.crds.enabled"
+    value = "false"
+  }
 
   depends_on = [
     kubernetes_namespace.cert_manager,
