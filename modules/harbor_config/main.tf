@@ -25,8 +25,8 @@ resource "harbor_project" "projects" {
 # Proxy cache projects
 
 resource "harbor_project" "proxy_cache" {
-  name        = "docker_proxy"
-  registry_id = harbor_registry.docker_hub.registry_id
+  name                   = "docker_proxy"
+  registry_id            = harbor_registry.docker_hub.registry_id
   vulnerability_scanning = "false"
   force_destroy          = true
 }
