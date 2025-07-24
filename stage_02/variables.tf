@@ -52,6 +52,7 @@ variable "helm_values_pat" {
   description = "Fine-grained personal access token (PAT) to access the Helm chart values repository (e.g. CHORUS-TRE/environment-template)"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "argocd_chart_name" {
@@ -78,10 +79,10 @@ variable "valkey_chart_name" {
   default     = "valkey"
 }
 
-variable "valkey_oauth2_proxy_chart_name" {
-  description = "Valkey OAuth2 Proxy Helm chart name"
+variable "oauth2_proxy_cache_chart_name" {
+  description = "OAuth2 Proxy cache Helm chart name"
   type        = string
-  default     = "oauth2-proxy-valkey"
+  default     = "oauth2-proxy-cache"
 }
 
 variable "alertmanager_oauth2_proxy_chart_name" {
@@ -126,16 +127,34 @@ variable "helm_values_credentials_secret" {
   default     = "argo-cd-github-environments"
 }
 
+variable "github_actions_harbor_robot_username" {
+  description = "Harbor robot username used by GitHub Actions"
+  type        = string
+  default     = "chorus-tre"
+}
+
 variable "argocd_harbor_robot_username" {
   description = "Harbor robot username used by ArgoCD"
   type        = string
   default     = "argo-cd"
 }
 
+variable "argoci_chart_name" {
+  description = "ArgoCI Helm chart name"
+  type        = string
+  default     = "argo-ci"
+}
+
 variable "argoci_harbor_robot_username" {
   description = "Harbor robot username used by ArgoCI"
   type        = string
   default     = "argo-ci"
+}
+
+variable "renovate_harbor_robot_username" {
+  description = "Harbor robot username used by Renovate"
+  type        = string
+  default     = "renovate"
 }
 
 variable "keycloak_chart_name" {
@@ -204,6 +223,12 @@ variable "argocd_keycloak_oidc_admin_group" {
   default     = "ArgoCDAdmins"
 }
 
+variable "argo_workflows_keycloak_oidc_admin_group" {
+  description = "Keycloak OIDC admin group assigned to Argo Workflows"
+  type        = string
+  default     = "ArgoWorkflowsAdmins"
+}
+
 variable "grafana_keycloak_oidc_admin_group" {
   description = "Keycloak OIDC admin group assigned to Grafana"
   type        = string
@@ -256,4 +281,33 @@ variable "grafana_admin_username" {
   description = "Grafana admin username"
   type        = string
   default     = "admin"
+}
+
+variable "github_username" {
+  description = "GitHub username owner of all the tokens"
+  type        = string
+}
+
+variable "github_workbench_operator_token" {
+  description = "GitHub token for the Workbench Operator repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_chorus_web_ui_token" {
+  description = "GitHub token for the Chorus Web UI repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_images_token" {
+  description = "GitHub token for the Images repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_chorus_backend_token" {
+  description = "GitHub token for the Chorus Backend repository"
+  type        = string
+  sensitive   = true
 }

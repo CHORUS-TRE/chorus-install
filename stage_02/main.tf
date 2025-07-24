@@ -1,9 +1,13 @@
 locals {
-  helm_values_folders        = toset([for x in fileset("${path.module}/${var.helm_values_path}/${var.cluster_name}", "**") : dirname(x)])
-  charts_versions            = { for x in local.helm_values_folders : jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).chart => jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).version... }
-  argo_deploy_chart_version  = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/config.json")).version
+  helm_values_folders = toset([for x in fileset("${path.module}/${var.helm_values_path}/${var.cluster_name}", "**") : dirname(x)])
+  charts_versions     = { for x in local.helm_values_folders : jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).chart => jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).version... }
+
+  argo_deploy_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/config.json")).version
+
   argocd_chart_version       = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).version
   argocd_cache_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json")).version
+  argocd_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
+  argoci_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argoci_chart_name}/config.json")).namespace
 
   harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed                      = yamldecode(local.harbor_values)
@@ -52,8 +56,8 @@ locals {
   prometheus_oauth2_proxy_values_parsed = yamldecode(local.prometheus_oauth2_proxy_values)
   prometheus_url                        = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
 
-  valkey_oauth2_proxy_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.valkey_oauth2_proxy_chart_name}/config.json")).namespace
-  valkey_oauth2_proxy_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.valkey_oauth2_proxy_chart_name}/values.yaml")
+  oauth2_proxy_cache_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json")).namespace
+  oauth2_proxy_cache_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml")
 }
 
 # Providers
@@ -230,10 +234,10 @@ module "oauth2_proxy" {
 
   alertmanager_oauth2_proxy_values    = local.alertmanager_oauth2_proxy_values
   prometheus_oauth2_proxy_values      = local.prometheus_oauth2_proxy_values
-  valkey_values                       = local.valkey_oauth2_proxy_values
+  oauth2_proxy_cache_values           = local.oauth2_proxy_cache_values
   alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
   prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
-  valkey_namespace                    = local.valkey_oauth2_proxy_namespace
+  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
   prometheus_keycloak_client_id       = var.prometheus_keycloak_client_id
   prometheus_keycloak_client_secret   = random_password.prometheus_keycloak_client_secret.result
   alertmanager_keycloak_client_id     = var.alertmanager_keycloak_client_id
@@ -304,6 +308,7 @@ module "keycloak_argo_workflows_client_config" {
   admin_url           = local.argo_workflows_url
   web_origins         = [local.argo_workflows_url]
   valid_redirect_uris = [local.argo_workflows_redirect_uri]
+  client_group        = var.argo_workflows_keycloak_oidc_admin_group
 }
 
 module "keycloak_grafana_client_config" {
@@ -374,8 +379,10 @@ module "harbor_config" {
   harbor_admin_password = local.harbor_admin_password
   harbor_helm_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
 
-  argocd_robot_username = var.argocd_harbor_robot_username
-  argoci_robot_username = var.argoci_harbor_robot_username
+  github_actions_robot_username = var.github_actions_harbor_robot_username
+  argocd_robot_username         = var.argocd_harbor_robot_username
+  argoci_robot_username         = var.argoci_harbor_robot_username
+  renovate_robot_username       = var.renovate_harbor_robot_username
 }
 
 module "argo_cd" {
@@ -391,7 +398,7 @@ module "argo_cd" {
   argocd_chart_name    = var.argocd_chart_name
   argocd_chart_version = local.argocd_chart_version
   argocd_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
-  argocd_namespace     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
+  argocd_namespace     = local.argocd_namespace
 
   argocd_cache_chart_name    = var.valkey_chart_name
   argocd_cache_chart_version = local.argocd_cache_chart_version
@@ -410,13 +417,15 @@ resource "null_resource" "wait_for_argocd" {
     quiet   = true
     command = <<EOT
       set -e
-      for i in {1..30}; do
-        if [ $(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz) -eq 200 ]; then
+      i=0
+      while [ $i -lt 30 ]; do
+        if [ "$(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz)" -eq 200 ]; then
           exit 0
         else
           echo "Waiting for ArgoCD... ($i)"
           sleep 10
         fi
+        i=$((i+1))
       done
       echo "Timed out waiting for ArgoCD" >&2
       exit 1
@@ -436,7 +445,7 @@ module "argocd_config" {
   cluster_name = var.cluster_name
 
   argocd_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml")
-  argocd_namespace   = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
+  argocd_namespace   = local.argocd_namespace
 
   helm_values_url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
   helm_values_revision = var.chorus_release
@@ -457,14 +466,34 @@ module "argocd_config" {
   ]
 }
 
+module "argoci_config" {
+  source = "../modules/argo_ci_config"
+
+  argoci_namespace   = local.argoci_namespace
+  argoci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.argoci_chart_name}/values.yaml")
+
+  github_chorus_web_ui_token      = var.github_chorus_web_ui_token
+  github_images_token             = var.github_images_token
+  github_chorus_backend_token     = var.github_chorus_backend_token
+  github_workbench_operator_token = var.github_workbench_operator_token
+
+  github_username = var.github_username
+
+  registry_server   = local.harbor_url
+  registry_username = var.argoci_harbor_robot_username
+  registry_password = module.harbor_config.argoci_robot_password
+}
+
 locals {
   output = {
-    harbor_admin_username        = var.harbor_admin_username
-    harbor_admin_password        = local.harbor_admin_password
-    harbor_url                   = local.harbor_url
-    harbor_admin_url             = join("/", [local.harbor_url, "account", "sign-in"])
-    harbor_argoci_robot_password = module.harbor_config.argoci_robot_password
-    harbor_argocd_robot_password = module.harbor_config.argocd_robot_password
+    harbor_admin_username = var.harbor_admin_username
+    harbor_admin_password = local.harbor_admin_password
+    harbor_url            = local.harbor_url
+    harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
+
+    harbor_argoci_robot_password   = module.harbor_config.argoci_robot_password
+    harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
+    harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
 
     keycloak_admin_username = var.keycloak_admin_username
     keycloak_admin_password = local.keycloak_admin_password

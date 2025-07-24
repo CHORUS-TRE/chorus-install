@@ -10,6 +10,13 @@ variable "helm_values_repo" {
   default     = "environment-template"
 }
 
+variable "helm_values_pat" {
+  description = "Fine-grained personal access token (PAT) to access the Helm chart values repository (e.g. CHORUS-TRE/environment-template)"
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
 variable "chorus_release" {
   description = "CHORUS-TRE release to use"
   type        = string
@@ -36,4 +43,15 @@ variable "cert_manager_chart_name" {
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
   type        = string
+}
+
+variable "helm_registry_username" {
+  description = "Username to connect to the CHORUS Helm chart registry"
+  type        = string
+}
+
+variable "helm_registry_password" {
+  description = "Password to connect to the CHORUS Helm chart registry"
+  type        = string
+  sensitive   = true
 }

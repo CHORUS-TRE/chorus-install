@@ -11,9 +11,9 @@ locals {
   prometheus_url                                 = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
   prometheus_existing_oidc_secret                = local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.config.existingSecret
 
-  valkey_values_parsed                       = yamldecode(var.valkey_values)
-  valkey_existing_session_storage_secret     = local.valkey_values_parsed.valkey.auth.existingSecret
-  valkey_existing_session_storage_secret_key = local.valkey_values_parsed.valkey.auth.existingSecretPasswordKey
+  oauth2_proxy_cache_values_parsed                       = yamldecode(var.oauth2_proxy_cache_values)
+  oauth2_proxy_cache_existing_session_storage_secret     = local.oauth2_proxy_cache_values_parsed.valkey.auth.existingSecret
+  oauth2_proxy_cache_existing_session_storage_secret_key = local.oauth2_proxy_cache_values_parsed.valkey.auth.existingSecretPasswordKey
 }
 
 resource "random_password" "prometheus_cookie_secret" {
@@ -89,13 +89,13 @@ resource "kubernetes_secret" "alertmanager_session_storage_secret" {
 
 # Valkey session storage secret
 
-resource "kubernetes_secret" "valkey_oauth2_proxy_secret" {
+resource "kubernetes_secret" "oauth2_proxy_cache_secret" {
   metadata {
-    name      = local.valkey_existing_session_storage_secret
-    namespace = var.valkey_namespace
+    name      = local.oauth2_proxy_cache_existing_session_storage_secret
+    namespace = var.oauth2_proxy_cache_namespace
   }
 
   data = {
-    "${local.valkey_existing_session_storage_secret_key}" = random_password.session_storage_secret.result
+    "${local.oauth2_proxy_cache_existing_session_storage_secret_key}" = random_password.session_storage_secret.result
   }
 }

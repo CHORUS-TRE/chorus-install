@@ -4,18 +4,105 @@ locals {
   charts               = [for k, v in var.charts_versions : k]
 }
 
+# Registries
+
+resource "harbor_registry" "docker_hub" {
+  provider_name = "docker-hub"
+  name          = "Docker Hub"
+  endpoint_url  = "https://hub.docker.com"
+}
+
+# Projects
+
 resource "harbor_project" "projects" {
-  for_each = toset(["apps", "cache", "charts", "chorus", "docker_proxy", "services"])
+  for_each = toset(["apps", "cache", "charts", "chorus", "services"])
 
   name                   = each.key
   vulnerability_scanning = "false"
   force_destroy          = true
 }
 
+# Proxy cache projects
+
+resource "harbor_project" "proxy_cache" {
+  name                   = "docker_proxy"
+  registry_id            = harbor_registry.docker_hub.registry_id
+  vulnerability_scanning = "false"
+  force_destroy          = true
+}
+
+# GitHub Actions robot account
+
+resource "random_password" "github_actions_robot_password" {
+  length      = 32
+  special     = false
+  min_upper   = 1
+  min_lower   = 1
+  min_numeric = 1
+}
+
+resource "harbor_robot_account" "github_actions" {
+  name        = var.github_actions_robot_username
+  description = "Robot used by GitHub Actions to automatically publish new Helm charts"
+  level       = "project"
+  secret      = random_password.github_actions_robot_password.result
+  permissions {
+    access {
+      action   = "create"
+      resource = "label"
+    }
+    access {
+      action   = "list"
+      resource = "label"
+    }
+    access {
+      action   = "read"
+      resource = "label"
+    }
+    access {
+      action   = "update"
+      resource = "label"
+    }
+    access {
+      action   = "list"
+      resource = "repository"
+    }
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    access {
+      action   = "push"
+      resource = "repository"
+    }
+    access {
+      action   = "read"
+      resource = "repository"
+    }
+    access {
+      action   = "update"
+      resource = "repository"
+    }
+    access {
+      action   = "create"
+      resource = "tag"
+    }
+    access {
+      action   = "list"
+      resource = "tag"
+    }
+
+    kind      = "project"
+    namespace = "charts"
+  }
+
+  depends_on = [harbor_project.projects]
+}
+
 # ArgoCD robot account
 
 resource "random_password" "argocd_robot_password" {
-  length      = 12
+  length      = 32
   special     = false
   min_upper   = 1
   min_lower   = 1
@@ -106,7 +193,7 @@ resource "harbor_robot_account" "argocd" {
 # ArgoCI robot account
 
 resource "random_password" "argoci_robot_password" {
-  length      = 12
+  length      = 32
   special     = false
   min_upper   = 1
   min_lower   = 1
@@ -589,12 +676,97 @@ resource "harbor_robot_account" "argoci" {
   depends_on = [harbor_project.projects]
 }
 
-# Registries
+# ArgoCI robot account
 
-resource "harbor_registry" "docker_hub" {
-  provider_name = "docker-hub"
-  name          = "Docker Hub"
-  endpoint_url  = "https://hub.docker.com"
+resource "random_password" "renovate_robot_password" {
+  length      = 32
+  special     = false
+  min_upper   = 1
+  min_lower   = 1
+  min_numeric = 1
+}
+
+resource "harbor_robot_account" "renovate" {
+  name        = var.renovate_robot_username
+  description = "Renovate robot account"
+  level       = "system"
+  secret      = random_password.renovate_robot_password.result
+  permissions {
+    access {
+      action   = "list"
+      resource = "project"
+    }
+    access {
+      action   = "list"
+      resource = "registry"
+    }
+    access {
+      action   = "read"
+      resource = "registry"
+    }
+    kind      = "system"
+    namespace = "/"
+  }
+  permissions {
+    access {
+      action   = "list"
+      resource = "label"
+    }
+    access {
+      action   = "read"
+      resource = "label"
+    }
+    access {
+      action   = "list"
+      resource = "repository"
+    }
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    access {
+      action   = "read"
+      resource = "repository"
+    }
+    access {
+      action   = "list"
+      resource = "tag"
+    }
+    kind      = "project"
+    namespace = "charts"
+  }
+  permissions {
+    access {
+      action   = "list"
+      resource = "label"
+    }
+    access {
+      action   = "read"
+      resource = "label"
+    }
+    access {
+      action   = "list"
+      resource = "repository"
+    }
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    access {
+      action   = "read"
+      resource = "repository"
+    }
+    access {
+      action   = "list"
+      resource = "tag"
+    }
+    kind      = "project"
+    namespace = "docker_proxy"
+  }
+  depends_on = [
+    harbor_project.projects,
+    harbor_project.proxy_cache
+  ]
 }
 
 # Add Helm charts to Harbor registry
@@ -607,11 +779,11 @@ resource "null_resource" "pull_charts" {
     destination=${path.module}/charts
     chart=${each.key}
     versions="${join(" ", each.value)}"
-    mkdir -p $destination
+    mkdir -p "$destination"
     for version in $versions; do
-      helm registry login ${var.source_helm_registry} --username=${var.source_helm_registry_username} --password=${var.source_helm_registry_password}
-      if [[ ! -f $destination/$chart-$version.tgz ]]; then
-        helm pull oci://${var.source_helm_registry}/charts/$chart --version $version --destination $destination
+      helm registry login "${var.source_helm_registry}" --username="${var.source_helm_registry_username}" --password="${var.source_helm_registry_password}"
+      if [ ! -f "$destination/$chart-$version.tgz" ]; then
+        helm pull "oci://${var.source_helm_registry}/charts/$chart" --version "$version" --destination "$destination"
       fi
     done
     EOT
@@ -632,12 +804,12 @@ resource "null_resource" "push_charts" {
     set -e
     source=${path.module}/charts
     harbor_domain=${replace(local.harbor_url, "https://", "")}
-    helm registry login $harbor_domain --username=${var.harbor_admin_username} --password=${var.harbor_admin_password} --insecure
+    helm registry login "$harbor_domain" --username="${var.harbor_admin_username}" --password="${var.harbor_admin_password}" --insecure
     chart=${each.key}
     versions="${join(" ", each.value)}"
     for version in $versions; do
-      if ! helm show chart oci://$harbor_domain/charts/$chart --version $version --insecure-skip-tls-verify >/dev/null 2>&1; then
-        helm push $source/$chart-$version.tgz oci://$harbor_domain/charts --insecure-skip-tls-verify
+      if ! helm show chart "oci://$harbor_domain/charts/$chart" --version "$version" --insecure-skip-tls-verify >/dev/null 2>&1; then
+        helm push "$source/$chart-$version.tgz" "oci://$harbor_domain/charts" --insecure-skip-tls-verify
       fi
     done
     EOT
