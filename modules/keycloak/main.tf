@@ -6,7 +6,6 @@ locals {
   keycloak_db_values_parsed      = yamldecode(var.keycloak_db_helm_values)
   keycloak_db_existing_secret    = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   keycloak_db_admin_password_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-  keycloak_db_postgres_password  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.postgresPassword
   keycloak_db_user_password_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 }
 
@@ -25,6 +24,11 @@ resource "random_password" "keycloak_db_password" {
   special = false
 }
 
+resource "random_password" "keycloak_db_admin_password" {
+  length  = 32
+  special = false
+}
+
 resource "kubernetes_secret" "keycloak_db_secret" {
   metadata {
     name      = local.keycloak_db_existing_secret
@@ -32,7 +36,7 @@ resource "kubernetes_secret" "keycloak_db_secret" {
   }
 
   data = {
-    "${local.keycloak_db_admin_password_key}" = local.keycloak_db_postgres_password
+    "${local.keycloak_db_admin_password_key}" = random_password.keycloak_db_admin_password.result
     "${local.keycloak_db_user_password_key}"  = random_password.keycloak_db_password.result
   }
 

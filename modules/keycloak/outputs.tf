@@ -7,3 +7,13 @@ output "keycloak_password" {
   description = "Keycloak password"
   sensitive   = true
 }
+
+output "keycloak_db_password" {
+  value       = random_password.keycloak_db_password.result
+  description = "Keycloak DB password for Keycloak user"
+}
+
+output "keycloak_db_admin_password" {
+  value       = random_password.keycloak_db_admin_password.result
+  description = "Keycloak DB password for Postgres user"
+}
