@@ -64,6 +64,7 @@
 
     ```
     cd stage_00
+    terraform login
     terraform init
     terraform plan -out="stage_00.plan"
     terraform apply "stage_00.plan"
@@ -73,6 +74,7 @@
 
     ```
     cd ../stage_01
+    terraform login
     terraform init
     terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
@@ -93,6 +95,7 @@
 1. Initialize, plan and apply stage 2
     ```
     cd ../stage_02
+    terraform login
     terraform init
     terraform plan -out="stage_02.plan"
     terraform apply "stage_02.plan"
