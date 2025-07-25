@@ -19,6 +19,11 @@ locals {
   harbor_existing_oidc_secret               = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.name
   harbor_existing_oidc_secret_key           = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.key
   harbor_keycloak_client_secret             = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_existing_oidc_secret_key}"]).oidc_client_secret
+  harbor_db_values                          = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/values.yaml")
+  harbor_db_values_parsed                   = yamldecode(local.harbor_db_values)
+  harbor_db_existing_secret                 = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  harbor_db_user_password_key               = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  harbor_db_admin_password_key              = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
   keycloak_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml")
   keycloak_values_parsed                      = yamldecode(local.keycloak_values)
@@ -27,6 +32,11 @@ locals {
   keycloak_existing_admin_password_secret_key = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_admin_password                     = data.kubernetes_secret.keycloak_existing_admin_password.data["${local.keycloak_existing_admin_password_secret_key}"]
   keycloak_url                                = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
+  keycloak_db_values                          = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/values.yaml")
+  keycloak_db_values_parsed                   = yamldecode(local.keycloak_db_values)
+  keycloak_db_existing_secret                 = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  keycloak_db_user_password_key               = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  keycloak_db_admin_password_key              = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
   kube_prometheus_stack_values             = file("${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
   kube_prometheus_stack_values_parsed      = yamldecode(local.kube_prometheus_stack_values)
@@ -151,6 +161,20 @@ data "kubernetes_secret" "keycloak_existing_admin_password" {
 data "kubernetes_secret" "harbor_oidc" {
   metadata {
     name      = local.harbor_existing_oidc_secret
+    namespace = local.harbor_namespace
+  }
+}
+
+data "kubernetes_secret" "keycloak_db_existing_secret" {
+  metadata {
+    name      = local.keycloak_db_existing_secret
+    namespace = local.keycloak_namespace
+  }
+}
+
+data "kubernetes_secret" "harbor_db_existing_secret" {
+  metadata {
+    name      = local.harbor_db_existing_secret
     namespace = local.harbor_namespace
   }
 }
@@ -494,10 +518,18 @@ locals {
     harbor_argoci_robot_password   = module.harbor_config.argoci_robot_password
     harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
     harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
+    harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
+    harbor_db_password             = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_user_password_key}"]
+    harbor_db_admin_username       = "postgres"
+    harbor_db_admin_password       = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_admin_password_key}"]
 
-    keycloak_admin_username = var.keycloak_admin_username
-    keycloak_admin_password = local.keycloak_admin_password
-    keycloak_url            = local.keycloak_url
+    keycloak_admin_username    = var.keycloak_admin_username
+    keycloak_admin_password    = local.keycloak_admin_password
+    keycloak_url               = local.keycloak_url
+    keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
+    keycloak_db_password       = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_user_password_key}"]
+    keycloak_db_admin_username = "postgres"
+    keycloak_db_admin_password = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_admin_password_key}"]
 
     argocd_url      = module.argo_cd.argocd_url
     argocd_username = module.argo_cd.argocd_username

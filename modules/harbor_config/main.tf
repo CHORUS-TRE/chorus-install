@@ -96,7 +96,10 @@ resource "harbor_robot_account" "github_actions" {
     namespace = "charts"
   }
 
-  depends_on = [harbor_project.projects]
+  depends_on = [
+    harbor_project.projects,
+    harbor_project.proxy_cache
+  ]
 }
 
 # ArgoCD robot account
@@ -187,7 +190,10 @@ resource "harbor_robot_account" "argocd" {
     namespace = "charts"
   }
 
-  depends_on = [harbor_project.projects]
+  depends_on = [
+    harbor_project.projects,
+    harbor_project.proxy_cache
+  ]
 }
 
 # ArgoCI robot account
@@ -673,7 +679,10 @@ resource "harbor_robot_account" "argoci" {
     kind      = "project"
     namespace = "chorus"
   }
-  depends_on = [harbor_project.projects]
+  depends_on = [
+    harbor_project.projects,
+    harbor_project.proxy_cache
+  ]
 }
 
 # ArgoCI robot account

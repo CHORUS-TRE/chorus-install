@@ -5,7 +5,6 @@ locals {
 
   harbor_db_values_parsed      = yamldecode(var.harbor_db_helm_values)
   harbor_db_existing_secret    = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
-  harbor_db_postgres_password  = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.postgresPassword
   harbor_db_user_password_key  = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
   harbor_db_admin_password_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
@@ -55,6 +54,11 @@ resource "kubernetes_namespace" "harbor" {
 # Secrets
 
 resource "random_password" "harbor_db_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "harbor_db_admin_password" {
   length  = 32
   special = false
 }
@@ -110,7 +114,7 @@ resource "kubernetes_secret" "harbor_db_secret" {
   }
 
   data = {
-    "${local.harbor_db_admin_password_key}" = local.harbor_db_postgres_password
+    "${local.harbor_db_admin_password_key}" = random_password.harbor_db_admin_password.result
     "${local.harbor_db_user_password_key}"  = random_password.harbor_db_password.result
   }
 
