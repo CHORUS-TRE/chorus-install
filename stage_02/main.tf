@@ -519,17 +519,17 @@ locals {
     harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
     harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
     harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
-    harbor_db_password             = data.kubernetes_secret.harbor_db_existing_secret["${local.harbor_db_user_password_key}"]
+    harbor_db_password             = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_user_password_key}"]
     harbor_db_admin_username       = "postgres"
-    harbor_db_admin_password       = data.kubernetes_secret.harbor_db_existing_secret["${local.harbor_db_admin_password_key}"]
+    harbor_db_admin_password       = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_admin_password_key}"]
 
     keycloak_admin_username    = var.keycloak_admin_username
     keycloak_admin_password    = local.keycloak_admin_password
     keycloak_url               = local.keycloak_url
     keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
-    keycloak_db_password       = data.kubernetes_secret.keycloak_db_existing_secret["${local.keycloak_db_user_password_key}"]
+    keycloak_db_password       = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_user_password_key}"]
     keycloak_db_admin_username = "postgres"
-    keycloak_db_admin_password = data.kubernetes_secret.keycloak_db_existing_secret["${local.keycloak_db_admin_password_key}"]
+    keycloak_db_admin_password = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_admin_password_key}"]
 
     argocd_url      = module.argo_cd.argocd_url
     argocd_username = module.argo_cd.argocd_username
