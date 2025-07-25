@@ -22,11 +22,11 @@ output "harbor_url_admin_login" {
 output "harbor_db_password" {
   value       = random_password.harbor_db_password.result
   description = "Harbor DB password for Harbor user"
-  sensitive = true
+  sensitive   = true
 }
 
 output "harbor_db_admin_password" {
   value       = random_password.harbor_db_admin_password.result
   description = "Habor DB password for Postgres user"
-  sensitive = true
+  sensitive   = true
 }
