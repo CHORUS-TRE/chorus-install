@@ -73,3 +73,26 @@ variable "harbor_robot_password" {
   description = "Password of the robot used to connect to Harbor"
   type        = string
 }
+
+variable "remote_clusters" {
+  description = "Map of remote cluster configurations for ArgoCD"
+  type = map(object({
+    name   = string
+    server = string
+    config = object({
+      bearer_token = optional(string)
+      tls_client_config = optional(object({
+        insecure = optional(bool, false)
+        ca_data  = optional(string)
+      }))
+    })
+  }))
+  default = {}
+  validation {
+    condition = alltrue([
+      for cluster_name, cluster_config in var.remote_clusters :
+      can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?$", cluster_name))
+    ])
+    error_message = "Cluster names must be valid Kubernetes resource names (lowercase alphanumeric and hyphens only)."
+  }
+}

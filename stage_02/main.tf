@@ -68,6 +68,21 @@ locals {
 
   oauth2_proxy_cache_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json")).namespace
   oauth2_proxy_cache_values    = file("${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml")
+
+  remote_clusters_config = flatten([
+    for kubeconfig_path in var.remote_clusters_kubeconfig_path : [
+      for context in yamldecode(file(kubeconfig_path)).contexts : {
+        name   = context.name
+        server = yamldecode(file(kubeconfig_path)).clusters[index(yamldecode(file(kubeconfig_path)).clusters.*.name, context.context.cluster)].cluster.server
+        config = {
+          bearer_token = yamldecode(file(kubeconfig_path)).users[index(yamldecode(file(kubeconfig_path)).users.*.name, context.context.user)].user.token
+          tls_client_config = yamldecode(file(kubeconfig_path)).clusters[index(yamldecode(file(kubeconfig_path)).clusters.*.name, context.context.cluster)].cluster["certificate-authority-data"] != null ? {
+            ca_data = yamldecode(file(kubeconfig_path)).clusters[index(yamldecode(file(kubeconfig_path)).clusters.*.name, context.context.cluster)].cluster["certificate-authority-data"]
+          } : null
+        }
+      }
+    ]
+  ])
 }
 
 # Providers
@@ -434,6 +449,14 @@ module "argo_cd" {
   harbor_domain                         = replace(local.harbor_url, "https://", "")
   harbor_robot_username                 = var.argocd_harbor_robot_username
   harbor_robot_password                 = module.harbor_config.argocd_robot_password
+
+  remote_clusters = {
+    for cluster in local.remote_clusters_config : cluster.name => {
+      name   = cluster.name
+      server = cluster.server
+      config = cluster.config
+    }
+  }
 }
 
 resource "null_resource" "wait_for_argocd" {

@@ -311,3 +311,8 @@ variable "github_chorus_backend_token" {
   type        = string
   sensitive   = true
 }
+
+variable "remote_clusters_kubeconfig_path" {
+  description = "Path to the Kubernetes config file for the remote clusters"
+  type        = list(string)
+}

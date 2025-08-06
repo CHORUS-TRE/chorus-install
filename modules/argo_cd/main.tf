@@ -3,6 +3,20 @@ locals {
   argocd_cache_values_parsed       = yamldecode(var.argocd_cache_helm_values)
   argocd_cache_existing_secret     = local.argocd_cache_values_parsed.valkey.auth.existingSecret
   argocd_cache_existing_secret_key = local.argocd_cache_values_parsed.valkey.auth.existingSecretPasswordKey
+
+  remote_cluster_configs = {
+    for cluster_name, cluster_config in var.remote_clusters : cluster_name => {
+      name   = cluster_config.name
+      server = cluster_config.server
+      config = jsonencode({
+        bearerToken = cluster_config.config.bearer_token
+        tlsClientConfig = cluster_config.config.tls_client_config != null ? {
+          insecure = cluster_config.config.tls_client_config.insecure
+          caData   = cluster_config.config.tls_client_config.ca_data
+        } : null
+      })
+    }
+  }
 }
 
 # Namespace
@@ -98,38 +112,28 @@ resource "kubernetes_secret" "oci-build" {
   depends_on = [kubernetes_namespace.argocd]
 }
 
-/*
-# Note: in-cluster is created by default in ArgoCD
-Remote cluster configuration will be done in a second development round
+# Remote Cluster Configuration
+# (in-cluster is created by default in ArgoCD)
 
-resource "kubernetes_secret" "remote_cluster" {
+resource "kubernetes_secret" "remote_clusters" {
+  for_each = var.remote_clusters
+
   metadata {
-    name = TODO
+    name      = "${each.key}"
     namespace = var.argocd_namespace
     labels = {
       "argocd.argoproj.io/secret-type" = "cluster"
     }
-
-    data = {
-      name = TODO
-      server = TODO
-      config = TODO
-    }
   }
-}
-IDEA: take the path to the config.json file as module input,
-read the file in the locals block at the top of this file and
-inject it in the secret
 
-{
-  "bearerToken": "<token>",
-  "tlsClientConfig": {
-    "insecure": false,
-    "caData": "<base64-encoded-ca-cert>"
+  data = {
+    name   = local.remote_cluster_configs[each.key].name
+    server = local.remote_cluster_configs[each.key].server
+    config = local.remote_cluster_configs[each.key].config
   }
-}
 
-*/
+  depends_on = [kubernetes_namespace.argocd]
+}
 
 # ArgoCD Cache (Valkey)
 
