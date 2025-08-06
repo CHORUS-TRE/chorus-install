@@ -119,7 +119,7 @@ resource "kubernetes_secret" "remote_clusters" {
   for_each = var.remote_clusters
 
   metadata {
-    name      = "${each.key}"
+    name      = each.key
     namespace = var.argocd_namespace
     labels = {
       "argocd.argoproj.io/secret-type" = "cluster"
