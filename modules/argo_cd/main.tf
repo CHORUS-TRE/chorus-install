@@ -113,13 +113,13 @@ resource "kubernetes_secret" "oci-build" {
 }
 
 # Remote Cluster Configuration
-# (in-cluster is created by default in ArgoCD)
+# (in-cluster is available by default)
 
 resource "kubernetes_secret" "remote_clusters" {
   for_each = var.remote_clusters
 
   metadata {
-    name      = each.key
+    name      = "${each.key}-cluster"
     namespace = var.argocd_namespace
     labels = {
       "argocd.argoproj.io/secret-type" = "cluster"
