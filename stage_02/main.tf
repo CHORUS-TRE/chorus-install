@@ -529,6 +529,8 @@ module "argoci_config" {
   registry_server   = local.harbor_url
   registry_username = var.argoci_harbor_robot_username
   registry_password = module.harbor_config.argoci_robot_password
+
+  depends_on = [kubernetes_namespace.argo]
 }
 
 locals {
