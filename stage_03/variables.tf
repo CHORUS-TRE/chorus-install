@@ -1,3 +1,13 @@
+variable "kubeconfig_path" {
+  description = "Path to the Kubernetes config file"
+  type        = string
+}
+
+variable "kubeconfig_context" {
+  description = "Kubernetes context to use"
+  type        = string
+}
+
 variable "remote_clusters_kubeconfig_path" {
   description = "Path to the Kubernetes config file for the remote clusters"
   type        = list(string)
