@@ -49,7 +49,7 @@ locals {
 
 resource "kubernetes_secret" "remote_clusters" {
   metadata {
-    name      = "${local.cluster_config.name}-cluster"
+    name      = "${var.remote_cluster.name}-cluster"
     namespace = var.argocd_namespace
     labels = {
       "argocd.argoproj.io/secret-type" = "cluster"
@@ -61,6 +61,4 @@ resource "kubernetes_secret" "remote_clusters" {
     server = var.remote_cluster_server
     config = local.cluster_config
   }
-
-  depends_on = [kubernetes_namespace.argocd]
 }
