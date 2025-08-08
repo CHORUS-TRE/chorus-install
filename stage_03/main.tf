@@ -17,7 +17,7 @@ module "remote_cluster" {
 
   argocd_namespace            = local.argocd_namespace
   remote_cluster_name         = each.value.name
-  remote_cluster_server       = each.value.cluster_server
+  remote_cluster_server       = each.value.server
   remote_cluster_bearer_token = each.value.bearer_token
   remote_cluster_ca_data      = each.value.ca_data
 
