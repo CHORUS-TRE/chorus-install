@@ -4,7 +4,7 @@ locals {
   remote_cluster_name = yamldecode(file(var.remote_cluster_kubeconfig_path)).contexts[local.remote_cluster_c5t_index].name
   remote_cluster_user = yamldecode(file(var.remote_cluster_kubeconfig_path)).contexts[local.remote_cluster_c5t_index].context.user 
   remote_cluster_c5r_index = index(yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters.*.name, local.remote_cluster_name)
-  remote_cluster_server = yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters[local.remote_cluster_c5r_index].server
+  remote_cluster_server = yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters[local.remote_cluster_c5r_index].cluster.server
   remote_cluster_u2r_index = index(yamldecode(file(var.remote_cluster_kubeconfig_path)).users.*.name, local.remote_cluster_user)
   remote_cluster_bearer_token = yamldecode(file(var.remote_cluster_kubeconfig_path)).users[local.remote_cluster_u2r_index].user.token 
   remote_cluster_ca_data = yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters[local.remote_cluster_c5r_index].cluster["certificate-authority-data"]
