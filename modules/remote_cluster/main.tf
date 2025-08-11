@@ -35,30 +35,3 @@
 # .dockerconfigjson
 # or is this created by reflector?!
 
-locals {
-  cluster_config = jsonencode({
-    bearerToken = var.remote_cluster_bearer_token
-    tlsClientConfig = {
-      insecure = false
-      caData   = var.remote_cluster_ca_data
-    }
-  })
-}
-
-# Remote Cluster Connection for ArgoCD
-
-resource "kubernetes_secret" "remote_clusters" {
-  metadata {
-    name      = "${var.remote_cluster_name}-cluster"
-    namespace = var.argocd_namespace
-    labels = {
-      "argocd.argoproj.io/secret-type" = "cluster"
-    }
-  }
-
-  data = {
-    name   = var.remote_cluster_name
-    server = var.remote_cluster_server
-    config = local.cluster_config
-  }
-}

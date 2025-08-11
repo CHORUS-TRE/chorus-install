@@ -8,10 +8,20 @@ variable "kubeconfig_context" {
   type        = string
 }
 
-variable "remote_clusters_kubeconfig_path" {
-  description = "Path to the Kubernetes config file for the remote clusters"
-  type        = list(string)
-  default     = []
+variable "remote_cluster_kubeconfig_path" {
+  description = "Path to the Kubernetes config file for the remote cluster"
+  type        = string
+}
+
+variable "remote_cluster_insecure" {
+  description = "Allow insecure connection to remote cluster"
+  type        = string
+  default     = false
+}
+
+variable "remote_cluster_kubeconfig_context" {
+  description = "Kubernetes context to use for the remote cluster"
+  type        = string
 }
 
 variable "helm_values_path" {
