@@ -1,16 +1,19 @@
 locals {
   argocd_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
-  remote_cluster_config = {
-    name         = var.remote_cluster_kubeconfig_context
-    server       = yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters[index(yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters.*.name, var.remote_cluster_kubeconfig_context)].cluster.server
-    bearer_token = yamldecode(file(var.remote_cluster_kubeconfig_path)).users[index(yamldecode(file(var.remote_cluster_kubeconfig_path)).users.*.name, var.remote_cluster_kubeconfig_context)].user.token
-    ca_data      = yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters[index(yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters.*.name, var.remote_cluster_kubeconfig_context)].cluster["certificate-authority-data"]
-  }
-  remote_cluster_config_encoded = jsonencode({
-    bearerToken = local.remote_cluster_config
+  remote_cluster_c5t_index = index(yamldecode(file(var.remote_cluster_kubeconfig_path)).contexts.*.name, var.remote_cluster_kubeconfig_context)
+  remote_cluster_name = yamldecode(file(var.remote_cluster_kubeconfig_path)).contexts[local.remote_cluster_c5t_index].name
+  remote_cluster_user = yamldecode(file(var.remote_cluster_kubeconfig_path)).contexts[local.remote_cluster_c5t_index].context.user 
+  remote_cluster_c5r_index = index(yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters.*.name, local.remote_cluster_name)
+  remote_cluster_server = yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters[local.remote_cluster_c5r_index].name
+  remote_cluster_u2r_index = index(yamldecode(file(var.remote_cluster_kubeconfig_path)).users.*.name, local.remote_cluster_user)
+  remote_cluster_bearer_token = yamldecode(file(var.remote_cluster_kubeconfig_path)).users[local.remote_cluster_u2r_index].user.token 
+  remote_cluster_ca_data = yamldecode(file(var.remote_cluster_kubeconfig_path)).clusters[local.remote_cluster_c5r_index].cluster["certificate-authority-data"]
+
+  remote_cluster_config = jsonencode({
+    bearerToken = local.remote_cluster_bearer_token
     tlsClientConfig = {
       insecure = var.remote_cluster_insecure
-      caData   = local.remote_cluster_config.ca_data
+      caData   = local.remote_cluster_ca_data
     }
   })
 }
@@ -19,7 +22,7 @@ locals {
 
 resource "kubernetes_secret" "remote_clusters" {
   metadata {
-    name      = "${local.remote_cluster_config.name}-cluster"
+    name      = "${local.remote_cluster_name}-cluster"
     namespace = local.argocd_namespace
     labels = {
       "argocd.argoproj.io/secret-type" = "cluster"
@@ -27,9 +30,9 @@ resource "kubernetes_secret" "remote_clusters" {
   }
 
   data = {
-    name   = local.remote_cluster_config.name
-    server = local.remote_cluster_config.server
-    config = local.remote_cluster_config_encoded
+    name   = local.remote_cluster_name
+    server = local.remote_cluster_server
+    config = local.remote_cluster_config
   }
 }
 
