@@ -12,7 +12,7 @@ locals {
   remote_cluster_config = jsonencode({
     bearerToken = local.remote_cluster_bearer_token
     tlsClientConfig = {
-      insecure = var.remote_cluster_insecure
+      insecure = bool(var.remote_cluster_insecure)
       caData   = local.remote_cluster_ca_data
     }
   })
