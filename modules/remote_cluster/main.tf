@@ -2,13 +2,13 @@
 # Plan: call this module for each remote cluster
 
 locals {
-    # TODO: read from values.yaml files
- keycloak_namespace = "keycloak"
- keycloak_existing_secret = "keycloak-secret"
- keycloak_password_secret_key = "adminPassword"
- keycloak_db_existing_secret = "keycloak_db_secret"
- keycloak_db_admin_password_key = "postgres-password"
- keycloak_db_user_password_key = "password"
+  # TODO: read from values.yaml files
+  keycloak_namespace             = "keycloak"
+  keycloak_existing_secret       = "keycloak-secret"
+  keycloak_password_secret_key   = "adminPassword"
+  keycloak_db_existing_secret    = "keycloak_db_secret"
+  keycloak_db_admin_password_key = "postgres-password"
+  keycloak_db_user_password_key  = "password"
 }
 
 # Keycloak
@@ -27,9 +27,9 @@ resource "kubernetes_namespace" "keycloak" {
 module "keycloak_db_secret" {
   source = "../db_secret"
 
-  namespace = local.keycloak_namespace
-  secret_name = local.keycloak_db_existing_secret
-  db_user_password_key = local.keycloak_db_user_password_key
+  namespace             = local.keycloak_namespace
+  secret_name           = local.keycloak_db_existing_secret
+  db_user_password_key  = local.keycloak_db_user_password_key
   db_admin_password_key = local.keycloak_db_admin_password_key
 
   depends_on = [kubernetes_namespace.keycloak]
@@ -38,9 +38,9 @@ module "keycloak_db_secret" {
 module "keycloak_secret" {
   source = "../keycloak_secret"
 
-  namespace = local.keycloak_namespace
+  namespace   = local.keycloak_namespace
   secret_name = local.keycloak_existing_secret
-  secret_key = local.keycloak_password_secret_key
+  secret_key  = local.keycloak_password_secret_key
 
   depends_on = [kubernetes_namespace.keycloak]
 }
