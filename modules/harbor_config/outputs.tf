@@ -10,9 +10,9 @@ output "argocd_robot_password" {
   sensitive   = true
 }
 
-output "argoci_robot_password" {
-  value       = random_password.argoci_robot_password.result
-  description = "Password of the robot user used by ArgoCI"
+output "chorusci_robot_password" {
+  value       = random_password.chorusci_robot_password.result
+  description = "Password of the robot user used by ChorusCI"
   sensitive   = true
 }
 

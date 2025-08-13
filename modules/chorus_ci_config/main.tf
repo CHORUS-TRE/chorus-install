@@ -1,24 +1,24 @@
 locals {
-  argoci_values_parsed         = yamldecode(var.argoci_helm_values)
-  argoci_sensor_regcred_secret = yamldecode(local.argoci_values_parsed.sensor.dockerConfig.secretName)
-  webhook_events               = { for event in local.argoci_values_parsed.webhookEvents : event.name => event.secretName }
+  chorusci_values_parsed         = yamldecode(var.chorusci_helm_values)
+  chorusci_sensor_regcred_secret = yamldecode(local.chorusci_values_parsed.sensor.dockerConfig.secretName)
+  webhook_events                 = { for event in local.chorusci_values_parsed.webhookEvents : event.name => event.secretName }
 }
 
 # Workbench operator
 
-resource "random_password" "argoci_github_workbench_operator_secret" {
+resource "random_password" "chorusci_github_workbench_operator_secret" {
   length  = 32
   special = false
 }
 
-resource "kubernetes_secret" "argoci_github_workbench_operator" {
+resource "kubernetes_secret" "chorusci_github_workbench_operator" {
   metadata {
     name      = local.webhook_events["workbench-operator"]
-    namespace = var.argoci_namespace
+    namespace = var.chorusci_namespace
   }
 
   data = {
-    secret = random_password.argoci_github_workbench_operator_secret.result
+    secret = random_password.chorusci_github_workbench_operator_secret.result
     token  = var.github_workbench_operator_token
   }
 
@@ -33,7 +33,7 @@ resource "kubernetes_secret" "argoci_github_workbench_operator" {
 resource "kubernetes_secret" "argo_workflows_github_workbench_operator" {
   metadata {
     name      = "argo-workflows-github-workbench-operator"
-    namespace = var.argoci_namespace
+    namespace = var.chorusci_namespace
   }
 
   data = {
@@ -44,19 +44,19 @@ resource "kubernetes_secret" "argo_workflows_github_workbench_operator" {
 
 # CHORUS Web UI
 
-resource "random_password" "argoci_github_chorus_web_ui_secret" {
+resource "random_password" "chorusci_github_chorus_web_ui_secret" {
   length  = 32
   special = false
 }
 
-resource "kubernetes_secret" "argoci_github_chorus_web_ui" {
+resource "kubernetes_secret" "chorusci_github_chorus_web_ui" {
   metadata {
     name      = local.webhook_events["chorus-web-ui"]
-    namespace = var.argoci_namespace
+    namespace = var.chorusci_namespace
   }
 
   data = {
-    secret = random_password.argoci_github_chorus_web_ui_secret.result
+    secret = random_password.chorusci_github_chorus_web_ui_secret.result
     token  = var.github_chorus_web_ui_token
   }
 
@@ -71,7 +71,7 @@ resource "kubernetes_secret" "argoci_github_chorus_web_ui" {
 resource "kubernetes_secret" "argo_workflows_github_chorus_web_ui" {
   metadata {
     name      = "argo-workflows-github-chorus-web-ui"
-    namespace = var.argoci_namespace
+    namespace = var.chorusci_namespace
   }
 
   data = {
@@ -82,19 +82,19 @@ resource "kubernetes_secret" "argo_workflows_github_chorus_web_ui" {
 
 # Images
 
-resource "random_password" "argoci_github_images_secret" {
+resource "random_password" "chorusci_github_images_secret" {
   length  = 32
   special = false
 }
 
-resource "kubernetes_secret" "argoci_github_images" {
+resource "kubernetes_secret" "chorusci_github_images" {
   metadata {
     name      = local.webhook_events["ci"]
-    namespace = var.argoci_namespace
+    namespace = var.chorusci_namespace
   }
 
   data = {
-    secret = random_password.argoci_github_images_secret.result
+    secret = random_password.chorusci_github_images_secret.result
     token  = var.github_images_token
   }
 
@@ -108,19 +108,19 @@ resource "kubernetes_secret" "argoci_github_images" {
 
 # CHORUS Backend
 
-resource "random_password" "argoci_github_chorus_backend_secret" {
+resource "random_password" "chorusci_github_chorus_backend_secret" {
   length  = 32
   special = false
 }
 
-resource "kubernetes_secret" "argoci_github_chorus_backend" {
+resource "kubernetes_secret" "chorusci_github_chorus_backend" {
   metadata {
     name      = local.webhook_events["chorus-backend"]
-    namespace = var.argoci_namespace
+    namespace = var.chorusci_namespace
   }
 
   data = {
-    secret = random_password.argoci_github_chorus_backend_secret.result
+    secret = random_password.chorusci_github_chorus_backend_secret.result
     token  = var.github_chorus_backend_token
   }
 
@@ -135,7 +135,7 @@ resource "kubernetes_secret" "argoci_github_chorus_backend" {
 resource "kubernetes_secret" "argo_workflows_github_chorus_backend" {
   metadata {
     name      = "argo-workflows-github-chorus-backend"
-    namespace = var.argoci_namespace
+    namespace = var.chorusci_namespace
   }
 
   data = {
@@ -146,10 +146,10 @@ resource "kubernetes_secret" "argo_workflows_github_chorus_backend" {
 
 # Sensor
 
-resource "kubernetes_secret" "argoci_sensor_regcred_secret" {
+resource "kubernetes_secret" "chorusci_sensor_regcred_secret" {
   metadata {
-    name      = local.argoci_sensor_regcred_secret
-    namespace = var.argoci_namespace
+    name      = local.chorusci_sensor_regcred_secret
+    namespace = var.chorusci_namespace
   }
 
   data = {

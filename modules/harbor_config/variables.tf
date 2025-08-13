@@ -34,8 +34,8 @@ variable "argocd_robot_username" {
   type        = string
 }
 
-variable "argoci_robot_username" {
-  description = "Username of the robot to be used by ArgoCI"
+variable "chorusci_robot_username" {
+  description = "Username of the robot to be used by ChorusCI"
   type        = string
 }
 

@@ -7,7 +7,7 @@ locals {
   argocd_chart_version       = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).version
   argocd_cache_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json")).version
   argocd_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
-  argoci_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argoci_chart_name}/config.json")).namespace
+  chorusci_namespace         = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/config.json")).namespace
 
   harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed                      = yamldecode(local.harbor_values)
@@ -144,11 +144,21 @@ resource "random_password" "grafana_admin_password" {
   special = false
 }
 
+import {
+  to = kubernetes_secret.harbor_existing_admin_password
+  id = local.harbor_existing_admin_password_secret
+}
+
 data "kubernetes_secret" "harbor_existing_admin_password" {
   metadata {
     name      = local.harbor_existing_admin_password_secret
     namespace = local.harbor_namespace
   }
+}
+
+import {
+  to = kubernetes_secret.keycloak_existing_admin_password
+  id = local.keycloak_existing_admin_password_secret
 }
 
 data "kubernetes_secret" "keycloak_existing_admin_password" {
@@ -158,6 +168,11 @@ data "kubernetes_secret" "keycloak_existing_admin_password" {
   }
 }
 
+import {
+  to = kubernetes_secret.harbor_oidc
+  id = local.harbor_existing_oidc_secret
+}
+
 data "kubernetes_secret" "harbor_oidc" {
   metadata {
     name      = local.harbor_existing_oidc_secret
@@ -165,11 +180,21 @@ data "kubernetes_secret" "harbor_oidc" {
   }
 }
 
+import {
+  to = kubernetes_secret.keycloak_db_existing_secret
+  id = local.keycloak_db_existing_secret
+}
+
 data "kubernetes_secret" "keycloak_db_existing_secret" {
   metadata {
     name      = local.keycloak_db_existing_secret
     namespace = local.keycloak_namespace
   }
+}
+
+import {
+  to = kubernetes_secret.harbor_db_existing_secret
+  id = local.harbor_db_existing_secret
 }
 
 data "kubernetes_secret" "harbor_db_existing_secret" {
@@ -181,10 +206,20 @@ data "kubernetes_secret" "harbor_db_existing_secret" {
 
 # Grafana
 
+import {
+  to = kubernetes_namespace.grafana
+  id = local.grafana_namespace
+}
+
 resource "kubernetes_namespace" "grafana" {
   metadata {
     name = local.grafana_namespace
   }
+}
+
+import {
+  to = kubernetes_secret.grafana_oauth_client_secret
+  id = local.grafana_existing_oauth_client_secret
 }
 
 resource "kubernetes_secret" "grafana_oauth_client_secret" {
@@ -210,10 +245,20 @@ resource "kubernetes_secret" "grafana_oauth_client_secret" {
 # we use Terraform's "count" with conditional check
 # to account for each case
 
+import {
+  to = kubernetes_namespace.argo
+  id = local.argo_workflows_workflow_namespace
+}
+
 resource "kubernetes_namespace" "argo" {
   metadata {
     name = local.argo_workflows_workflow_namespace
   }
+}
+
+import {
+  to = kubernetes_secret.argo_workflows_oidc_client_id_and_secret
+  id = local.argo_workflows_existing_sso_server_client_id_name
 }
 
 resource "kubernetes_secret" "argo_workflows_oidc_client_id_and_secret" {
@@ -229,6 +274,11 @@ resource "kubernetes_secret" "argo_workflows_oidc_client_id_and_secret" {
   count = local.argo_workflows_existing_sso_server_client_secret_name == local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
 }
 
+import {
+  to = kubernetes_secret.argo_workflows_oidc_client_id
+  id = local.argo_workflows_existing_sso_server_client_id_name
+}
+
 resource "kubernetes_secret" "argo_workflows_oidc_client_id" {
   metadata {
     name      = local.argo_workflows_existing_sso_server_client_id_name
@@ -239,6 +289,11 @@ resource "kubernetes_secret" "argo_workflows_oidc_client_id" {
     "${local.argo_workflows_existing_sso_server_client_id_key}" = var.argo_workflows_keycloak_client_id
   }
   count = local.argo_workflows_existing_sso_server_client_secret_name != local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
+}
+
+import {
+  to = kubernetes_secret.argo_workflows_oidc_client_secret
+  id = local.argo_workflows_existing_sso_server_client_secret_name
 }
 
 resource "kubernetes_secret" "argo_workflows_oidc_client_secret" {
@@ -405,7 +460,7 @@ module "harbor_config" {
 
   github_actions_robot_username = var.github_actions_harbor_robot_username
   argocd_robot_username         = var.argocd_harbor_robot_username
-  argoci_robot_username         = var.argoci_harbor_robot_username
+  chorusci_robot_username       = var.chorusci_harbor_robot_username
   renovate_robot_username       = var.renovate_harbor_robot_username
 }
 
@@ -438,8 +493,8 @@ module "argo_cd" {
 
 resource "null_resource" "wait_for_argocd" {
   provisioner "local-exec" {
-    quiet   = true
-    command = <<EOT
+    quiet       = true
+    command     = <<EOT
       set -e
       i=0
       while [ $i -lt 30 ]; do
@@ -454,6 +509,7 @@ resource "null_resource" "wait_for_argocd" {
       echo "Timed out waiting for ArgoCD" >&2
       exit 1
     EOT
+    interpreter = ["/bin/sh", "-c"]
   }
 
   triggers = {
@@ -490,11 +546,11 @@ module "argocd_config" {
   ]
 }
 
-module "argoci_config" {
-  source = "../modules/argo_ci_config"
+module "chorusci_config" {
+  source = "../modules/chorus_ci_config"
 
-  argoci_namespace   = local.argoci_namespace
-  argoci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.argoci_chart_name}/values.yaml")
+  chorusci_namespace   = local.chorusci_namespace
+  chorusci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/values.yaml")
 
   github_chorus_web_ui_token      = var.github_chorus_web_ui_token
   github_images_token             = var.github_images_token
@@ -504,8 +560,8 @@ module "argoci_config" {
   github_username = var.github_username
 
   registry_server   = local.harbor_url
-  registry_username = var.argoci_harbor_robot_username
-  registry_password = module.harbor_config.argoci_robot_password
+  registry_username = var.chorusci_harbor_robot_username
+  registry_password = module.harbor_config.chorusci_robot_password
 }
 
 locals {
@@ -515,7 +571,7 @@ locals {
     harbor_url            = local.harbor_url
     harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
 
-    harbor_argoci_robot_password   = module.harbor_config.argoci_robot_password
+    harbor_chorusci_robot_password = module.harbor_config.chorusci_robot_password
     harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
     harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
     harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username

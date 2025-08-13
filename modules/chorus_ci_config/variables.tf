@@ -1,10 +1,10 @@
-variable "argoci_namespace" {
-  description = "Namespace where ArgoCI is deployed"
+variable "chorusci_namespace" {
+  description = "Namespace where ChorusCI is deployed"
   type        = string
 }
 
-variable "argoci_helm_values" {
-  description = "ArgoCI Helm chart values"
+variable "chorusci_helm_values" {
+  description = "ChorusCI Helm chart values"
   type        = string
 }
 
