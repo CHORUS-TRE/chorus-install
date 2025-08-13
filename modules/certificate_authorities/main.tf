@@ -20,13 +20,8 @@ data "http" "cert_manager_crds" {
 }
 
 resource "kubernetes_manifest" "cert_manager_crds" {
-  for_each = {
-    for idx, manifest in provider::kubernetes::manifest_decode_multi(data.http.cert_manager_crds.response_body) :
-    idx => manifest
-  }
-
+  for_each = { for i, m in provider::kubernetes::manifest_decode_multi(data.http.cert_manager_crds.response_body) : i => m }
   manifest = each.value
-
   depends_on = [
     kubernetes_namespace.cert_manager,
     data.http.cert_manager_crds
