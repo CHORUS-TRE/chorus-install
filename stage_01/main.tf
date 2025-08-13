@@ -99,6 +99,30 @@ import {
   id = local.ingress_nginx_namespace
 }
 
+resource "null_resource" "cond_import_ingress_nginx_ns" {
+   provisioner "local-exec" {
+    quiet       = true
+    command     = <<EOT
+      export KUBECONFIG
+      chmod +x ${path.module}/../scripts/conditional_import.sh && \
+      ${path.module}/../scripts/conditional_import.sh
+      "secret" \
+      "${local.ingress_nginx_namespace}"
+      "module.ingress_nginx.kubernetes_namespace.ingress_nginx"
+    EOT
+    interpreter = ["/bin/sh", "-c"]
+    environment = {
+      KUBECONFIG = pathexpand(var.kubeconfig_path)
+    }
+  }
+
+  triggers = {
+    ingress_nginx_namespace = local.ingress_nginx_namespace
+  }
+
+  depends_on = [helm_release.cert_manager] 
+}
+
 module "ingress_nginx" {
   source = "../modules/ingress_nginx"
 
