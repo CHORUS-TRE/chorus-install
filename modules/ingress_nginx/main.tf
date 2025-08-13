@@ -1,5 +1,10 @@
 # Namespace
 
+import {
+  to = kubernetes_namespace.ingress_nginx
+  id = var.namespace
+}
+
 resource "kubernetes_namespace" "ingress_nginx" {
   metadata {
     name = var.namespace
