@@ -111,7 +111,7 @@ module "ingress_nginx" {
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
 
-  depends_on = [null_resource.cond_import_ingress_nginx_ns]
+  depends_on = [null_resource.cond_import_namespaces]
 }
 
 module "certificate_authorities" {
@@ -136,6 +136,8 @@ module "certificate_authorities" {
 
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
+
+  depends_on = [null_resource.cond_import_namespaces]
 }
 
 module "keycloak" {
@@ -164,7 +166,8 @@ module "keycloak" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx
+    module.ingress_nginx,
+    null_resource.cond_import_secrets
   ]
 }
 
@@ -219,6 +222,7 @@ module "harbor" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx
+    module.ingress_nginx,
+    null_resource.cond_import_secrets
   ]
 }
