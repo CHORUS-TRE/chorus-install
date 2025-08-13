@@ -91,7 +91,7 @@ resource "kubernetes_secret" "harbor_secret" {
   depends_on = [kubernetes_namespace.harbor]
 }
 
-resource "kubernetes_secret" "harbor_secret_secret_key" {
+resource "kubernetes_secret" "harbor_harbor_encryption_key_secret" {
   metadata {
     name      = var.harbor_encryption_key_secret_name
     namespace = var.harbor_namespace
@@ -119,7 +119,7 @@ resource "kubernetes_secret" "harbor_xsrf_secret" {
   depends_on = [kubernetes_namespace.harbor]
 }
 
-resource "kubernetes_secret" "harbor_admin_password_secret" {
+resource "kubernetes_secret" "harbor_admin_secret" {
   metadata {
     name      = var.harbor_admin_secret_name
     namespace = var.harbor_namespace

@@ -206,42 +206,42 @@ import {
 }
 
 import {
-  to = module.harbor.kubernetes_secret.harbor_db_secret_name
+  to = module.harbor.kubernetes_secret.harbor_db_secret
   id = local.harbor_db_secret_name
 }
 
 import {
-  to = module.harbor.kubernetes_secret.harbor_secret_name
+  to = module.harbor.kubernetes_secret.harbor_secret
   id = local.harbor_secret_name
 }
 
 import {
-  to = module.harbor.kubernetes_secret.harbor_encryption_key_secret_name
+  to = module.harbor.kubernetes_secret.harbor_encryption_key_secret
   id = local.harbor_encryption_key_secret_name
 }
 
 import {
-  to = module.harbor.kubernetes_secret.harbor_xsrf_secret_name
+  to = module.harbor.kubernetes_secret.harbor_xsrf_secret
   id = local.harbor_xsrf_secret_name
 }
 
 import {
-  to = module.harbor.kubernetes_secret.harbor_admin_secret_name
+  to = module.harbor.kubernetes_secret.harbor_admin_secret
   id = local.harbor_admin_secret_name
 }
 
 import {
-  to = module.harbor.kubernetes_secret.harbor_jobservice_secret_name
+  to = module.harbor.kubernetes_secret.harbor_jobservice_secret
   id = local.harbor_jobservice_secret_name
 }
 
 import {
-  to = module.harbor.kubernetes_secret.harbor_registry_http_secret_name
+  to = module.harbor.kubernetes_secret.harbor_registry_http_secret
   id = local.harbor_registry_http_secret_name
 }
 
 import {
-  to = module.harbor.kubernetes_secret.harbor_registry_credentials_secret_name
+  to = module.harbor.kubernetes_secret.harbor_registry_credentials_secret
   id = local.harbor_registry_credentials_secret_name
 }
 
