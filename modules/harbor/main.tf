@@ -21,6 +21,7 @@ locals {
   harbor_existing_registry_http_secret_key    = local.harbor_values_parsed.harbor.registry.existingSecretKey
   harbor_existing_registry_credentials_secret = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
 
+  # TODO: use tf index instead of this for loop
   oidc_secret = [
     for env in local.harbor_values_parsed.harbor.core.extraEnvVars : env
     if env.name == "CONFIG_OVERWRITE_JSON"
