@@ -91,7 +91,7 @@ resource "kubernetes_secret" "harbor_secret" {
   depends_on = [kubernetes_namespace.harbor]
 }
 
-resource "kubernetes_secret" "harbor_harbor_encryption_key_secret" {
+resource "kubernetes_secret" "harbor_encryption_key_secret" {
   metadata {
     name      = var.harbor_encryption_key_secret_name
     namespace = var.harbor_namespace
@@ -126,7 +126,7 @@ resource "kubernetes_secret" "harbor_admin_secret" {
   }
 
   data = {
-    "${var.harbor_existing_admin_secret_key}" = random_password.harbor_admin_password.result
+    "${var.harbor_admin_secret_key}" = random_password.harbor_admin_password.result
   }
 
   depends_on = [kubernetes_namespace.harbor]

@@ -4,14 +4,9 @@ output "harbor_username" {
 }
 
 output "harbor_password" {
-  value       = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey}"]
+  value       = data.kubernetes_secret.harbor_admin_password.data["${var.harbor_admin_secret_key}"]
   description = "Harbor password"
   sensitive   = true
-}
-
-output "harbor_url" {
-  value       = local.harbor_values_parsed.harbor.externalURL
-  description = "Harbor URL"
 }
 
 output "harbor_url_admin_login" {
