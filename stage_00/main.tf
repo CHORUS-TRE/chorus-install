@@ -4,8 +4,8 @@ locals {
 
 resource "null_resource" "fetch_helm_charts_values" {
   provisioner "local-exec" {
-    quiet   = true
-    command = <<EOT
+    quiet       = true
+    command     = <<EOT
         set -e
         mkdir -p ${var.helm_values_path}/${var.helm_values_repo}
         cd ${var.helm_values_path}/${var.helm_values_repo}
@@ -24,6 +24,7 @@ resource "null_resource" "fetch_helm_charts_values" {
         cd ..
         rm -r ${var.helm_values_repo}
     EOT
+    interpreter = ["/bin/sh", "-c"]
   }
   triggers = {
     always_run = timestamp()
@@ -32,13 +33,13 @@ resource "null_resource" "fetch_helm_charts_values" {
 
 data "external" "cert_manager_config" {
   depends_on = [null_resource.fetch_helm_charts_values]
-  program    = ["bash", "-c", "cat ${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"]
+  program    = ["/bin/cat ${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"]
 }
 
 resource "null_resource" "fetch_cert_manager_app_version" {
   provisioner "local-exec" {
-    quiet   = true
-    command = <<EOT
+    quiet       = true
+    command     = <<EOT
       set -e
       mkdir -p ${path.module}/tmp
       helm registry login ${var.helm_registry} -u ${var.helm_registry_username} -p ${var.helm_registry_password}
@@ -48,6 +49,7 @@ resource "null_resource" "fetch_cert_manager_app_version" {
       printf '%s' $(yq '.dependencies[0].version' ${path.module}/tmp/${var.cert_manager_chart_name}/Chart.yaml) > ${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/app_version
       rm -r ${path.module}/tmp
     EOT
+    interpreter = ["/bin/sh", "-c"]
   }
 
   triggers = {
