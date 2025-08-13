@@ -43,6 +43,7 @@ resource "null_resource" "wait_for_lb_ip" {
     echo "Timed out waiting for LoadBalancer IP" >&2
     exit 1
     EOT
+    interpreter = [ "/bin/sh", "-c" ]
     environment = {
       KUBECONFIG = pathexpand(var.kubeconfig_path)
     }
