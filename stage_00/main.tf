@@ -33,7 +33,7 @@ resource "null_resource" "fetch_helm_charts_values" {
 
 data "external" "cert_manager_config" {
   depends_on = [null_resource.fetch_helm_charts_values]
-  program    = ["/bin/cat ${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"]
+  program    = ["/bin/cat", "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"]
 }
 
 resource "null_resource" "fetch_cert_manager_app_version" {
