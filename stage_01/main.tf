@@ -106,13 +106,14 @@ resource "null_resource" "cond_import_ingress_nginx_ns" {
       export KUBECONFIG
       chmod +x ${path.module}/../scripts/conditional_import.sh && \
       ${path.module}/../scripts/conditional_import.sh
-      "secret" \
+      "$OBJECT_TYPE" \
       "${local.ingress_nginx_namespace}"
       "module.ingress_nginx.kubernetes_namespace.ingress_nginx"
     EOT
     interpreter = ["/bin/sh", "-c"]
     environment = {
       KUBECONFIG = pathexpand(var.kubeconfig_path)
+      OBJECT_TYPE = "namespace"
     }
   }
 
