@@ -187,7 +187,7 @@ resource "kubernetes_secret" "oidc_secret" {
   }
 
   data = {
-    "${local.harbor_oidc_secret_key}" = var.harbor_oidc_config
+    "${var.harbor_oidc_secret_key}" = var.harbor_oidc_config
   }
 
   depends_on = [kubernetes_namespace.harbor]
