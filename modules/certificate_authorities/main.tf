@@ -54,8 +54,8 @@ resource "helm_release" "cert_manager" {
 
 resource "null_resource" "wait_for_cert_manager_webhook" {
   provisioner "local-exec" {
-    quiet   = true
-    command = <<EOT
+    quiet       = true
+    command     = <<EOT
       set -e
       export KUBECONFIG
       kubectl config use-context ${var.kubeconfig_context}
@@ -68,6 +68,7 @@ resource "null_resource" "wait_for_cert_manager_webhook" {
       echo "Timeout waiting for cert-manager webhook" >&2
       exit 1
     EOT
+    interpreter = ["/bin/sh", "-c"]
     environment = {
       KUBECONFIG = pathexpand(var.kubeconfig_path)
     }
