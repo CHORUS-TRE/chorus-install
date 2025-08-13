@@ -100,7 +100,7 @@ import {
 }
 
 resource "null_resource" "cond_import_ingress_nginx_ns" {
-   provisioner "local-exec" {
+  provisioner "local-exec" {
     quiet       = true
     command     = <<EOT
       export KUBECONFIG
@@ -119,8 +119,6 @@ resource "null_resource" "cond_import_ingress_nginx_ns" {
   triggers = {
     ingress_nginx_namespace = local.ingress_nginx_namespace
   }
-
-  depends_on = [helm_release.cert_manager] 
 }
 
 module "ingress_nginx" {
@@ -139,6 +137,8 @@ module "ingress_nginx" {
   namespace          = local.ingress_nginx_namespace
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
+
+  depends_on = [null_resource.cond_import_ingress_nginx_ns]
 }
 
 import {
