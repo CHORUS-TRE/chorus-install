@@ -50,8 +50,8 @@ locals {
 
   harbor_oidc_secret = local.harbor_values_parsed.harbor.core.extraEnvVars[
     index(
-      local.harbor_values_parsed.harbor.core.extraEnvVars,
-      { name = "CONFIG_OVERWRITE_JSON" }
+      local.harbor_values_parsed.harbor.core.extraEnvVars[*].name,
+      "CONFIG_OVERWRITE_JSON"
     )
   ].valueFrom.secretKeyRef
   harbor_oidc_secret_name = local.harbor_oidc_secret.name
