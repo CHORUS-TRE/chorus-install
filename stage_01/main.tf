@@ -94,36 +94,6 @@ provider "helm" {
   }
 }
 
-/*
-import {
-  to = module.ingress_nginx.kubernetes_namespace.ingress_nginx
-  id = local.ingress_nginx_namespace
-}
-*/
-
-resource "null_resource" "cond_import_ingress_nginx_ns" {
-  provisioner "local-exec" {
-    quiet       = true
-    command     = <<EOT
-      export KUBECONFIG
-      chmod +x ${path.module}/../scripts/conditional_import.sh && \
-      ${path.module}/../scripts/conditional_import.sh
-      "$OBJECT_TYPE" \
-      "${local.ingress_nginx_namespace}"
-      "module.ingress_nginx.kubernetes_namespace.ingress_nginx"
-    EOT
-    interpreter = ["/bin/sh", "-c"]
-    environment = {
-      KUBECONFIG = pathexpand(var.kubeconfig_path)
-      OBJECT_TYPE = "namespace"
-    }
-  }
-
-  triggers = {
-    ingress_nginx_namespace = local.ingress_nginx_namespace
-  }
-}
-
 module "ingress_nginx" {
   source = "../modules/ingress_nginx"
 
@@ -142,11 +112,6 @@ module "ingress_nginx" {
   kubeconfig_context = var.kubeconfig_context
 
   depends_on = [null_resource.cond_import_ingress_nginx_ns]
-}
-
-import {
-  to = module.certificate_authorities.kubernetes_namespace.cert_manager
-  id = local.cert_manager_namespace
 }
 
 module "certificate_authorities" {
@@ -171,21 +136,6 @@ module "certificate_authorities" {
 
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
-}
-
-import {
-  to = module.keycloak.kubernetes_namespace.keycloak
-  id = local.keycloak_namespace
-}
-
-import {
-  to = module.keycloak.kubernetes_secret.keycloak_db_secret
-  id = local.keycloak_db_secret_name
-}
-
-import {
-  to = module.keycloak.kubernetes_secret.keycloak_secret
-  id = local.keycloak_secret_name
 }
 
 module "keycloak" {
@@ -226,51 +176,6 @@ resource "random_password" "harbor_keycloak_client_secret" {
 resource "random_password" "argocd_keycloak_client_secret" {
   length  = 32
   special = false
-}
-
-import {
-  to = module.harbor.kubernetes_namespace.harbor
-  id = local.harbor_namespace
-}
-
-import {
-  to = module.harbor.kubernetes_secret.harbor_db_secret
-  id = local.harbor_db_secret_name
-}
-
-import {
-  to = module.harbor.kubernetes_secret.harbor_secret
-  id = local.harbor_secret_name
-}
-
-import {
-  to = module.harbor.kubernetes_secret.harbor_encryption_key_secret
-  id = local.harbor_encryption_key_secret_name
-}
-
-import {
-  to = module.harbor.kubernetes_secret.harbor_xsrf_secret
-  id = local.harbor_xsrf_secret_name
-}
-
-import {
-  to = module.harbor.kubernetes_secret.harbor_admin_secret
-  id = local.harbor_admin_secret_name
-}
-
-import {
-  to = module.harbor.kubernetes_secret.harbor_jobservice_secret
-  id = local.harbor_jobservice_secret_name
-}
-
-import {
-  to = module.harbor.kubernetes_secret.harbor_registry_http_secret
-  id = local.harbor_registry_http_secret_name
-}
-
-import {
-  to = module.harbor.kubernetes_secret.harbor_registry_credentials_secret
-  id = local.harbor_registry_credentials_secret_name
 }
 
 module "harbor" {
