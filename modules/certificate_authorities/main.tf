@@ -1,9 +1,3 @@
-locals {
-  cert_manager_crds = provider::kubernetes::manifest_decode_multi(
-    data.http.cert_manager_crds.response_body
-  )
-}
-
 # Namespace
 
 resource "kubernetes_namespace" "cert_manager" {
@@ -27,8 +21,8 @@ data "http" "cert_manager_crds" {
 
 resource "kubernetes_manifest" "cert_manager_crds" {
   for_each = {
-    for idx, manifest in local.cert_manager_crds :
-    idx => manifest
+    for manifest in provider::kubernetes::manifest_decode_multi(data.http.cert_manager_crds.response_body) :
+    manifest["metadata"]["name"] => manifest
   }
 
   manifest = each.value
