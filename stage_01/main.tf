@@ -94,10 +94,12 @@ provider "helm" {
   }
 }
 
+/*
 import {
   to = module.ingress_nginx.kubernetes_namespace.ingress_nginx
   id = local.ingress_nginx_namespace
 }
+*/
 
 resource "null_resource" "cond_import_ingress_nginx_ns" {
   provisioner "local-exec" {
