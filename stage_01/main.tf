@@ -10,6 +10,7 @@ locals {
   harbor_db_chart_version     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/config.json")).version
 
   ingress_nginx_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json")).namespace
+  cert_manager_namespace  = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json")).namespace
 }
 
 # Install charts
@@ -52,6 +53,11 @@ module "ingress_nginx" {
   kubeconfig_context = var.kubeconfig_context
 }
 
+import {
+  to = module.certificate_authorities.kubernetes_namespace.cert_manager
+  id = local.cert_manager_namespace
+}
+
 module "certificate_authorities" {
   source = "../modules/certificate_authorities"
 
@@ -66,7 +72,7 @@ module "certificate_authorities" {
   cert_manager_chart_version = local.cert_manager_chart_version
   cert_manager_app_version   = local.cert_manager_app_version
   cert_manager_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/values.yaml")
-  cert_manager_namespace     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json")).namespace
+  cert_manager_namespace     = local.cert_manager_namespace
 
   selfsigned_chart_name    = var.selfsigned_chart_name
   selfsigned_chart_version = local.selfsigned_chart_version
