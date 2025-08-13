@@ -11,6 +11,18 @@ locals {
 
   ingress_nginx_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json")).namespace
   cert_manager_namespace  = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json")).namespace
+  keycloak_namespace      = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
+
+  keycloak_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml")
+  keycloak_values_parsed = yamldecode(local.keycloak_helm_values)
+  keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
+  keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
+
+  keycloak_db_helm_values      = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/values.yaml")
+  keycloak_db_values_parsed    = yamldecode(local.keycloak_db_helm_values)
+  keycloak_db_secret_name      = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  keycloak_db_admin_secret_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
+  keycloak_db_user_secret_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 }
 
 # Install charts
@@ -82,6 +94,21 @@ module "certificate_authorities" {
   kubeconfig_context = var.kubeconfig_context
 }
 
+import {
+  to = module.keycloak.kubernetes_namespace.keycloak
+  id = local.keycloak_namespace
+}
+
+import {
+  to = module.keycloak.kubernetes_secret.keycloak_db_secret
+  id = local.keycloak_db_secret_name
+}
+
+import {
+  to = module.keycloak.kubernetes_secret.keycloak_secret
+  id = local.keycloak_secret_name
+}
+
 module "keycloak" {
   source = "../modules/keycloak"
 
@@ -94,12 +121,17 @@ module "keycloak" {
 
   keycloak_chart_name    = var.keycloak_chart_name
   keycloak_chart_version = local.keycloak_chart_version
-  keycloak_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml")
-  keycloak_namespace     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
+  keycloak_helm_values   = local.keycloak_helm_values
+  keycloak_namespace     = local.keycloak_namespace
+  keycloak_secret_name   = local.keycloak_secret_name
+  keycloak_secret_key    = local.keycloak_secret_key
 
-  keycloak_db_chart_name    = var.postgresql_chart_name
-  keycloak_db_chart_version = local.keycloak_db_chart_version
-  keycloak_db_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/values.yaml")
+  keycloak_db_chart_name      = var.postgresql_chart_name
+  keycloak_db_chart_version   = local.keycloak_db_chart_version
+  keycloak_db_helm_values     = local.keycloak_db_helm_values
+  keycloak_db_secret_name     = local.keycloak_db_secret_name
+  keycloak_db_admin_secret_key = local.keycloak_db_admin_secret_key
+  keycloak_db_user_secret_key = local.keycloak_db_user_secret_key
 
   depends_on = [
     module.certificate_authorities,
