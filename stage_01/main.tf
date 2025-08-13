@@ -18,6 +18,7 @@ locals {
   keycloak_values_parsed = yamldecode(local.keycloak_helm_values)
   keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
   keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
+  keycloak_url           = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
   keycloak_db_helm_values      = file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/values.yaml")
   keycloak_db_values_parsed    = yamldecode(local.keycloak_db_helm_values)
@@ -55,7 +56,7 @@ locals {
   ].valueFrom.secretKeyRef
   harbor_oidc_secret_name = local.harbor_oidc_secret.name
   harbor_oidc_secret_key  = local.harbor_oidc_secret.key
-  harbor_oidc_endpoint    = join("/", [module.keycloak.keycloak_url, "realms", var.keycloak_realm])
+  harbor_oidc_endpoint    = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
 
   harbor_oidc_config = <<EOT
   {

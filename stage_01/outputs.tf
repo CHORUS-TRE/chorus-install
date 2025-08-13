@@ -24,7 +24,7 @@ output "harbor_password" {
 }
 
 output "keycloak_url" {
-  value = try("https://${local.keycloak_values_parsed.keycloak.ingress.hostname}",
+  value = try(local.keycloak_url,
   "Failed to retrieve Keycloak URL")
 }
 
