@@ -21,8 +21,8 @@ data "http" "cert_manager_crds" {
 
 resource "kubernetes_manifest" "cert_manager_crds" {
   for_each = {
-    for manifest in provider::kubernetes::manifest_decode_multi(data.http.cert_manager_crds.response_body) :
-    manifest["metadata"]["name"] => manifest
+    for idx, manifest in provider::kubernetes::manifest_decode_multi(data.http.cert_manager_crds.response_body) :
+    idx => manifest
   }
 
   manifest = each.value
