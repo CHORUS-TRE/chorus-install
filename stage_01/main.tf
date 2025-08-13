@@ -8,6 +8,8 @@ locals {
   harbor_chart_version        = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json")).version
   harbor_cache_chart_version  = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/config.json")).version
   harbor_db_chart_version     = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/config.json")).version
+
+  ingress_nginx_namespace = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json")).namespace
 }
 
 # Install charts
@@ -27,6 +29,11 @@ provider "helm" {
   }
 }
 
+import {
+  to = module.ingress_nginx.kubernetes_namespace.ingress_nginx
+  id = local.ingress_nginx_namespace
+}
+
 module "ingress_nginx" {
   source = "../modules/ingress_nginx"
 
@@ -40,7 +47,7 @@ module "ingress_nginx" {
   chart_name         = var.ingress_nginx_chart_name
   chart_version      = local.ingress_nginx_chart_version
   helm_values        = file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/values.yaml")
-  namespace          = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json")).namespace
+  namespace          = local.ingress_nginx_namespace
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
 }
