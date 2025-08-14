@@ -106,6 +106,18 @@ resource "kubernetes_secret" "chorusci_github_images" {
   }
 }
 
+resource "kubernetes_secret" "argo_workflows_github_images" {
+  metadata {
+    name      = "argo-workflows-github-images"
+    namespace = var.chorusci_namespace
+  }
+
+  data = {
+    username = var.github_username
+    password = var.github_images_token
+  }
+}
+
 # CHORUS Backend
 
 resource "random_password" "chorusci_github_chorus_backend_secret" {
