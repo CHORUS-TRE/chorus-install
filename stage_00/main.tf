@@ -77,14 +77,10 @@ data "external" "cert_manager_app_version" {
 }
 
 data "http" "cert_manager_crds" {
-  url = "https://github.com/cert-manager/cert-manager/releases/download/${var.cert_manager_app_version}/cert-manager.crds.yaml"
+  url = "https://github.com/cert-manager/cert-manager/releases/download/${local.cert_manager_app_version}/cert-manager.crds.yaml"
 }
 
 resource "local_file" "cert_manager_crds" {
   filename = "${path.module}/${var.cert_manager_crds_path}"
   content  = data.http.cert_manager_crds.response_body
-}
-
-output "cert_manager_crds_path" {
-  value = local_file.cert_manager_crds.filename
 }
