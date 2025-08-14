@@ -3,7 +3,7 @@ locals {
   # such that
   # cert_manager_chart_version != cert_manager_app_version
   cert_manager_chart_version = data.external.cert_manager_config.result.version
-  cert_manager_app_version = data.external.cert_manager_app_version.result.version
+  cert_manager_app_version   = data.external.cert_manager_app_version.result.version
 }
 
 resource "null_resource" "fetch_helm_charts_values" {
