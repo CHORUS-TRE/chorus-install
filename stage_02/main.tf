@@ -491,8 +491,8 @@ module "argocd_config" {
   ]
 }
 
-module "chorusci_config" {
-  source = "../modules/chorus_ci_config"
+module "chorus_ci" {
+  source = "../modules/chorus_ci"
 
   chorusci_namespace   = local.chorusci_namespace
   chorusci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/values.yaml")

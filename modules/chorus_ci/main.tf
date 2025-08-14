@@ -24,8 +24,8 @@ resource "kubernetes_secret" "chorusci_github_workbench_operator" {
 
   lifecycle {
     precondition {
-      condition     = anytrue([for k, v in local.webhook_events : k == "workbench-operator"])
-      error_message = "Not found: 'workbench-operator' webhook event missing in argo-ci Helm values"
+      condition     = contains(keys(local.webhook_events), "workbench-operator")
+      error_message = "Not found: 'workbench-operator' webhook event missing in chorus-ci Helm values"
     }
   }
 }
@@ -62,8 +62,8 @@ resource "kubernetes_secret" "chorusci_github_chorus_web_ui" {
 
   lifecycle {
     precondition {
-      condition     = anytrue([for k, v in local.webhook_events : k == "chorus-web-ui"])
-      error_message = "Not found: 'chorus-web-ui' webhook event missing in argo-ci Helm values"
+      condition     = contains(keys(local.webhook_events), "chorus-web-ui")
+      error_message = "Not found: 'chorus-web-ui' webhook event missing in chorus-ci Helm values"
     }
   }
 }
@@ -100,8 +100,8 @@ resource "kubernetes_secret" "chorusci_github_images" {
 
   lifecycle {
     precondition {
-      condition     = anytrue([for k, v in local.webhook_events : k == "ci"])
-      error_message = "Not found: 'ci' webhook event missing in argo-ci Helm values"
+      condition     = contains(keys(local.webhook_events), "ci")
+      error_message = "Not found: 'ci' webhook event missing in chorus-ci Helm values"
     }
   }
 }
@@ -126,8 +126,8 @@ resource "kubernetes_secret" "chorusci_github_chorus_backend" {
 
   lifecycle {
     precondition {
-      condition     = anytrue([for k, v in local.webhook_events : k == "chorus-backend"])
-      error_message = "Not found: 'chorus-backend' webhook event missing in argo-ci Helm values"
+      condition     = contains(keys(local.webhook_events), "chorus-backend")
+      error_message = "Not found: 'chorus-backend' webhook event missing in chorus-ci Helm values"
     }
   }
 }
