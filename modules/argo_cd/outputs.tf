@@ -1,9 +1,9 @@
 output "argocd_url" {
-  value = "https://${local.argocd_values_parsed.argo-cd.global.domain}"
+  value = try("https://${local.argocd_values_parsed.argo-cd.global.domain}", null)
 }
 
 output "argocd_grpc_url" {
-  value = "https://grpc.${local.argocd_values_parsed.argo-cd.global.domain}"
+  value = try("https://grpc.${local.argocd_values_parsed.argo-cd.global.domain}", null)
 }
 
 output "argocd_username" {
@@ -13,7 +13,7 @@ output "argocd_username" {
 }
 
 output "argocd_password" {
-  value       = data.kubernetes_secret.argocd_admin_password.data.password
+  value       = try(data.kubernetes_secret.argocd_admin_password.data.password, null)
   description = "ArgoCD password"
   sensitive   = true
 }
