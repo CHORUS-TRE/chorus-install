@@ -132,7 +132,7 @@ terraform import module.ingress_nginx_kubernetes_namespace.ingress_nginx ingress
 ```
 
 Where 
-- ```module.ingress_nginx_kubernetes_namespace.ingress_nginx``` is the Terraform object to import the resource int
+- ```module.ingress_nginx_kubernetes_namespace.ingress_nginx``` is the Terraform object to import the resource into
 - ```ingress-nginx``` is the resource ID
 
 
