@@ -128,11 +128,11 @@ Error example
 Import command
 
 ```
-terraform import module.ingress_nginx_kubernetes_namespace.ingress_nginx ingress-nginx 
+terraform import module.ingress_nginx.kubernetes_namespace.ingress_nginx ingress-nginx 
 ```
 
 Where 
-- ```module.ingress_nginx_kubernetes_namespace.ingress_nginx``` is the Terraform object to import the resource into
+- ```module.ingress_nginx.kubernetes_namespace.ingress_nginx``` is the Terraform object to import the resource into
 - ```ingress-nginx``` is the resource ID
 
 
