@@ -77,7 +77,7 @@ resource "null_resource" "cond_import_namespaces" {
 
   provisioner "local-exec" {
     quiet       = true
-    command     = "${path.module}/../scripts/conditional_import.sh $OBJECT_TYPE $OBJECT_ID $ATTACH_TO"
+    command     = "chmod +x ${path.module}/../scripts/conditional_import.sh && ${path.module}/../scripts/conditional_import.sh $OBJECT_TYPE $OBJECT_ID $ATTACH_TO"
     interpreter = ["/bin/sh", "-c"]
     environment = {
       KUBECONFIG  = pathexpand(var.kubeconfig_path)
@@ -97,7 +97,7 @@ resource "null_resource" "cond_import_secrets" {
 
   provisioner "local-exec" {
     quiet       = true
-    command     = "${path.module}/../scripts/conditional_import.sh $OBJECT_TYPE $OBJECT_ID $ATTACH_TO"
+    command     = "chmod +x ${path.module}/../scripts/conditional_import.sh && ${path.module}/../scripts/conditional_import.sh $OBJECT_TYPE $OBJECT_ID $ATTACH_TO"
     interpreter = ["/bin/sh", "-c"]
     environment = {
       KUBECONFIG  = pathexpand(var.kubeconfig_path)
