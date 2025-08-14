@@ -426,7 +426,7 @@ module "chorus_ci" {
   registry_username = var.chorusci_harbor_robot_username
   registry_password = module.harbor_config.chorusci_robot_password
 
-  depends_on = [ kubernetes_namespace.argo]
+  depends_on = [kubernetes_namespace.argo]
 }
 
 module "argo_cd" {

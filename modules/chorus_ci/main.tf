@@ -66,8 +66,6 @@ resource "kubernetes_secret" "chorusci_github_chorus_web_ui" {
       error_message = "Not found: 'chorus-web-ui' webhook event missing in chorus-ci Helm values"
     }
   }
-
-  depends_on = [ kubernetes_namespace.argo ]
 }
 
 resource "kubernetes_secret" "argo_workflows_github_chorus_web_ui" {
