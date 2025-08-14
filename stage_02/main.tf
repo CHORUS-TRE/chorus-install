@@ -409,6 +409,24 @@ module "harbor_config" {
   renovate_robot_username       = var.renovate_harbor_robot_username
 }
 
+module "chorus_ci" {
+  source = "../modules/chorus_ci"
+
+  chorusci_namespace   = local.chorusci_namespace
+  chorusci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/values.yaml")
+
+  github_chorus_web_ui_token      = var.github_chorus_web_ui_token
+  github_images_token             = var.github_images_token
+  github_chorus_backend_token     = var.github_chorus_backend_token
+  github_workbench_operator_token = var.github_workbench_operator_token
+
+  github_username = var.github_username
+
+  registry_server   = local.harbor_url
+  registry_username = var.chorusci_harbor_robot_username
+  registry_password = module.harbor_config.chorusci_robot_password
+}
+
 module "argo_cd" {
   source = "../modules/argo_cd"
 
@@ -434,6 +452,8 @@ module "argo_cd" {
   harbor_domain                         = replace(local.harbor_url, "https://", "")
   harbor_robot_username                 = var.argocd_harbor_robot_username
   harbor_robot_password                 = module.harbor_config.argocd_robot_password
+
+  depends_on = [ module.chorus_ci ]
 }
 
 resource "null_resource" "wait_for_argocd" {
@@ -489,24 +509,6 @@ module "argocd_config" {
     module.argo_cd,
     null_resource.wait_for_argocd
   ]
-}
-
-module "chorus_ci" {
-  source = "../modules/chorus_ci"
-
-  chorusci_namespace   = local.chorusci_namespace
-  chorusci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/values.yaml")
-
-  github_chorus_web_ui_token      = var.github_chorus_web_ui_token
-  github_images_token             = var.github_images_token
-  github_chorus_backend_token     = var.github_chorus_backend_token
-  github_workbench_operator_token = var.github_workbench_operator_token
-
-  github_username = var.github_username
-
-  registry_server   = local.harbor_url
-  registry_username = var.chorusci_harbor_robot_username
-  registry_password = module.harbor_config.chorusci_robot_password
 }
 
 locals {
