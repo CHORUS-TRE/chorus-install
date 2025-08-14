@@ -8,24 +8,21 @@ resource "kubernetes_namespace" "cert_manager" {
 
 # Cert-Manager CRDs
 
-data "http" "cert_manager_crds" {
-  url = "https://github.com/cert-manager/cert-manager/releases/download/${var.cert_manager_app_version}/cert-manager.crds.yaml"
-
-  lifecycle {
-    postcondition {
-      condition     = self.status_code == 200
-      error_message = "Failed to download Cert-Manager CRDs: ${self.status_code}"
-    }
-  }
+data "local_file" "cert_manager_crds" {
+  filename = var.cert_manager_crds_path
 }
 
 resource "kubernetes_manifest" "cert_manager_crds" {
-  for_each = { for i, m in provider::kubernetes::manifest_decode_multi(data.http.cert_manager_crds.response_body) : i => m }
+  for_each = {
+    for manifest in provider::kubernetes::manifest_decode_multi(
+      data.local_file.cert_manager_crds.content
+    ) :
+    manifest.metadata.name => manifest
+  }
+
   manifest = each.value
-  depends_on = [
-    kubernetes_namespace.cert_manager,
-    data.http.cert_manager_crds
-  ]
+
+  depends_on = [kubernetes_namespace.cert_manager]
 }
 
 # Cert-Manager

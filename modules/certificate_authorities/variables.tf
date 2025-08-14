@@ -57,3 +57,8 @@ variable "kubeconfig_context" {
   description = "Kubernetes context to use"
   type        = string
 }
+
+variable "cert_manager_crds_path" {
+  description = "Path to the downloaded Cert-Manager CRDs file"
+  type        = string
+}

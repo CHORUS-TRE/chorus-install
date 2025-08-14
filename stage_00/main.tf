@@ -1,5 +1,9 @@
 locals {
+  # CHORUS uses its own versioning system
+  # such that
+  # cert_manager_chart_version != cert_manager_app_version
   cert_manager_chart_version = data.external.cert_manager_config.result.version
+  cert_manager_app_version = data.external.cert_manager_app_version.result.version
 }
 
 resource "null_resource" "fetch_helm_charts_values" {
@@ -55,4 +59,32 @@ resource "null_resource" "fetch_cert_manager_app_version" {
   triggers = {
     always_run = timestamp()
   }
+}
+
+data "external" "cert_manager_app_version" {
+  program = [
+    "/bin/sh", "-c",
+    <<EOT
+      set -e
+      helm registry login ${var.helm_registry} -u ${var.helm_registry_username} -p ${var.helm_registry_password} >/dev/null
+      helm pull "oci://${var.helm_registry}/charts/${var.cert_manager_chart_name}" --version ${local.cert_manager_chart_version} --destination /tmp
+      tar -xzf /tmp/cert-manager-*.tgz -C /tmp
+      version=$(yq '.dependencies[0].version' /tmp/${var.cert_manager_chart_name}/Chart.yaml)
+      rm -rf /tmp/cert-manager*
+      echo "{\"version\": \"${version}\"}"
+    EOT
+  ]
+}
+
+data "http" "cert_manager_crds" {
+  url = "https://github.com/cert-manager/cert-manager/releases/download/${var.cert_manager_app_version}/cert-manager.crds.yaml"
+}
+
+resource "local_file" "cert_manager_crds" {
+  filename = "${path.module}/${var.cert_manager_crds_path}"
+  content  = data.http.cert_manager_crds.response_body
+}
+
+output "cert_manager_crds_path" {
+  value = local_file.cert_manager_crds.filename
 }

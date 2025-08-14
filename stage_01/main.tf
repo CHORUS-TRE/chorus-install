@@ -129,6 +129,7 @@ module "certificate_authorities" {
   cert_manager_app_version   = local.cert_manager_app_version
   cert_manager_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/values.yaml")
   cert_manager_namespace     = local.cert_manager_namespace
+  cert_manager_crds_path     = var.cert_manager_crds_path
 
   selfsigned_chart_name    = var.selfsigned_chart_name
   selfsigned_chart_version = local.selfsigned_chart_version
