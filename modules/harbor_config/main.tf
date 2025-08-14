@@ -196,9 +196,9 @@ resource "harbor_robot_account" "argocd" {
   ]
 }
 
-# ArgoCI robot account
+# ChorusCI robot account
 
-resource "random_password" "argoci_robot_password" {
+resource "random_password" "chorusci_robot_password" {
   length      = 32
   special     = false
   min_upper   = 1
@@ -206,11 +206,11 @@ resource "random_password" "argoci_robot_password" {
   min_numeric = 1
 }
 
-resource "harbor_robot_account" "argoci" {
-  name        = var.argoci_robot_username
-  description = "ArgoCI robot account"
+resource "harbor_robot_account" "chorusci" {
+  name        = var.chorusci_robot_username
+  description = "ChorusCI robot account"
   level       = "system"
-  secret      = random_password.argoci_robot_password.result
+  secret      = random_password.chorusci_robot_password.result
   permissions {
     access {
       action   = "list"
@@ -685,7 +685,7 @@ resource "harbor_robot_account" "argoci" {
   ]
 }
 
-# ArgoCI robot account
+# Chorus-CI robot account
 
 resource "random_password" "renovate_robot_password" {
   length      = 32

@@ -1,5 +1,6 @@
 **/charts
 **/values
+**/crds
 **/*.tgz
 **/*.tfvars
 **/.terraform

@@ -66,6 +66,12 @@ variable "selfsigned_chart_name" {
   default     = "self-signed-issuer"
 }
 
+variable "cert_manager_crds_path" {
+  description = "Path to the downloaded Cert-Manager CRDs file"
+  type        = string
+  default     = "../crds/cert-manager.crds.yaml"
+}
+
 variable "valkey_chart_name" {
   description = "Valkey Helm chart folder name"
   type        = string

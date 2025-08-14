@@ -1,14 +1,3 @@
-locals {
-  keycloak_values_parsed       = yamldecode(var.keycloak_helm_values)
-  keycloak_existing_secret     = local.keycloak_values_parsed.keycloak.auth.existingSecret
-  keycloak_password_secret_key = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
-
-  keycloak_db_values_parsed      = yamldecode(var.keycloak_db_helm_values)
-  keycloak_db_existing_secret    = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
-  keycloak_db_admin_password_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-  keycloak_db_user_password_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
-}
-
 # Namespace
 
 resource "kubernetes_namespace" "keycloak" {
@@ -31,13 +20,13 @@ resource "random_password" "keycloak_db_admin_password" {
 
 resource "kubernetes_secret" "keycloak_db_secret" {
   metadata {
-    name      = local.keycloak_db_existing_secret
+    name      = var.keycloak_db_secret_name
     namespace = var.keycloak_namespace
   }
 
   data = {
-    "${local.keycloak_db_admin_password_key}" = random_password.keycloak_db_admin_password.result
-    "${local.keycloak_db_user_password_key}"  = random_password.keycloak_db_password.result
+    "${var.keycloak_db_admin_secret_key}" = random_password.keycloak_db_admin_password.result
+    "${var.keycloak_db_user_secret_key}"  = random_password.keycloak_db_password.result
   }
 
   depends_on = [kubernetes_namespace.keycloak]
@@ -50,12 +39,12 @@ resource "random_password" "keycloak_password" {
 
 resource "kubernetes_secret" "keycloak_secret" {
   metadata {
-    name      = local.keycloak_existing_secret
+    name      = var.keycloak_secret_name
     namespace = var.keycloak_namespace
   }
 
   data = {
-    "${local.keycloak_password_secret_key}" = random_password.keycloak_password.result
+    "${var.keycloak_secret_key}" = random_password.keycloak_password.result
   }
 
   depends_on = [kubernetes_namespace.keycloak]
@@ -115,7 +104,7 @@ resource "helm_release" "keycloak" {
 
 data "kubernetes_secret" "keycloak_admin_password" {
   metadata {
-    name      = local.keycloak_values_parsed.keycloak.auth.existingSecret
+    name      = var.keycloak_secret_name
     namespace = var.keycloak_namespace
   }
 

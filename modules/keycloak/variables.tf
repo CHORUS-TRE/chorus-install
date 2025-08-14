@@ -42,3 +42,28 @@ variable "keycloak_db_helm_values" {
   description = "Path to the Keycloak DB (e.g. PostgreSQL) Helm chart values"
   type        = string
 }
+
+variable "keycloak_secret_name" {
+  description = "Name of the Kubernetes Secret containing Keycloak credentials"
+  type        = string
+}
+
+variable "keycloak_secret_key" {
+  description = "The specific key within the Keycloak secret to retrieve"
+  type        = string
+}
+
+variable "keycloak_db_secret_name" {
+  description = "Name of the Kubernetes Secret containing Keycloak database credentials"
+  type        = string
+}
+
+variable "keycloak_db_admin_secret_key" {
+  description = "The specific key within the Keycloak database secret to retrieve the admin password"
+  type        = string
+}
+
+variable "keycloak_db_user_secret_key" {
+  description = "The specific key within the Keycloak database secret to retrieve the user password"
+  type        = string
+}

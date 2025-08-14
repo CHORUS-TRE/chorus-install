@@ -1,32 +1,22 @@
 output "harbor_username" {
-  value       = var.harbor_admin_username
+  value       = try(var.harbor_admin_username, null)
   description = "Harbor username"
 }
 
 output "harbor_password" {
-  value       = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey}"]
+  value       = try(data.kubernetes_secret.harbor_admin_password.data["${var.harbor_admin_secret_key}"], null)
   description = "Harbor password"
   sensitive   = true
 }
 
-output "harbor_url" {
-  value       = local.harbor_values_parsed.harbor.externalURL
-  description = "Harbor URL"
-}
-
-output "harbor_url_admin_login" {
-  value       = join("/", [local.harbor_values_parsed.harbor.externalURL, "account/sign-in"])
-  description = "Harbor URL to login with local DB admin user"
-}
-
 output "harbor_db_password" {
-  value       = random_password.harbor_db_password.result
+  value       = try(random_password.harbor_db_password.result, null)
   description = "Harbor DB password for Harbor user"
   sensitive   = true
 }
 
 output "harbor_db_admin_password" {
-  value       = random_password.harbor_db_admin_password.result
+  value       = try(random_password.harbor_db_admin_password.result, null)
   description = "Habor DB password for Postgres user"
   sensitive   = true
 }

@@ -7,7 +7,7 @@ locals {
   argocd_chart_version       = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).version
   argocd_cache_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json")).version
   argocd_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
-  argoci_namespace           = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argoci_chart_name}/config.json")).namespace
+  chorusci_namespace         = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/config.json")).namespace
 
   harbor_values                             = file("${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed                      = yamldecode(local.harbor_values)
@@ -405,8 +405,28 @@ module "harbor_config" {
 
   github_actions_robot_username = var.github_actions_harbor_robot_username
   argocd_robot_username         = var.argocd_harbor_robot_username
-  argoci_robot_username         = var.argoci_harbor_robot_username
+  chorusci_robot_username       = var.chorusci_harbor_robot_username
   renovate_robot_username       = var.renovate_harbor_robot_username
+}
+
+module "chorus_ci" {
+  source = "../modules/chorus_ci"
+
+  chorusci_namespace   = local.chorusci_namespace
+  chorusci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/values.yaml")
+
+  github_chorus_web_ui_token      = var.github_chorus_web_ui_token
+  github_images_token             = var.github_images_token
+  github_chorus_backend_token     = var.github_chorus_backend_token
+  github_workbench_operator_token = var.github_workbench_operator_token
+
+  github_username = var.github_username
+
+  registry_server   = local.harbor_url
+  registry_username = var.chorusci_harbor_robot_username
+  registry_password = module.harbor_config.chorusci_robot_password
+
+  depends_on = [kubernetes_namespace.argo]
 }
 
 module "argo_cd" {
@@ -438,8 +458,8 @@ module "argo_cd" {
 
 resource "null_resource" "wait_for_argocd" {
   provisioner "local-exec" {
-    quiet   = true
-    command = <<EOT
+    quiet       = true
+    command     = <<EOT
       set -e
       i=0
       while [ $i -lt 30 ]; do
@@ -454,6 +474,7 @@ resource "null_resource" "wait_for_argocd" {
       echo "Timed out waiting for ArgoCD" >&2
       exit 1
     EOT
+    interpreter = ["/bin/sh", "-c"]
   }
 
   triggers = {
@@ -490,26 +511,6 @@ module "argocd_config" {
   ]
 }
 
-module "argoci_config" {
-  source = "../modules/argo_ci_config"
-
-  argoci_namespace   = local.argoci_namespace
-  argoci_helm_values = file("${var.helm_values_path}/${var.cluster_name}/${var.argoci_chart_name}/values.yaml")
-
-  github_chorus_web_ui_token      = var.github_chorus_web_ui_token
-  github_images_token             = var.github_images_token
-  github_chorus_backend_token     = var.github_chorus_backend_token
-  github_workbench_operator_token = var.github_workbench_operator_token
-
-  github_username = var.github_username
-
-  registry_server   = local.harbor_url
-  registry_username = var.argoci_harbor_robot_username
-  registry_password = module.harbor_config.argoci_robot_password
-
-  depends_on = [kubernetes_namespace.argo]
-}
-
 locals {
   output = {
     harbor_admin_username = var.harbor_admin_username
@@ -517,7 +518,7 @@ locals {
     harbor_url            = local.harbor_url
     harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
 
-    harbor_argoci_robot_password   = module.harbor_config.argoci_robot_password
+    harbor_chorusci_robot_password = module.harbor_config.chorusci_robot_password
     harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
     harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
     harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username

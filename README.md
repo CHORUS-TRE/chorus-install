@@ -122,6 +122,32 @@
 
     > **_NOTE:_** As ArgoCD takes over the responsibility for the components that were already deployed (e.g. Keycloak, Harbor), their related services will experience a short unavailability period.
 
+## Handle existing resources
+
+In the case where Terraform fails due to existing resources not managed by Terraform,
+you can [import](https://developer.hashicorp.com/terraform/cli/import) them.
+
+Error example
+
+```
+│ Error: namespaces "ingress-nginx" already exists
+│
+│   with module.ingress_nginx.kubernetes_namespace.ingress_nginx,
+│   on ../modules/ingress_nginx/main.tf line 3, in resource "kubernetes_namespace" "ingress_nginx":
+│    3: resource "kubernetes_namespace" "ingress_nginx" {
+```
+
+Import command
+
+```
+terraform import module.ingress_nginx.kubernetes_namespace.ingress_nginx ingress-nginx 
+```
+
+Where 
+- ```module.ingress_nginx.kubernetes_namespace.ingress_nginx``` is the Terraform object to import the resource into
+- ```ingress-nginx``` is the resource ID
+
+
 ## Uninstall
 
 1. Destroy the infrastructure

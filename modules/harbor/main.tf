@@ -1,49 +1,3 @@
-locals {
-  harbor_values_parsed = yamldecode(var.harbor_helm_values)
-
-  harbor_cache_values_parsed = yamldecode(var.harbor_cache_helm_values)
-
-  harbor_db_values_parsed      = yamldecode(var.harbor_db_helm_values)
-  harbor_db_existing_secret    = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
-  harbor_db_user_password_key  = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
-  harbor_db_admin_password_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-
-
-  harbor_existing_secret                      = local.harbor_values_parsed.harbor.core.existingSecret
-  harbor_existing_secret_secret_key           = local.harbor_values_parsed.harbor.existingSecretSecretKey
-  harbor_existing_xsrf_secret                 = local.harbor_values_parsed.harbor.core.existingXsrfSecret
-  harbor_existing_xsrf_secret_key             = local.harbor_values_parsed.harbor.core.existingXsrfSecretKey
-  harbor_existing_admin_password_secret       = local.harbor_values_parsed.harbor.existingSecretAdminPassword
-  harbor_existing_admin_password_secret_key   = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
-  harbor_existing_jobservice_secret           = local.harbor_values_parsed.harbor.jobservice.existingSecret
-  harbor_existing_jobservice_secret_key       = local.harbor_values_parsed.harbor.jobservice.existingSecretKey
-  harbor_existing_registry_http_secret        = local.harbor_values_parsed.harbor.registry.existingSecret
-  harbor_existing_registry_http_secret_key    = local.harbor_values_parsed.harbor.registry.existingSecretKey
-  harbor_existing_registry_credentials_secret = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
-
-  # TODO: use tf index instead of this for loop
-  oidc_secret = [
-    for env in local.harbor_values_parsed.harbor.core.extraEnvVars : env
-    if env.name == "CONFIG_OVERWRITE_JSON"
-  ][0].valueFrom.secretKeyRef
-  oidc_config = <<EOT
-  {
-  "auth_mode": "oidc_auth",
-  "primary_auth_mode": "true",
-  "oidc_name": "Keycloak",
-  "oidc_endpoint": "${var.oidc_endpoint}",
-  "oidc_client_id": "${var.oidc_client_id}",
-  "oidc_client_secret": "${var.oidc_client_secret}",
-  "oidc_groups_claim": "groups",
-  "oidc_admin_group": "${var.oidc_admin_group}",
-  "oidc_scope": "openid,profile,offline_access,email,groups",
-  "oidc_verify_cert": "false",
-  "oidc_auto_onboard": "true",
-  "oidc_user_claim": "name"
-  }
-  EOT
-} #TODO: set oidc_verify_cert to "true"
-
 # Namespace
 
 resource "kubernetes_namespace" "harbor" {
@@ -70,7 +24,7 @@ resource "random_password" "harbor_secret" {
   special = false
 }
 
-resource "random_password" "harbor_secret_secret_key" {
+resource "random_password" "harbor_encryption_key" {
   # Must be a string of 16 chars.
   length  = 16
   special = false
@@ -110,13 +64,13 @@ resource "random_password" "salt" {
 
 resource "kubernetes_secret" "harbor_db_secret" {
   metadata {
-    name      = local.harbor_db_existing_secret
+    name      = var.harbor_db_secret_name
     namespace = var.harbor_namespace
   }
 
   data = {
-    "${local.harbor_db_admin_password_key}" = random_password.harbor_db_admin_password.result
-    "${local.harbor_db_user_password_key}"  = random_password.harbor_db_password.result
+    "${var.harbor_db_admin_secret_key}" = random_password.harbor_db_admin_password.result
+    "${var.harbor_db_user_secret_key}"  = random_password.harbor_db_password.result
   }
 
   depends_on = [kubernetes_namespace.harbor]
@@ -124,7 +78,7 @@ resource "kubernetes_secret" "harbor_db_secret" {
 
 resource "kubernetes_secret" "harbor_secret" {
   metadata {
-    name      = local.harbor_existing_secret
+    name      = var.harbor_secret_name
     namespace = var.harbor_namespace
   }
 
@@ -137,16 +91,16 @@ resource "kubernetes_secret" "harbor_secret" {
   depends_on = [kubernetes_namespace.harbor]
 }
 
-resource "kubernetes_secret" "harbor_secret_secret_key" {
+resource "kubernetes_secret" "harbor_encryption_key_secret" {
   metadata {
-    name      = local.harbor_existing_secret_secret_key
+    name      = var.harbor_encryption_key_secret_name
     namespace = var.harbor_namespace
   }
 
   # Harbor Helm chart does not allow to change the secret key
   # which is why "secretKey" is hardoced here
   data = {
-    "secretKey" = random_password.harbor_secret_secret_key.result
+    "secretKey" = random_password.harbor_encryption_key.result
   }
 
   depends_on = [kubernetes_namespace.harbor]
@@ -154,25 +108,25 @@ resource "kubernetes_secret" "harbor_secret_secret_key" {
 
 resource "kubernetes_secret" "harbor_xsrf_secret" {
   metadata {
-    name      = local.harbor_existing_xsrf_secret
+    name      = var.harbor_xsrf_secret_name
     namespace = var.harbor_namespace
   }
 
   data = {
-    "${local.harbor_existing_xsrf_secret_key}" = random_password.harbor_csrf_key.result
+    "${var.harbor_xsrf_secret_key}" = random_password.harbor_csrf_key.result
   }
 
   depends_on = [kubernetes_namespace.harbor]
 }
 
-resource "kubernetes_secret" "harbor_admin_password_secret" {
+resource "kubernetes_secret" "harbor_admin_secret" {
   metadata {
-    name      = local.harbor_existing_admin_password_secret
+    name      = var.harbor_admin_secret_name
     namespace = var.harbor_namespace
   }
 
   data = {
-    "${local.harbor_existing_admin_password_secret_key}" = random_password.harbor_admin_password.result
+    "${var.harbor_admin_secret_key}" = random_password.harbor_admin_password.result
   }
 
   depends_on = [kubernetes_namespace.harbor]
@@ -180,12 +134,12 @@ resource "kubernetes_secret" "harbor_admin_password_secret" {
 
 resource "kubernetes_secret" "harbor_jobservice_secret" {
   metadata {
-    name      = local.harbor_existing_jobservice_secret
+    name      = var.harbor_jobservice_secret_name
     namespace = var.harbor_namespace
   }
 
   data = {
-    "${local.harbor_existing_jobservice_secret_key}" = random_password.harbor_jobservice_secret.result
+    "${var.harbor_jobservice_secret_key}" = random_password.harbor_jobservice_secret.result
   }
 
   depends_on = [kubernetes_namespace.harbor]
@@ -193,12 +147,12 @@ resource "kubernetes_secret" "harbor_jobservice_secret" {
 
 resource "kubernetes_secret" "harbor_registry_http_secret" {
   metadata {
-    name      = local.harbor_existing_registry_http_secret
+    name      = var.harbor_registry_http_secret_name
     namespace = var.harbor_namespace
   }
 
   data = {
-    "${local.harbor_existing_registry_http_secret_key}" = random_password.harbor_registry_http_secret.result
+    "${var.harbor_registry_http_secret_key}" = random_password.harbor_registry_http_secret.result
   }
 
   depends_on = [kubernetes_namespace.harbor]
@@ -211,7 +165,7 @@ resource "htpasswd_password" "harbor_registry" {
 
 resource "kubernetes_secret" "harbor_registry_credentials_secret" {
   metadata {
-    name      = local.harbor_existing_registry_credentials_secret
+    name      = var.harbor_registry_credentials_secret_name
     namespace = var.harbor_namespace
   }
 
@@ -228,12 +182,12 @@ resource "kubernetes_secret" "harbor_registry_credentials_secret" {
 
 resource "kubernetes_secret" "oidc_secret" {
   metadata {
-    name      = local.oidc_secret.name
+    name      = var.harbor_oidc_secret_name
     namespace = var.harbor_namespace
   }
 
   data = {
-    "${local.oidc_secret.key}" = local.oidc_config
+    "${var.harbor_oidc_secret_key}" = var.harbor_oidc_config
   }
 
   depends_on = [kubernetes_namespace.harbor]
@@ -318,7 +272,7 @@ resource "helm_release" "harbor" {
 
 data "kubernetes_secret" "harbor_admin_password" {
   metadata {
-    name      = local.harbor_values_parsed.harbor.existingSecretAdminPassword
+    name      = var.harbor_admin_secret_name
     namespace = var.harbor_namespace
   }
 
