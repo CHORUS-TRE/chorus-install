@@ -1,3 +1,6 @@
+locals {
+  cert_manager_crds_content = file(var.cert_manager_crds_path)
+}
 # Namespace
 
 resource "kubernetes_namespace" "cert_manager" {
@@ -8,14 +11,16 @@ resource "kubernetes_namespace" "cert_manager" {
 
 # Cert-Manager CRDs
 
+/*
 data "local_file" "cert_manager_crds" {
   filename = var.cert_manager_crds_path
 }
+*/
 
 resource "kubernetes_manifest" "cert_manager_crds" {
   for_each = {
     for manifest in provider::kubernetes::manifest_decode_multi(
-      data.local_file.cert_manager_crds.content
+      local.cert_manager_crds_content
     ) :
     manifest.metadata.name => manifest
   }
