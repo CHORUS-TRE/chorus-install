@@ -4,14 +4,6 @@ locals {
   webhook_events                 = { for event in local.chorusci_values_parsed.webhookEvents : event.name => event.secretName }
 }
 
-# Namespace
-
-resource "kubernetes_namespace" "argo" {
-  metadata {
-    name = var.chorusci_namespace
-  }
-}
-
 # Workbench operator
 
 resource "random_password" "chorusci_github_workbench_operator_secret" {
@@ -36,8 +28,6 @@ resource "kubernetes_secret" "chorusci_github_workbench_operator" {
       error_message = "Not found: 'workbench-operator' webhook event missing in chorus-ci Helm values"
     }
   }
-
-  depends_on = [ kubernetes_namespace.argo ]
 }
 
 resource "kubernetes_secret" "argo_workflows_github_workbench_operator" {
@@ -50,8 +40,6 @@ resource "kubernetes_secret" "argo_workflows_github_workbench_operator" {
     username = var.github_username
     password = var.github_workbench_operator_token
   }
-
-  depends_on = [ kubernetes_namespace.argo ]
 }
 
 # CHORUS Web UI
@@ -92,8 +80,6 @@ resource "kubernetes_secret" "argo_workflows_github_chorus_web_ui" {
     username = var.github_username
     password = var.github_chorus_web_ui_token
   }
-
-  depends_on = [ kubernetes_namespace.argo ]
 }
 
 # Images
@@ -120,8 +106,6 @@ resource "kubernetes_secret" "chorusci_github_images" {
       error_message = "Not found: 'ci' webhook event missing in chorus-ci Helm values"
     }
   }
-
-  depends_on = [ kubernetes_namespace.argo ]
 }
 
 # CHORUS Backend
@@ -148,8 +132,6 @@ resource "kubernetes_secret" "chorusci_github_chorus_backend" {
       error_message = "Not found: 'chorus-backend' webhook event missing in chorus-ci Helm values"
     }
   }
-
-  depends_on = [ kubernetes_namespace.argo ]
 }
 
 resource "kubernetes_secret" "argo_workflows_github_chorus_backend" {
@@ -162,8 +144,6 @@ resource "kubernetes_secret" "argo_workflows_github_chorus_backend" {
     username = var.github_username
     password = var.github_chorus_backend_token
   }
-
-  depends_on = [ kubernetes_namespace.argo ]
 }
 
 # Sensor
@@ -185,6 +165,4 @@ resource "kubernetes_secret" "chorusci_sensor_regcred_secret" {
   }
 
   type = "kubernetes.io/dockerconfigjson"
-
-  depends_on = [ kubernetes_namespace.argo ]
 }

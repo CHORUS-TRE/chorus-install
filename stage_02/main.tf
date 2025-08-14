@@ -425,6 +425,8 @@ module "chorus_ci" {
   registry_server   = local.harbor_url
   registry_username = var.chorusci_harbor_robot_username
   registry_password = module.harbor_config.chorusci_robot_password
+
+  depends_on = [ kubernetes_namespace.argo]
 }
 
 module "argo_cd" {
@@ -452,8 +454,6 @@ module "argo_cd" {
   harbor_domain                         = replace(local.harbor_url, "https://", "")
   harbor_robot_username                 = var.argocd_harbor_robot_username
   harbor_robot_password                 = module.harbor_config.argocd_robot_password
-
-  depends_on = [ module.chorus_ci ]
 }
 
 resource "null_resource" "wait_for_argocd" {
