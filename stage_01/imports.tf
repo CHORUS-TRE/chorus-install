@@ -88,7 +88,7 @@ resource "null_resource" "cond_import_namespaces" {
   }
 
   triggers = {
-    object_id = each.value.object_id
+    always_run = timestamp()
   }
 }
 
@@ -109,7 +109,7 @@ resource "null_resource" "cond_import_secrets" {
   }
 
   triggers = {
-    object_id = each.value.object_id
+    always_run = timestamp()
   }
 
   depends_on = [null_resource.cond_import_namespaces]
