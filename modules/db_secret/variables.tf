@@ -8,12 +8,12 @@ variable "namespace" {
   description = "The Kubernetes namespace where the secret will be created or referenced"
 }
 
-variable "db_admin_password_key" {
+variable "db_admin_secret_key" {
   type        = string
   description = "The key name within the secret that stores the database admin password"
 }
 
-variable "db_user_password_key" {
+variable "db_user_secret_key" {
   type        = string
   description = "The key name within the secret that stores the database user password"
 }

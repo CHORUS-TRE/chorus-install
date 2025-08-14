@@ -52,5 +52,5 @@ resource "kubernetes_secret" "remote_clusters" {
   # We wait for the remote cluster configuration
   # to complete to avoir race condition on
   # namespace creation
-  depends_on = [ module.remote_cluster ]
+  depends_on = [module.remote_cluster]
 }

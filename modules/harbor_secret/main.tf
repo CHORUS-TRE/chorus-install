@@ -60,7 +60,7 @@ resource "kubernetes_secret" "harbor_secret" {
 
 resource "kubernetes_secret" "harbor_secret_secret_key" {
   metadata {
-    name      = var.secret_key_secret_name
+    name      = var.encryption_key_secret_name
     namespace = var.namespace
   }
 
@@ -84,12 +84,12 @@ resource "kubernetes_secret" "harbor_xsrf_secret" {
 
 resource "kubernetes_secret" "harbor_admin_password_secret" {
   metadata {
-    name      = var.admin_password_secret_name
+    name      = var.admin_secret_name
     namespace = var.namespace
   }
 
   data = {
-    "${var.admin_password_secret_key}" = random_password.harbor_admin_password.result
+    "${var.admin_secret_key}" = random_password.harbor_admin_password.result
   }
 }
 

@@ -8,9 +8,9 @@ variable "secret_name" {
   description = "The name of the Kubernetes Secret that contains shared Harbor secrets (e.g., core, token, etc.)"
 }
 
-variable "secret_key_secret_name" {
+variable "encryption_key_secret_name" {
   type        = string
-  description = "The name of the Kubernetes Secret that contains the encryption secret key"
+  description = "The name of the Kubernetes Secret that contains the encryption key"
 }
 
 variable "xsrf_secret_name" {
@@ -23,12 +23,12 @@ variable "xsrf_secret_key" {
   description = "The key in the XSRF protection secret that stores the actual token"
 }
 
-variable "admin_password_secret_name" {
+variable "admin_secret_name" {
   type        = string
   description = "The name of the Kubernetes Secret that contains the Harbor admin password"
 }
 
-variable "admin_password_secret_key" {
+variable "admin_secret_key" {
   type        = string
   description = "The key in the Harbor admin password secret that stores the actual admin password"
 }

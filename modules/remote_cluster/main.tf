@@ -2,33 +2,33 @@
 
 locals {
   # TODO: read from values.yaml files
-  keycloak_namespace             = "keycloak"
-  keycloak_existing_secret       = "keycloak-secret"
-  keycloak_password_secret_key   = "adminPassword"
-  keycloak_db_existing_secret    = "keycloak_db_secret"
-  keycloak_db_admin_password_key = "postgres-password"
-  keycloak_db_user_password_key  = "password"
+  keycloak_namespace           = "keycloak"
+  keycloak_secret_name         = "keycloak-secret"
+  keycloak_secret_key          = "adminPassword"
+  keycloak_db_secret_name      = "keycloak_db_secret"
+  keycloak_db_admin_secret_key = "postgres-password"
+  keycloak_db_user_secret_key  = "password"
 
-  harbor_namespace             = "harbor"
-  harbor_existing_secret       = "harbor-secret"
-  harbor_password_secret_key   = "adminPassword"
-  harbor_db_existing_secret    = "harbor_db_secret"
-  harbor_db_admin_password_key = "postgres-password"
-  harbor_db_user_password_key  = "password"
+  harbor_namespace           = "harbor"
+  harbor_secret_name         = "harbor-secret"
+  harbor_secret_key          = "adminPassword"
+  harbor_db_secret_name      = "harbor_db_secret"
+  harbor_db_admin_secret_key = "postgres-password"
+  harbor_db_user_secret_key  = "password"
 
-  harbor_existing_secret_secret_key           = "harbor-key"
-  harbor_existing_xsrf_secret                 = "harbor-xsrf"
-  harbor_existing_xsrf_secret_key             = "CSRF_KEY"
-  harbor_existing_admin_password              = "harbor-admin-password"
-  harbor_existing_secret_admin_password_key   = "HARBOR_ADMIN_PASSWORD"
-  harbor_existing_jobservice_secret           = "harbor-jobservice"
-  harbor_existing_jobservice_secret_key       = "JOBSERVICE_SECRET"
-  harbor_existing_registry_http_secret        = "harbor-registry"
-  harbor_existing_registry_http_secret_key    = "REGISTRY_HTTP_SECRET"
-  harbor_existing_registry_credentials_secret = "harbor-registry-credentials"
-  harbor_oidc_secret                          = "harbor-oidc"
-  harbor_oidc_secret_key                      = "CONFIG_OVERWRITE_JSON"
-  harbor_oidc_config                          = <<EOT
+  harbor_encryption_key_secret_name       = "harbor-key"
+  harbor_xsrf_secret_name                 = "harbor-xsrf"
+  harbor_xsrf_secret_key                  = "CSRF_KEY"
+  harbor_admin_secret_name                = "harbor-admin-password"
+  harbor_admin_secret_key                 = "HARBOR_ADMIN_PASSWORD"
+  harbor_jobservice_secret_name           = "harbor-jobservice"
+  harbor_jobservice_secret_key            = "JOBSERVICE_SECRET"
+  harbor_registry_http_secret_name        = "harbor-registry"
+  harbor_registry_http_secret_key         = "REGISTRY_HTTP_SECRET"
+  harbor_registry_credentials_secret_name = "harbor-registry-credentials"
+  harbor_oidc_secret_name                 = "harbor-oidc"
+  harbor_oidc_secret_key                  = "CONFIG_OVERWRITE_JSON"
+  harbor_oidc_config                      = <<EOT
   {
   "auth_mode": "oidc_auth",
   "primary_auth_mode": "true",
@@ -57,10 +57,10 @@ resource "kubernetes_namespace" "keycloak" {
 module "keycloak_db_secret" {
   source = "../db_secret"
 
-  namespace             = local.keycloak_namespace
-  secret_name           = local.keycloak_db_existing_secret
-  db_user_password_key  = local.keycloak_db_user_password_key
-  db_admin_password_key = local.keycloak_db_admin_password_key
+  namespace           = local.keycloak_namespace
+  secret_name         = local.keycloak_db_secret_name
+  db_user_secret_key  = local.keycloak_db_user_secret_key
+  db_admin_secret_key = local.keycloak_db_admin_secret_key
 
   depends_on = [kubernetes_namespace.keycloak]
 }
@@ -69,8 +69,8 @@ module "keycloak_secret" {
   source = "../keycloak_secret"
 
   namespace   = local.keycloak_namespace
-  secret_name = local.keycloak_existing_secret
-  secret_key  = local.keycloak_password_secret_key
+  secret_name = local.keycloak_secret_name
+  secret_key  = local.keycloak_secret_key
 
   depends_on = [kubernetes_namespace.keycloak]
 }
@@ -86,10 +86,10 @@ resource "kubernetes_namespace" "harbor" {
 module "harbor_db_secret" {
   source = "../db_secret"
 
-  namespace             = local.harbor_namespace
-  secret_name           = local.harbor_db_existing_secret
-  db_user_password_key  = local.harbor_db_user_password_key
-  db_admin_password_key = local.harbor_db_admin_password_key
+  namespace           = local.harbor_namespace
+  secret_name         = local.harbor_db_secret_name
+  db_user_secret_key  = local.harbor_db_user_secret_key
+  db_admin_secret_key = local.harbor_db_admin_secret_key
 
   depends_on = [kubernetes_namespace.harbor]
 }
@@ -98,18 +98,18 @@ module "harbor_secret" {
   source = "../harbor_secret"
 
   namespace                        = local.harbor_namespace
-  secret_name                      = local.harbor_existing_secret
-  secret_key_secret_name           = local.harbor_existing_secret_secret_key
-  xsrf_secret_name                 = local.harbor_existing_xsrf_secret
-  xsrf_secret_key                  = local.harbor_existing_xsrf_secret_key
-  admin_password_secret_name       = local.harbor_existing_admin_password
-  admin_password_secret_key        = local.harbor_existing_secret_admin_password_key
-  jobservice_secret_name           = local.harbor_existing_jobservice_secret
-  jobservice_secret_key            = local.harbor_existing_jobservice_secret_key
-  registry_secret_name             = local.harbor_existing_registry_http_secret
-  registry_secret_key              = local.harbor_existing_registry_http_secret_key
-  registry_credentials_secret_name = local.harbor_existing_registry_credentials_secret
-  oidc_secret_name                 = local.harbor_oidc_secret
+  secret_name                      = local.harbor_secret_name
+  encryption_key_secret_name       = local.harbor_encryption_key_secret_name
+  xsrf_secret_name                 = local.harbor_xsrf_secret_name
+  xsrf_secret_key                  = local.harbor_xsrf_secret_key
+  admin_secret_name                = local.harbor_admin_secret_name
+  admin_secret_key                 = local.harbor_admin_secret_key
+  jobservice_secret_name           = local.harbor_jobservice_secret_name
+  jobservice_secret_key            = local.harbor_jobservice_secret_key
+  registry_secret_name             = local.harbor_registry_http_secret_name
+  registry_secret_key              = local.harbor_registry_http_secret_key
+  registry_credentials_secret_name = local.harbor_registry_credentials_secret_name
+  oidc_secret_name                 = local.harbor_oidc_secret_name
   oidc_secret_key                  = local.harbor_oidc_secret_key
   oidc_config                      = local.harbor_oidc_config
 

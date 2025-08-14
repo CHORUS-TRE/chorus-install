@@ -15,7 +15,7 @@ resource "kubernetes_secret" "db_secret" {
   }
 
   data = {
-    "${var.db_admin_password_key}" = random_password.db_admin_password.result
-    "${var.db_user_password_key}"  = random_password.db_password.result
+    "${var.db_admin_secret_key}" = random_password.db_admin_password.result
+    "${var.db_user_secret_key}"  = random_password.db_password.result
   }
 }
