@@ -47,7 +47,7 @@ data "external" "cert_manager_app_version" {
       set -e
       helm registry login ${var.helm_registry} -u ${var.helm_registry_username} -p ${var.helm_registry_password} >/dev/null
       helm pull "oci://${var.helm_registry}/charts/${var.cert_manager_chart_name}" --version ${local.cert_manager_chart_version} --destination ${path.module}/tmp
-      tar -xzf /tmp/cert-manager-*.tgz -C ${path.module}/tmp
+      tar -xzf ${path.module}/tmp/cert-manager-*.tgz -C ${path.module}/tmp
       version=$(yq '.dependencies[0].version' ${path.module}/tmp/${var.cert_manager_chart_name}/Chart.yaml)
       rm -rf ${path.module}/tmp
       echo "{\"version\": \"$version\"}"
