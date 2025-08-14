@@ -5,14 +5,14 @@ locals {
   keycloak_namespace           = "keycloak"
   keycloak_secret_name         = "keycloak-secret"
   keycloak_secret_key          = "adminPassword"
-  keycloak_db_secret_name      = "keycloak_db_secret"
+  keycloak_db_secret_name      = "keycloak-db-secret"
   keycloak_db_admin_secret_key = "postgres-password"
   keycloak_db_user_secret_key  = "password"
 
   harbor_namespace           = "harbor"
   harbor_secret_name         = "harbor-secret"
   harbor_secret_key          = "adminPassword"
-  harbor_db_secret_name      = "harbor_db_secret"
+  harbor_db_secret_name      = "harbor-db-secret"
   harbor_db_admin_secret_key = "postgres-password"
   harbor_db_user_secret_key  = "password"
 
