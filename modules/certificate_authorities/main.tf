@@ -11,12 +11,6 @@ resource "kubernetes_namespace" "cert_manager" {
 
 # Cert-Manager CRDs
 
-/*
-data "local_file" "cert_manager_crds" {
-  filename = var.cert_manager_crds_path
-}
-*/
-
 resource "kubernetes_manifest" "cert_manager_crds" {
   for_each = {
     for manifest in provider::kubernetes::manifest_decode_multi(
