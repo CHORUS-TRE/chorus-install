@@ -8,38 +8,6 @@ resource "kubernetes_namespace" "harbor" {
 
 # Secrets
 
-resource "random_password" "harbor_csrf_key" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_admin_password" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_jobservice_secret" {
-  # Must be a string of 16 chars.
-  length  = 16
-  special = false
-}
-
-resource "random_password" "harbor_registry_http_secret" {
-  # Must be a string of 16 chars.
-  length  = 16
-  special = false
-}
-
-resource "random_password" "harbor_registry_passwd" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "salt" {
-  length  = 8
-  special = false
-}
-
 module "db_secret" {
   source = "../db_secret"
 
