@@ -1,5 +1,4 @@
-# TODO: create all secrets needed for e.g. chorus-dev, chorus-int, chorus-qa, ...
-# Plan: call this module for each remote cluster
+# TODO: create all secrets needed for one remote cluster (e.g. chorus-dev)
 
 locals {
   # TODO: read from values.yaml files

@@ -18,7 +18,7 @@ locals {
   })
 }
 
-# Remote Cluster Connection for ArgoCD
+# Remote Cluster Connection for ArgoCD running on chorus-build
 
 resource "kubernetes_secret" "remote_clusters" {
   metadata {
