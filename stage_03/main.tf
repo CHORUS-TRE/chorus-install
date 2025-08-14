@@ -18,6 +18,20 @@ locals {
   })
 }
 
+provider "kubernetes" {
+  alias          = "remote_cluster"
+  config_path    = var.remote_cluster_kubeconfig_path
+  config_context = var.remote_cluster_kubeconfig_context
+}
+
+module "remote_cluster" {
+  source = "../modules/remote_cluster"
+
+  providers = {
+    kubernetes = kubernetes.remote_cluster
+  }
+}
+
 # Remote Cluster Connection for ArgoCD running on chorus-build
 
 resource "kubernetes_secret" "remote_clusters" {
@@ -34,18 +48,9 @@ resource "kubernetes_secret" "remote_clusters" {
     server = local.remote_cluster_server
     config = local.remote_cluster_config
   }
-}
 
-provider "kubernetes" {
-  alias          = "remote_cluster"
-  config_path    = var.remote_cluster_kubeconfig_path
-  config_context = var.remote_cluster_kubeconfig_context
-}
-
-module "remote_cluster" {
-  source = "../modules/remote_cluster"
-
-  providers = {
-    kubernetes = kubernetes.remote_cluster
-  }
+  # We wait for the remote cluster configuration
+  # to complete to avoir race condition on
+  # namespace creation
+  depends_on = [ module.remote_cluster ]
 }
