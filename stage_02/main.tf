@@ -144,21 +144,11 @@ resource "random_password" "grafana_admin_password" {
   special = false
 }
 
-import {
-  to = kubernetes_secret.harbor_existing_admin_password
-  id = local.harbor_existing_admin_password_secret
-}
-
 data "kubernetes_secret" "harbor_existing_admin_password" {
   metadata {
     name      = local.harbor_existing_admin_password_secret
     namespace = local.harbor_namespace
   }
-}
-
-import {
-  to = kubernetes_secret.keycloak_existing_admin_password
-  id = local.keycloak_existing_admin_password_secret
 }
 
 data "kubernetes_secret" "keycloak_existing_admin_password" {
@@ -168,11 +158,6 @@ data "kubernetes_secret" "keycloak_existing_admin_password" {
   }
 }
 
-import {
-  to = kubernetes_secret.harbor_oidc
-  id = local.harbor_existing_oidc_secret
-}
-
 data "kubernetes_secret" "harbor_oidc" {
   metadata {
     name      = local.harbor_existing_oidc_secret
@@ -180,21 +165,11 @@ data "kubernetes_secret" "harbor_oidc" {
   }
 }
 
-import {
-  to = kubernetes_secret.keycloak_db_existing_secret
-  id = local.keycloak_db_existing_secret
-}
-
 data "kubernetes_secret" "keycloak_db_existing_secret" {
   metadata {
     name      = local.keycloak_db_existing_secret
     namespace = local.keycloak_namespace
   }
-}
-
-import {
-  to = kubernetes_secret.harbor_db_existing_secret
-  id = local.harbor_db_existing_secret
 }
 
 data "kubernetes_secret" "harbor_db_existing_secret" {
@@ -206,20 +181,10 @@ data "kubernetes_secret" "harbor_db_existing_secret" {
 
 # Grafana
 
-import {
-  to = kubernetes_namespace.grafana
-  id = local.grafana_namespace
-}
-
 resource "kubernetes_namespace" "grafana" {
   metadata {
     name = local.grafana_namespace
   }
-}
-
-import {
-  to = kubernetes_secret.grafana_oauth_client_secret
-  id = local.grafana_existing_oauth_client_secret
 }
 
 resource "kubernetes_secret" "grafana_oauth_client_secret" {
@@ -245,20 +210,10 @@ resource "kubernetes_secret" "grafana_oauth_client_secret" {
 # we use Terraform's "count" with conditional check
 # to account for each case
 
-import {
-  to = kubernetes_namespace.argo
-  id = local.argo_workflows_workflow_namespace
-}
-
 resource "kubernetes_namespace" "argo" {
   metadata {
     name = local.argo_workflows_workflow_namespace
   }
-}
-
-import {
-  to = kubernetes_secret.argo_workflows_oidc_client_id_and_secret
-  id = local.argo_workflows_existing_sso_server_client_id_name
 }
 
 resource "kubernetes_secret" "argo_workflows_oidc_client_id_and_secret" {
@@ -274,11 +229,6 @@ resource "kubernetes_secret" "argo_workflows_oidc_client_id_and_secret" {
   count = local.argo_workflows_existing_sso_server_client_secret_name == local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
 }
 
-import {
-  to = kubernetes_secret.argo_workflows_oidc_client_id
-  id = local.argo_workflows_existing_sso_server_client_id_name
-}
-
 resource "kubernetes_secret" "argo_workflows_oidc_client_id" {
   metadata {
     name      = local.argo_workflows_existing_sso_server_client_id_name
@@ -289,11 +239,6 @@ resource "kubernetes_secret" "argo_workflows_oidc_client_id" {
     "${local.argo_workflows_existing_sso_server_client_id_key}" = var.argo_workflows_keycloak_client_id
   }
   count = local.argo_workflows_existing_sso_server_client_secret_name != local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
-}
-
-import {
-  to = kubernetes_secret.argo_workflows_oidc_client_secret
-  id = local.argo_workflows_existing_sso_server_client_secret_name
 }
 
 resource "kubernetes_secret" "argo_workflows_oidc_client_secret" {
