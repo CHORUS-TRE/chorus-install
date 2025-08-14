@@ -1,7 +1,6 @@
 locals {
   ingress_nginx_chart_version = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json")).version
   cert_manager_chart_version  = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json")).version
-  cert_manager_app_version    = file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/app_version")
   selfsigned_chart_version    = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/config.json")).version
   keycloak_chart_version      = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json")).version
   keycloak_db_chart_version   = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/config.json")).version
@@ -124,7 +123,6 @@ module "certificate_authorities" {
 
   cert_manager_chart_name    = var.cert_manager_chart_name
   cert_manager_chart_version = local.cert_manager_chart_version
-  cert_manager_app_version   = local.cert_manager_app_version
   cert_manager_helm_values   = file("${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/values.yaml")
   cert_manager_namespace     = local.cert_manager_namespace
   cert_manager_crds_path     = var.cert_manager_crds_path

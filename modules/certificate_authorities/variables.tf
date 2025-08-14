@@ -18,11 +18,6 @@ variable "cert_manager_chart_version" {
   type        = string
 }
 
-variable "cert_manager_app_version" {
-  description = "Cert-Manager version"
-  type        = string
-}
-
 variable "cert_manager_helm_values" {
   description = "Cert-Manager Helm chart values"
   type        = string
