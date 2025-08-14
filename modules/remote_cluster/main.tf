@@ -48,11 +48,6 @@ locals {
 
 # Keycloak
 
-import {
-  to = kubernetes_namespace.keycloak
-  id = local.keycloak_namespace
-}
-
 resource "kubernetes_namespace" "keycloak" {
   metadata {
     name = local.keycloak_namespace
@@ -81,11 +76,6 @@ module "keycloak_secret" {
 }
 
 # Harbor
-
-import {
-  to = kubernetes_namespace.harbor
-  id = local.harbor_namespace
-}
 
 resource "kubernetes_namespace" "harbor" {
   metadata {
