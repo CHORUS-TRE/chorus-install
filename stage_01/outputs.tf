@@ -4,12 +4,12 @@ output "loadbalancer_ip" {
 }
 
 output "harbor_url" {
-  value = try(module.harbor.harbor_url,
+  value = try(local.harbor_values_parsed.harbor.externalURL,
   "Failed to retrieve Harbor URL")
 }
 
 output "harbor_url_admin_login" {
-  value = try(module.harbor.harbor_url_admin_login,
+  value = try(join("/", [local.harbor_values_parsed.harbor.externalURL, "account/sign-in"]),
   "Failed to retrieve Harbor URL to login with local DB admin user")
 }
 
@@ -24,7 +24,7 @@ output "harbor_password" {
 }
 
 output "keycloak_url" {
-  value = try(module.keycloak.keycloak_url,
+  value = try(local.keycloak_url,
   "Failed to retrieve Keycloak URL")
 }
 

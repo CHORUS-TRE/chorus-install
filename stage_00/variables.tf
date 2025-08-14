@@ -40,6 +40,12 @@ variable "cert_manager_chart_name" {
   default     = "cert-manager"
 }
 
+variable "cert_manager_crds_path" {
+  description = "Path to the downloaded Cert-Manager CRDs file"
+  type        = string
+  default     = "../crds/cert-manager.crds.yaml"
+}
+
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
   type        = string

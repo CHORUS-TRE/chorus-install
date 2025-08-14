@@ -25,8 +25,8 @@ resource "helm_release" "ingress_nginx" {
 
 resource "null_resource" "wait_for_lb_ip" {
   provisioner "local-exec" {
-    quiet   = true
-    command = <<EOT
+    quiet       = true
+    command     = <<EOT
     set -e
     export KUBECONFIG
     kubectl config use-context ${var.kubeconfig_context}
@@ -43,6 +43,7 @@ resource "null_resource" "wait_for_lb_ip" {
     echo "Timed out waiting for LoadBalancer IP" >&2
     exit 1
     EOT
+    interpreter = ["/bin/sh", "-c"]
     environment = {
       KUBECONFIG = pathexpand(var.kubeconfig_path)
     }

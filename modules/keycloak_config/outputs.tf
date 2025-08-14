@@ -1,3 +1,3 @@
 output "infra_realm_id" {
-  value = keycloak_realm.infra.id
+  value = try(keycloak_realm.infra.id, null)
 }

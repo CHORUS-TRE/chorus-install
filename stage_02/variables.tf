@@ -139,16 +139,16 @@ variable "argocd_harbor_robot_username" {
   default     = "argo-cd"
 }
 
-variable "argoci_chart_name" {
-  description = "ArgoCI Helm chart name"
+variable "chorusci_chart_name" {
+  description = "ChorusCI Helm chart name"
   type        = string
-  default     = "argo-ci"
+  default     = "chorus-ci"
 }
 
-variable "argoci_harbor_robot_username" {
-  description = "Harbor robot username used by ArgoCI"
+variable "chorusci_harbor_robot_username" {
+  description = "Harbor robot username used by ChorusCI"
   type        = string
-  default     = "argo-ci"
+  default     = "chorus-ci"
 }
 
 variable "renovate_harbor_robot_username" {
