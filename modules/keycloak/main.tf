@@ -11,8 +11,8 @@ resource "kubernetes_namespace" "keycloak" {
 module "db_secret" {
   source = "../db_secret"
 
-  namespace             = var.keycloak_namespace
-  secret_name           = var.keycloak_db_secret_name
+  namespace           = var.keycloak_namespace
+  secret_name         = var.keycloak_db_secret_name
   db_user_secret_key  = var.keycloak_db_user_secret_key
   db_admin_secret_key = var.keycloak_db_admin_secret_key
 
