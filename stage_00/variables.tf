@@ -26,12 +26,18 @@ variable "chorus_release" {
 variable "helm_values_path" {
   description = "Path to the local folder gathering the CHORUS Helm charts values"
   type        = string
-  default     = "../values"
+  default     = "../../values"
+}
+
+variable "kubeconfig_context" {
+  description = "Kubernetes context to use"
+  type        = string
 }
 
 variable "cluster_name" {
   description = "The cluster name to be used as a prefix to release names"
   type        = string
+  default     = ""
 }
 
 variable "cert_manager_chart_name" {
@@ -40,11 +46,13 @@ variable "cert_manager_chart_name" {
   default     = "cert-manager"
 }
 
+
 variable "cert_manager_crds_path" {
   description = "Path to the downloaded Cert-Manager CRDs file"
   type        = string
-  default     = "../crds/cert-manager.crds.yaml"
+  default     = "../../crds"
 }
+
 
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
@@ -60,4 +68,15 @@ variable "helm_registry_password" {
   description = "Password to connect to the CHORUS Helm chart registry"
   type        = string
   sensitive   = true
+}
+
+variable "remote_cluster_kubeconfig_context" {
+  description = "Kubernetes context to use for the remote cluster"
+  type        = string
+}
+
+variable "remote_cluster_name" {
+  description = "The name of the remote cluster"
+  type        = string
+  default     = ""
 }
