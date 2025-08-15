@@ -11,8 +11,8 @@ resource "kubernetes_namespace" "harbor" {
 module "db_secret" {
   source = "../db_secret"
 
-  namespace             = var.harbor_namespace
-  secret_name           = var.harbor_db_secret_name
+  namespace           = var.harbor_namespace
+  secret_name         = var.harbor_db_secret_name
   db_user_secret_key  = var.harbor_db_user_secret_key
   db_admin_secret_key = var.harbor_db_admin_secret_key
 
