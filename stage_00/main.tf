@@ -40,6 +40,9 @@ data "external" "cert_manager_config" {
   program    = ["/bin/cat", "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"]
 }
 
+# In the official Jetstack Helm chart,
+# the cert-manager release tag corresponds
+# to the app version
 data "external" "cert_manager_app_version" {
   program = [
     "/bin/sh", "-c",
