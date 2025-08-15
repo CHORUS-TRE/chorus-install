@@ -32,13 +32,13 @@ resource "null_resource" "fetch_helm_charts_values" {
   }
 
   provisioner "local-exec" {
-    when = destroy
-    command = "rm -r ${self.triggers.target_path}"
+    when        = destroy
+    command     = "rm -r ${self.triggers.target_path}"
     interpreter = ["/bin/sh", "-c"]
   }
 
   triggers = {
-    always_run = timestamp()
+    always_run  = timestamp()
     target_path = "${path.module}/${var.helm_values_path}/${var.cluster_name}"
   }
 }
