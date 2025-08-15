@@ -10,6 +10,8 @@ locals {
     }
   })
 
+  cert_manager_crds_content = file("${var.cert_manager_crds_path}/${local.remote_cluster_name}/cert-manager.crds.yaml")
+
   keycloak_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml")
   keycloak_values_parsed = yamldecode(local.keycloak_values)
   keycloak_namespace     = jsondecode(file("${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
@@ -28,6 +30,7 @@ locals {
   harbor_namespace     = jsondecode(file("${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
   harbor_secret_name   = local.harbor_values_parsed.harbor.existingSecretAdminPassword
   harbor_secret_key    = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
+  harbor_url                                = local.harbor_values_parsed.harbor.externalURL
 
   harbor_db_values           = file("${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
   harbor_db_values_parsed    = yamldecode(local.harbor_db_values)
@@ -75,11 +78,76 @@ locals {
   #TODO: set oidc_verify_cert to "true"
 }
 
+# Providers
+
 provider "kubernetes" {
-  alias          = "remote_cluster"
-  config_path    = var.remote_cluster_kubeconfig_path
-  config_context = var.remote_cluster_kubeconfig_context
+  alias          = "build_cluster"
+  config_path    = var.kubeconfig_path
+  config_context = var.kubeconfig_context
 }
+
+provider "keycloak" {
+  alias     = "kcadmin-provider"
+  client_id = "admin-cli"
+  username  = var.keycloak_admin_username
+  password  = local.keycloak_admin_password
+  url       = local.keycloak_url
+  # Ignoring certificate errors
+  # because it might take some times
+  # for certificates to be signed
+  # by a trusted authority
+  tls_insecure_skip_verify = true
+}
+
+provider "harbor" {
+  alias    = "harboradmin-provider"
+  url      = local.harbor_url
+  username = var.harbor_admin_username
+  password = local.harbor_admin_password
+  # Ignoring certificate errors
+  # because it might take some times
+  # for certificates to be signed
+  # by a trusted authority
+  insecure = true
+}
+
+# Cert-Manager CRDs
+
+module "cert_manager_crds" {
+  source = "../modules/cert_manager_crds"
+
+  cert_manager_crds_content = local.cert_manager_crds_content
+}
+
+# Keycloak
+
+resource "kubernetes_namespace" "keycloak" {
+  metadata {
+    name = local.keycloak_namespace
+  }
+}
+
+module "keycloak_db_secret" {
+  source = "../modules/db_secret"
+
+  namespace           = local.keycloak_namespace
+  secret_name         = local.keycloak_db_secret_name
+  db_user_secret_key  = local.keycloak_db_user_secret_key
+  db_admin_secret_key = local.keycloak_db_admin_secret_key
+
+  depends_on = [kubernetes_namespace.keycloak]
+}
+
+module "keycloak_secret" {
+  source = "../modules/keycloak_secret"
+
+  namespace   = local.keycloak_namespace
+  secret_name = local.keycloak_secret_name
+  secret_key  = local.keycloak_secret_key
+
+  depends_on = [kubernetes_namespace.keycloak]
+}
+
 
 module "remote_cluster" {
   source = "../modules/remote_cluster"
@@ -112,15 +180,101 @@ module "remote_cluster" {
   harbor_oidc_secret_name                 = local.harbor_oidc_secret_name
   harbor_oidc_secret_key                  = local.harbor_oidc_secret_key
   harbor_oidc_config                      = local.harbor_oidc_config
+}
 
-  providers = {
-    kubernetes = kubernetes.remote_cluster
+# Harbor
+
+resource "kubernetes_namespace" "harbor" {
+  metadata {
+    name = local.harbor_namespace
   }
 }
+
+module "harbor_db_secret" {
+  source = "../modules/db_secret"
+
+  namespace           = local.harbor_namespace
+  secret_name         = local.harbor_db_secret_name
+  db_user_secret_key  = local.harbor_db_user_secret_key
+  db_admin_secret_key = local.harbor_db_admin_secret_key
+
+  depends_on = [kubernetes_namespace.harbor]
+}
+
+module "harbor_secret" {
+  source = "../modules/harbor_secret"
+
+  namespace                        = local.harbor_namespace
+  secret_name                      = local.harbor_secret_name
+  encryption_key_secret_name       = local.harbor_encryption_key_secret_name
+  xsrf_secret_name                 = local.harbor_xsrf_secret_name
+  xsrf_secret_key                  = local.harbor_xsrf_secret_key
+  admin_secret_name                = local.harbor_admin_secret_name
+  admin_secret_key                 = local.harbor_admin_secret_key
+  jobservice_secret_name           = local.harbor_jobservice_secret_name
+  jobservice_secret_key            = local.harbor_jobservice_secret_key
+  registry_secret_name             = local.harbor_registry_http_secret_name
+  registry_secret_key              = local.harbor_registry_http_secret_key
+  registry_credentials_secret_name = local.harbor_registry_credentials_secret_name
+  oidc_secret_name                 = local.harbor_oidc_secret_name
+  oidc_secret_key                  = local.harbor_oidc_secret_key
+  oidc_config                      = local.harbor_oidc_config
+
+  depends_on = [kubernetes_namespace.harbor]
+}
+
+module "harbor_config" {
+  source = "../modules/remote_cluster_harbor_config"
+
+  providers = {
+    harbor = harbor.harboradmin-provider
+  }
+
+  build_robot_username = "harbor-build"
+  cluster_robot_username = "chorus"
+}
+
+# need to upload the following charts
+# - backend 0.1.15
+# - matomo 0.0.9
+# - web-ui 1.3.4
+# - workbench-operator 0.3.17
+# helm pull oci://harbor.build.chorus-tre.ch/charts/workbench-operator --version 0.3.17
+
+# Backend
+
+# backend-service-account service account in backend namespace
+# >> backend/values.deployment.serviceAccountName
+# secrets:
+# - name: backend-service-account-secret
+
+# backend-postgresql secret in backend namespace
+# admin-password:
+# postgres-password:
+# replication-password:
+# user-password:
+
+# Matomo
+
+# matomo-mariadb-secret secret in matomo namespace
+# db-password:
+
+# Web-UI / Frontend
+
+# regcred secret in frontend namespace
+# .dockerconfigjson
+# or is this created by reflector?!
+
+
+
+
+
 
 # Remote Cluster Connection for ArgoCD running on chorus-build
 
 resource "kubernetes_secret" "remote_clusters" {
+  provider = kubernetes.build_cluster
+
   metadata {
     name      = "${local.remote_cluster_name}-cluster"
     namespace = local.argocd_namespace
