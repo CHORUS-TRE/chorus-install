@@ -27,6 +27,8 @@ provider "kubernetes" {
 module "remote_cluster" {
   source = "../modules/remote_cluster"
 
+  cert_manager_crds_path = "../crds/${local.remote_cluster_name}/cert-manager.crds.yaml"
+
   providers = {
     kubernetes = kubernetes.remote_cluster
   }

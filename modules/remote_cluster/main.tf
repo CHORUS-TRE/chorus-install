@@ -44,6 +44,15 @@ locals {
   "oidc_user_claim": "name"
   }
   EOT
+  cert_manager_crds_content = file(var.cert_manager_crds_path)
+}
+
+# Cert-Manager CRDs
+
+module "cert_manager_crds" {
+  source = "../cert_manager_crds"
+
+  cert_manager_crds_content = local.cert_manager_crds_content
 }
 
 # Keycloak
