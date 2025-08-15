@@ -14,6 +14,12 @@ variable "helm_values_path" {
   default     = "../values"
 }
 
+variable "cert_manager_crds_path" {
+  description = "Path to the downloaded Cert-Manager CRDs file"
+  type        = string
+  default     = "../../crds"
+}
+
 variable "cluster_name" {
   description = "The cluster name to be used as a prefix to release names"
   type        = string

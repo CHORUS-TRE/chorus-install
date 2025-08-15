@@ -84,7 +84,7 @@ provider "kubernetes" {
 module "remote_cluster" {
   source = "../modules/remote_cluster"
 
-  cert_manager_crds_path       = "../crds/${local.remote_cluster_name}/cert-manager.crds.yaml"
+  cert_manager_crds_path       = "${var.cert_manager_crds_path}/${local.remote_cluster_name}/cert-manager.crds.yaml"
   keycloak_namespace           = local.keycloak_namespace
   keycloak_secret_name         = local.keycloak_secret_name
   keycloak_secret_key          = local.keycloak_secret_key
