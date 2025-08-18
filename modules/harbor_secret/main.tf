@@ -45,9 +45,9 @@ resource "random_password" "salt" {
   special = false
 }
 
-resource "kubernetes_secret" "harbor_secret" {
+resource "kubernetes_secret" "harbor_core_secret" {
   metadata {
-    name      = var.secret_name
+    name      = var.core_secret_name
     namespace = var.namespace
   }
 
@@ -58,7 +58,7 @@ resource "kubernetes_secret" "harbor_secret" {
   }
 }
 
-resource "kubernetes_secret" "harbor_secret_secret_key" {
+resource "kubernetes_secret" "harbor_encryption_secret" {
   metadata {
     name      = var.encryption_key_secret_name
     namespace = var.namespace

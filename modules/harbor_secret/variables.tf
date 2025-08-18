@@ -3,9 +3,19 @@ variable "namespace" {
   description = "The Kubernetes namespace where Harbor is deployed"
 }
 
-variable "secret_name" {
+variable "core_secret_name" {
   type        = string
-  description = "The name of the Kubernetes Secret that contains shared Harbor secrets (e.g., core, token, etc.)"
+  description = "The name of the Kubernetes Secret that contains the core secrets for Harbor"
+}
+
+variable "admin_secret_name" {
+  type        = string
+  description = "The name of the Kubernetes Secret that contains the Harbor admin password"
+}
+
+variable "admin_secret_key" {
+  type        = string
+  description = "The key in the Harbor admin password secret that stores the actual admin password"
 }
 
 variable "encryption_key_secret_name" {
@@ -21,16 +31,6 @@ variable "xsrf_secret_name" {
 variable "xsrf_secret_key" {
   type        = string
   description = "The key in the XSRF protection secret that stores the actual token"
-}
-
-variable "admin_secret_name" {
-  type        = string
-  description = "The name of the Kubernetes Secret that contains the Harbor admin password"
-}
-
-variable "admin_secret_key" {
-  type        = string
-  description = "The key in the Harbor admin password secret that stores the actual admin password"
 }
 
 variable "jobservice_secret_name" {

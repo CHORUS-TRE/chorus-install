@@ -35,7 +35,7 @@ locals {
   harbor_db_admin_secret_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
   harbor_values_parsed                    = yamldecode(local.harbor_helm_values)
-  harbor_secret_name                      = local.harbor_values_parsed.harbor.core.existingSecret
+  harbor_core_secret_name                 = local.harbor_values_parsed.harbor.core.existingSecret
   harbor_encryption_key_secret_name       = local.harbor_values_parsed.harbor.existingSecretSecretKey
   harbor_xsrf_secret_name                 = local.harbor_values_parsed.harbor.core.existingXsrfSecret
   harbor_xsrf_secret_key                  = local.harbor_values_parsed.harbor.core.existingXsrfSecretKey
@@ -198,7 +198,7 @@ module "harbor" {
   harbor_db_secret_name                   = local.harbor_db_secret_name
   harbor_db_user_secret_key               = local.harbor_db_user_secret_key
   harbor_db_admin_secret_key              = local.harbor_db_admin_secret_key
-  harbor_secret_name                      = local.harbor_secret_name
+  harbor_core_secret_name                 = local.harbor_core_secret_name
   harbor_encryption_key_secret_name       = local.harbor_encryption_key_secret_name
   harbor_xsrf_secret_name                 = local.harbor_xsrf_secret_name
   harbor_xsrf_secret_key                  = local.harbor_xsrf_secret_key

@@ -23,7 +23,7 @@ module "harbor_secret" {
   source = "../harbor_secret"
 
   namespace                        = var.harbor_namespace
-  secret_name                      = var.harbor_secret_name
+  core_secret_name                 = var.harbor_core_secret_name
   encryption_key_secret_name       = var.harbor_encryption_key_secret_name
   xsrf_secret_name                 = var.harbor_xsrf_secret_name
   xsrf_secret_key                  = var.harbor_xsrf_secret_key

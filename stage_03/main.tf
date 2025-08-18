@@ -25,12 +25,11 @@ locals {
   keycloak_db_admin_secret_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   keycloak_db_user_secret_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
-  harbor_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml")
-  harbor_values_parsed = yamldecode(local.harbor_values)
-  harbor_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
-  harbor_secret_name   = local.harbor_values_parsed.harbor.existingSecretAdminPassword
-  harbor_secret_key    = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
-  harbor_url           = local.harbor_values_parsed.harbor.externalURL
+  harbor_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml")
+  harbor_values_parsed    = yamldecode(local.harbor_values)
+  harbor_namespace        = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
+  harbor_core_secret_name = local.harbor_values_parsed.harbor.core.existingSecret
+  harbor_url              = local.harbor_values_parsed.harbor.externalURL
 
   harbor_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
   harbor_db_values_parsed    = yamldecode(local.harbor_db_values)
@@ -169,7 +168,7 @@ module "harbor_secret" {
   source = "../modules/harbor_secret"
 
   namespace                        = local.harbor_namespace
-  secret_name                      = local.harbor_secret_name
+  core_secret_name                 = local.harbor_core_secret_name
   encryption_key_secret_name       = local.harbor_encryption_key_secret_name
   xsrf_secret_name                 = local.harbor_xsrf_secret_name
   xsrf_secret_key                  = local.harbor_xsrf_secret_key
