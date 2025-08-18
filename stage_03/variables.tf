@@ -17,7 +17,7 @@ variable "helm_values_path" {
 variable "cert_manager_crds_path" {
   description = "Path to the downloaded Cert-Manager CRDs file"
   type        = string
-  default     = "../../crds"
+  default     = "../crds"
 }
 
 variable "cluster_name" {
