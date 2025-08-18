@@ -107,87 +107,6 @@ provider "kubernetes" {
   config_context = var.kubeconfig_context
 }
 
-provider "keycloak" {
-  alias     = "kcadmin-provider"
-  client_id = "admin-cli"
-  username  = var.keycloak_admin_username
-  password  = local.keycloak_admin_password
-  url       = local.keycloak_url
-  # Ignoring certificate errors
-  # because it might take some times
-  # for certificates to be signed
-  # by a trusted authority
-  tls_insecure_skip_verify = true
-
-  depends_on = [module.keycloak_secret]
-}
-
-provider "harbor" {
-  alias    = "harboradmin-provider"
-  url      = local.harbor_url
-  username = var.harbor_admin_username
-  password = local.harbor_admin_password
-  # Ignoring certificate errors
-  # because it might take some times
-  # for certificates to be signed
-  # by a trusted authority
-  insecure = true
-}
-
-# Random passwords
-
-resource "random_password" "harbor_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "grafana_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "alertmanager_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "prometheus_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "backend_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-data "kubernetes_secret" "harbor_oidc" {
-  metadata {
-    name      = local.harbor_oidc_secret_name
-    namespace = local.harbor_namespace
-  }
-
-  depends_on = [module.harbor_secret]
-}
-
-data "kubernetes_secret" "keycloak_admin_password" {
-  metadata {
-    name      = local.keycloak_secret_name
-    namespace = local.keycloak_namespace
-  }
-
-  depends_on = [module.keycloak_secret]
-}
-
-data "kubernetes_secret" "harbor_admin_password" {
-  metadata {
-    name      = local.harbor_secret_name
-    namespace = local.harbor_namespace
-  }
-
-  depends_on = [module.harbor_secret]
-}
-
 # Cert-Manager CRDs
 
 module "cert_manager_crds" {
@@ -223,117 +142,6 @@ module "keycloak_secret" {
   secret_key  = local.keycloak_secret_key
 
   depends_on = [kubernetes_namespace.keycloak]
-}
-
-module "remote_cluster_keycloak_config" {
-  source = "../modules/remote_cluster_keycloak_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  admin_id           = var.keycloak_admin_username
-  infra_realm_name   = var.keycloak_infra_realm
-  backend_realm_name = var.keycloak_backend_realm
-
-  depends_on = [kubernetes_secret.remote_clusters]
-}
-
-module "keycloak_harbor_client_config" {
-  source = "../modules/keycloak_generic_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.remote_cluster_keycloak_config.infra_realm_id
-  client_id           = var.harbor_keycloak_client_id
-  client_secret       = local.harbor_keycloak_client_secret
-  root_url            = local.harbor_url
-  base_url            = var.harbor_keycloak_base_url
-  admin_url           = local.harbor_url
-  web_origins         = [local.harbor_url]
-  valid_redirect_uris = [join("/", [local.harbor_url, "c/oidc/callback"])]
-  client_group        = var.harbor_keycloak_oidc_admin_group
-
-  depends_on = [kubernetes_secret.remote_clusters]
-}
-
-module "keycloak_grafana_client_config" {
-  source = "../modules/keycloak_grafana_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.remote_cluster_keycloak_config.infra_realm_id
-  client_id           = var.grafana_keycloak_client_id
-  client_secret       = random_password.grafana_keycloak_client_secret.result
-  root_url            = local.grafana_url
-  base_url            = var.grafana_keycloak_base_url
-  admin_url           = local.grafana_url
-  web_origins         = [local.grafana_url]
-  valid_redirect_uris = [join("/", [local.grafana_url, "login/generic_oauth"])]
-  client_group        = var.grafana_keycloak_oidc_admin_group
-
-  depends_on = [kubernetes_secret.remote_clusters]
-}
-
-module "keycloak_alertmanager_client_config" {
-  source = "../modules/keycloak_oauth2_proxy_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.remote_cluster_keycloak_config.infra_realm_id
-  client_id           = var.alertmanager_keycloak_client_id
-  client_secret       = random_password.alertmanager_keycloak_client_secret.result
-  root_url            = local.alertmanager_url
-  base_url            = var.alertmanager_keycloak_base_url
-  admin_url           = local.alertmanager_url
-  web_origins         = [local.alertmanager_url]
-  valid_redirect_uris = [join("/", [local.alertmanager_url, "*"])]
-
-  depends_on = [kubernetes_secret.remote_clusters]
-}
-
-module "keycloak_prometheus_client_config" {
-  source = "../modules/keycloak_oauth2_proxy_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.remote_cluster_keycloak_config.infra_realm_id
-  client_id           = var.prometheus_keycloak_client_id
-  client_secret       = random_password.prometheus_keycloak_client_secret.result
-  root_url            = local.prometheus_url
-  base_url            = var.prometheus_keycloak_base_url
-  admin_url           = local.prometheus_url
-  web_origins         = [local.prometheus_url]
-  valid_redirect_uris = [join("/", [local.prometheus_url, "*"]), join("/", [local.alertmanager_url, "*"])]
-
-  depends_on = [kubernetes_secret.remote_clusters]
-}
-
-module "keycloak_backend_client_config" {
-  source = "../modules/keycloak_backend_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.remote_cluster_keycloak_config.backend_realm_id
-  client_id           = var.backend_keycloak_client_id
-  client_secret       = random_password.backend_keycloak_client_secret.result
-  root_url            = local.backend_url
-  base_url            = var.backend_keycloak_base_url
-  admin_url           = local.backend_url
-  web_origins         = [local.backend_url]
-  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${var.cluster_name}", "chorus-tre.ch", "*"])]
-
-  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 # Harbor
@@ -377,19 +185,6 @@ module "harbor_secret" {
   depends_on = [kubernetes_namespace.harbor]
 }
 
-module "harbor_config" {
-  source = "../modules/remote_cluster_harbor_config"
-
-  providers = {
-    harbor = harbor.harboradmin-provider
-  }
-
-  build_robot_username   = "harbor-build"
-  cluster_robot_username = "chorus"
-
-  depends_on = [kubernetes_secret.remote_clusters]
-}
-
 # need to upload the following charts
 # - backend 0.1.15
 # - matomo 0.0.9
@@ -420,10 +215,6 @@ module "harbor_config" {
 # regcred secret in frontend namespace
 # .dockerconfigjson
 # or is this created by reflector?!
-
-
-
-
 
 
 # Remote Cluster Connection for ArgoCD running on chorus-build
