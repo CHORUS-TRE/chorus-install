@@ -96,7 +96,7 @@ locals {
 
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
   backend_values_parsed = yamldecode(local.backend_values)
-  backend_url           = "https://${local.backend_values_parsed.ingress.hosts.0}"
+  backend_url           = "https://${local.backend_values_parsed.ingress.host}"
 }
 
 # Providers
@@ -161,7 +161,7 @@ resource "random_password" "backend_keycloak_client_secret" {
 
 data "kubernetes_secret" "harbor_oidc" {
   metadata {
-    name      = local.harbor_oidc_secret
+    name      = local.harbor_oidc_secret_name
     namespace = local.harbor_namespace
   }
 
