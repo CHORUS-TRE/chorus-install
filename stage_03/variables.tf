@@ -187,3 +187,15 @@ variable "backend_chart_name" {
   type        = string
   default     = "backend"
 }
+
+variable "kube_prometheus_stack_chart_name" {
+  description = "Kube Prometheus stack Helm chart name (i.e. Prometheus, Alertmanager, Grafana)"
+  type        = string
+  default     = "kube-prometheus-stack"
+}
+
+variable "harbor_admin_username" {
+  description = "Harbor admin username"
+  type        = string
+  default     = "admin"
+}
