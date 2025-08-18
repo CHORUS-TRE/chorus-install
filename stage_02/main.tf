@@ -278,7 +278,7 @@ module "keycloak_config" {
   }
 
   admin_id   = var.keycloak_admin_username
-  realm_name = var.keycloak_realm
+  infra_realm_name = var.keycloak_realm
 }
 
 module "keycloak_harbor_client_config" {
