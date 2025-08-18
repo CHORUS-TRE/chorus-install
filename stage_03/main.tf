@@ -77,11 +77,6 @@ locals {
   EOT
   #TODO: set oidc_verify_cert to "true"
 
-  harbor_keycloak_client_secret = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_oidc_secret_key}"]).oidc_client_secret
-
-  keycloak_admin_password = data.kubernetes_secret.keycloak_admin_password.data["${local.keycloak_secret_key}"]
-  harbor_admin_password   = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_secret_key}"]
-
   kube_prometheus_stack_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
   kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)
   grafana_url                         = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
@@ -105,6 +100,13 @@ provider "kubernetes" {
   alias          = "build_cluster"
   config_path    = var.kubeconfig_path
   config_context = var.kubeconfig_context
+}
+
+# Random passwords
+
+resource "random_password" "harbor_keycloak_client_secret" {
+  length  = 32
+  special = false
 }
 
 # Cert-Manager CRDs
