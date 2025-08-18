@@ -17,7 +17,7 @@ variable "helm_values_path" {
 variable "cert_manager_crds_path" {
   description = "Path to the downloaded Cert-Manager CRDs file"
   type        = string
-  default     = "../crds"
+  default     = "../../crds"
 }
 
 variable "cluster_name" {
@@ -50,7 +50,6 @@ variable "remote_cluster_kubeconfig_context" {
 variable "remote_cluster_name" {
   description = "The name of the remote cluster"
   type        = string
-  default     = ""
 }
 
 variable "remote_cluster_bearer_token" {

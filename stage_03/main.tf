@@ -1,6 +1,6 @@
 locals {
   argocd_namespace    = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
-  remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
+  remote_cluster_name = coalesce(local.remote_cluster_name, var.remote_cluster_kubeconfig_context)
 
   remote_cluster_config = jsonencode({
     bearerToken = var.remote_cluster_bearer_token
@@ -14,7 +14,7 @@ locals {
 
   keycloak_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml")
   keycloak_values_parsed = yamldecode(local.keycloak_values)
-  keycloak_namespace     = jsondecode(file("${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
+  keycloak_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
   keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
   keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_url           = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
@@ -25,14 +25,14 @@ locals {
   keycloak_db_admin_secret_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   keycloak_db_user_secret_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
-  harbor_values        = file("${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/values.yaml")
+  harbor_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed = yamldecode(local.harbor_values)
-  harbor_namespace     = jsondecode(file("${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
+  harbor_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
   harbor_secret_name   = local.harbor_values_parsed.harbor.existingSecretAdminPassword
   harbor_secret_key    = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
   harbor_url           = local.harbor_values_parsed.harbor.externalURL
 
-  harbor_db_values           = file("${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
+  harbor_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
   harbor_db_values_parsed    = yamldecode(local.harbor_db_values)
   harbor_db_secret_name      = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   harbor_db_admin_secret_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
@@ -82,19 +82,19 @@ locals {
   keycloak_admin_password = data.kubernetes_secret.keycloak_admin_password.data["${local.keycloak_secret_key}"]
   harbor_admin_password = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_secret_key}"]
 
-  kube_prometheus_stack_values = file("${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
+  kube_prometheus_stack_values = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
   kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)
   grafana_url = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
 
-  alertmanager_oauth2_proxy_values        = file("${var.helm_values_path}/${var.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml")
+  alertmanager_oauth2_proxy_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml")
   alertmanager_oauth2_proxy_values_parsed = yamldecode(local.alertmanager_oauth2_proxy_values)
   alertmanager_url                        = "https://${local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
 
-  prometheus_oauth2_proxy_values        = file("${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml")
+  prometheus_oauth2_proxy_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml")
   prometheus_oauth2_proxy_values_parsed = yamldecode(local.prometheus_oauth2_proxy_values)
   prometheus_url                        = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
 
-  backend_values        = file("${var.helm_values_path}/${var.cluster_name}/${var.backend_chart_name}/values.yaml")
+  backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
   backend_values_parsed = yamldecode(local.backend_values)
   backend_url           = "https://${local.backend_values_parsed.ingress.hosts.0}"
 }
@@ -164,6 +164,8 @@ data "kubernetes_secret" "harbor_oidc" {
     name      = local.harbor_oidc_secret
     namespace = local.harbor_namespace
   }
+
+  depends_on = [ module.harbor_secret ]
 }
 
 data "kubernetes_secret" "keycloak_admin_password" {
@@ -171,6 +173,8 @@ data "kubernetes_secret" "keycloak_admin_password" {
     name      = local.keycloak_secret_name
     namespace = local.keycloak_namespace
   }
+
+  depends_on = [ module.keycloak_secret ]
 }
 
 data "kubernetes_secret" "harbor_admin_password" {
@@ -178,6 +182,8 @@ data "kubernetes_secret" "harbor_admin_password" {
     name      = local.harbor_secret_name
     namespace = local.harbor_namespace
   }
+
+  depends_on = [ module.harbor_secret ]
 }
 
 # Cert-Manager CRDs
