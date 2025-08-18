@@ -227,6 +227,8 @@ module "remote_cluster_keycloak_config" {
   admin_id           = var.keycloak_admin_username
   infra_realm_name   = var.keycloak_infra_realm
   backend_realm_name = var.keycloak_backend_realm
+
+  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 module "keycloak_harbor_client_config" {
@@ -245,6 +247,8 @@ module "keycloak_harbor_client_config" {
   web_origins         = [local.harbor_url]
   valid_redirect_uris = [join("/", [local.harbor_url, "c/oidc/callback"])]
   client_group        = var.harbor_keycloak_oidc_admin_group
+
+  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 module "keycloak_grafana_client_config" {
@@ -263,6 +267,8 @@ module "keycloak_grafana_client_config" {
   web_origins         = [local.grafana_url]
   valid_redirect_uris = [join("/", [local.grafana_url, "login/generic_oauth"])]
   client_group        = var.grafana_keycloak_oidc_admin_group
+
+  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 module "keycloak_alertmanager_client_config" {
@@ -280,6 +286,8 @@ module "keycloak_alertmanager_client_config" {
   admin_url           = local.alertmanager_url
   web_origins         = [local.alertmanager_url]
   valid_redirect_uris = [join("/", [local.alertmanager_url, "*"])]
+
+  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 module "keycloak_prometheus_client_config" {
@@ -297,6 +305,8 @@ module "keycloak_prometheus_client_config" {
   admin_url           = local.prometheus_url
   web_origins         = [local.prometheus_url]
   valid_redirect_uris = [join("/", [local.prometheus_url, "*"]), join("/", [local.alertmanager_url, "*"])]
+
+  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 module "keycloak_backend_client_config" {
@@ -313,7 +323,9 @@ module "keycloak_backend_client_config" {
   base_url            = var.backend_keycloak_base_url
   admin_url           = local.backend_url
   web_origins         = [local.backend_url]
-  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${var.var.cluster_name}", "chorus-tre.ch", "*"])]
+  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${var.cluster_name}", "chorus-tre.ch", "*"])]
+
+  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 # Harbor
