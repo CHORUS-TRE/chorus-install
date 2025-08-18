@@ -277,7 +277,7 @@ module "keycloak_config" {
     keycloak = keycloak.kcadmin-provider
   }
 
-  admin_id   = var.keycloak_admin_username
+  admin_id         = var.keycloak_admin_username
   infra_realm_name = var.keycloak_realm
 }
 
