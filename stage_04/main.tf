@@ -266,38 +266,3 @@ module "harbor_config" {
 # regcred secret in frontend namespace
 # .dockerconfigjson
 # or is this created by reflector?!
-
-
-
-
-
-
-# Remote Cluster Connection for ArgoCD running on chorus-build
-
-resource "kubernetes_secret" "remote_clusters" {
-  provider = kubernetes.build_cluster
-
-  metadata {
-    name      = "${local.remote_cluster_name}-cluster"
-    namespace = local.argocd_namespace
-    labels = {
-      "argocd.argoproj.io/secret-type" = "cluster"
-    }
-  }
-
-  data = {
-    name   = local.remote_cluster_name
-    server = var.remote_cluster_server
-    config = local.remote_cluster_config
-  }
-
-  # We wait for the remote cluster configuration
-  # to complete to avoir race condition on
-  # namespace creation
-  depends_on = [
-    module.harbor_db_secret,
-    module.harbor_secret,
-    module.keycloak_db_secret,
-    module.keycloak_secret
-  ]
-}
