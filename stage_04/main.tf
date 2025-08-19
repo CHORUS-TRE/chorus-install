@@ -62,14 +62,18 @@ locals {
       k8s_client_api_server = var.remote_cluster_server
       k8s_client_ca = var.remote_cluster_ca_data
       k8s_client_token = var.remote_cluster_bearer_token
-      k8s_client_image_pull_secrets = {
-      - registry: "harbor.${var.cluster_name}.chorus-tre.ch"
-        username: join("", ["robot$", "${var.cluster_name}"])
-        password: module.harbor_config.build_robot_password
-      - registry: "harbor.${var.remote_cluster_name}.chorus-tre.ch"
-        username: join("", ["robot$", "${var.remote_cluster_name}"])
-        password: module.harbor_config.cluster_robot_password
-      }
+      k8s_client_image_pull_secrets = [
+        {
+          registry = "harbor.${var.cluster_name}.chorus-tre.ch"
+          username = join("", ["robot$", "${var.cluster_name}"])
+          password = module.harbor_config.build_robot_password
+        },
+        {
+          registry = "harbor.${var.remote_cluster_name}.chorus-tre.ch"
+          username = join("", ["robot$", "${var.remote_cluster_name}"])
+          password = module.harbor_config.cluster_robot_password
+        }
+      ]
       keycloak_openid_client_secret = random_password.backend_keycloak_client_secret.result
       steward_user_password = random_password.steward_password.result
     }
