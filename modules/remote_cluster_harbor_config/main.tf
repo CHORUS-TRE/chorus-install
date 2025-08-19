@@ -252,10 +252,6 @@ resource "harbor_robot_account" "build" {
       resource = "purge-audit"
     }
     access {
-      action   = "list"
-      resource = "quota"
-    }
-    access {
       action   = "update"
       resource = "quota"
     }
@@ -477,10 +473,6 @@ resource "harbor_robot_account" "build" {
       resource = "project"
     }
     access {
-      action   = "list"
-      resource = "quota"
-    }
-    access {
       action   = "update"
       resource = "quota"
     }
@@ -698,10 +690,6 @@ resource "harbor_robot_account" "build" {
       resource = "project"
     }
     access {
-      action   = "list"
-      resource = "quota"
-    }
-    access {
       action   = "update"
       resource = "quota"
     }
@@ -917,10 +905,6 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "update"
       resource = "project"
-    }
-    access {
-      action   = "list"
-      resource = "quota"
     }
     access {
       action   = "update"
