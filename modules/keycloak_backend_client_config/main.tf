@@ -48,3 +48,18 @@ resource "keycloak_role" "realm_role" {
   realm_id    = var.realm_id
   name        = "uma_authorization"
 }
+
+resource "keycloak_user" "user" {
+    realm_id = var.realm_id
+    username = "service-account-chorus"
+    enabled  = false
+}
+
+resource "keycloak_user_roles" "user_roles" {
+  realm_id = var.realm_id
+  user_id  = keycloak_user.user.id
+
+  role_ids = [
+    keycloak_role.client_role.id
+  ]
+}
