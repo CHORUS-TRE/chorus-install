@@ -91,14 +91,6 @@ locals {
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
   backend_values_parsed = yamldecode(local.backend_values)
   backend_url           = "https://${local.backend_values_parsed.ingress.host}"
-
-  backend_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json")).namespace
-  backend_db_values = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml")
-  backend_db_values_parsed = yamldecode(local.backend_db_values)
-  backend_db_secret_name = local.backend_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
-  backend_db_admin_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-  backend_db_user_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
-
 }
 
 # Providers
@@ -207,15 +199,6 @@ module "harbor_secret" {
 # >> backend/values.deployment.serviceAccountName
 # secrets:
 # - name: backend-service-account-secret
-
-module "backend_db_secret" {
-  source = "../modules/db_secret"
-
-  namespace = local.backend_db_namespace
-  secret_name = local.backend_db_secret_name
-  db_user_secret_key = local.backend_db_user_secret_key
-  db_admin_secret_key = local.backend_db_admin_secret_key
-}
 
 # Matomo
 
