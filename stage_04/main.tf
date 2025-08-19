@@ -366,7 +366,7 @@ resource "kubernetes_secret" "backend_secrets" {
   }
 
   data = {
-    "secret.yaml" = local.backend_secrets_content
+    "secrets.yaml" = local.backend_secrets_content
   }
 }
 
