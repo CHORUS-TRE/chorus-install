@@ -405,11 +405,280 @@ resource "harbor_robot_account" "build" {
     namespace = "/"
   }
 
-/*
   permissions {
+    # Accessory
+    access {
+      action   = "list"
+      resource = "accessory"
+    }
+
+    # Artifact
+    access {
+      action   = "create"
+      resource = "artifact"
+    }
+    access {
+      action   = "delete"
+      resource = "artifact"
+    }
+    access {
+      action   = "list"
+      resource = "artifact"
+    }
+    access {
+      action   = "read"
+      resource = "artifact"
+    }
+
+    # Artifact Addition
+    access {
+      action   = "read"
+      resource = "artifact-addition"
+    }   
+
+    # Artifact Label
+    access {
+      action   = "create"
+      resource = "artifact-label"
+    }
+    access {
+      action   = "delete"
+      resource = "artifact-label"
+    }
+
+    # Immutable Tag
+    access {
+      action   = "create"
+      resource = "immutable-tag"
+    }  
+    access {
+      action   = "delete"
+      resource = "immutable-tag"
+    }  
+    access {
+      action   = "list"
+      resource = "immutable-tag"
+    }
+    access {
+      action   = "update"
+      resource = "immutable-tag"
+    }
+
+    # Label
+    access {
+      action   = "create"
+      resource = "label"
+    }  
+    access {
+      action   = "delete"
+      resource = "label"
+    }  
+    access {
+      action   = "list"
+      resource = "label"
+    }
+    access {
+      action   = "read"
+      resource = "label"
+    }
+    access {
+      action   = "update"
+      resource = "label"
+    }
+
+    # Log
+    access {
+      action   = "list"
+      resource = "log"
+    }
+
+    # Project Metadata
+    access {
+      action   = "create"
+      resource = "metadata"
+    }
+    access {
+      action   = "delete"
+      resource = "metadata"
+    }
+    access {
+      action   = "list"
+      resource = "metadata"
+    }
+    access {
+      action   = "read"
+      resource = "metadata"
+    }
+    access {
+      action   = "update"
+      resource = "metadata"
+    }
+
+    # Notification Policy
+    access {
+      action   = "create"
+      resource = "notification-policy"
+    }
+    access {
+      action   = "delete"
+      resource = "notification-policy"
+    }
+    access {
+      action   = "list"
+      resource = "notification-policy"
+    }
+    access {
+      action   = "read"
+      resource = "notification-policy"
+    }
+    access {
+      action   = "update"
+      resource = "notification-policy"
+    }
+
+    # Preheat Policy
+    access {
+      action   = "create"
+      resource = "preheat-policy"
+    }
+    access {
+      action   = "delete"
+      resource = "preheat-policy"
+    }
+    access {
+      action   = "list"
+      resource = "preheat-policy"
+    }
+    access {
+      action   = "read"
+      resource = "preheat-policy"
+    }
+    access {
+      action   = "update"
+      resource = "preheat-policy"
+    }
+
+    # Project
+    access {
+      action   = "delete"
+      resource = "project"
+    }
+    access {
+      action   = "read"
+      resource = "project"
+    }
+    access {
+      action   = "update"
+      resource = "project"
+    }
+
+    # Quota
+    access {
+      action   = "read"
+      resource = "quota"
+    }
+
+    # Repository
+    access {
+      action   = "delete"
+      resource = "repository"
+    }
+    access {
+      action   = "list"
+      resource = "repository"
+    }
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    access {
+      action   = "push"
+      resource = "repository"
+    }
+    access {
+      action   = "read"
+      resource = "repository"
+    }
+    access {
+      action   = "update"
+      resource = "repository"
+    }
+
+    # SBOM
+    access {
+      action   = "create"
+      resource = "sbom"
+    }
+    access {
+      action   = "read"
+      resource = "sbom"
+    }
+    access {
+      action   = "stop"
+      resource = "sbom"
+    }
+
+    # Scan
+    access {
+      action   = "create"
+      resource = "scan"
+    }
+    access {
+      action   = "read"
+      resource = "scan"
+    }
+    access {
+      action   = "stop"
+      resource = "scan"
+    }
+
+    # Scanner
+    access {
+      action   = "create"
+      resource = "scanner"
+    }
+    access {
+      action   = "read"
+      resource = "scanner"
+    }
+
+    # Tag
+    access {
+      action   = "create"
+      resource = "tag"
+    }
+    access {
+      action   = "delete"
+      resource = "tag"
+    }
+    access {
+      action   = "list"
+      resource = "tag"
+    }
+
+    # Tag Retention
+    access {
+      action   = "create"
+      resource = "tag-retention"
+    }
+    access {
+      action   = "delete"
+      resource = "tag-retention"
+    }
+    access {
+      action   = "list"
+      resource = "tag-retention"
+    }
+    access {
+      action   = "read"
+      resource = "tag-retention"
+    }
+    access {
+      action   = "update"
+      resource = "tag-retention"
+    }
 
     kind      = "project"
     namespace = "chorus"
   }
-*/
 }
