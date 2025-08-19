@@ -1,6 +1,7 @@
 resource "keycloak_openid_client" "openid_client" {
   realm_id      = var.realm_id
   client_id     = var.client_id
+  name          = title(var.client_id)
   client_secret = var.client_secret
   enabled       = true
   access_type   = "CONFIDENTIAL"
