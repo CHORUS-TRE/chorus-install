@@ -582,10 +582,6 @@ resource "harbor_robot_account" "build" {
       resource = "artifact"
     }
     access {
-      action   = "create"
-      resource = "artifact-addition"
-    }
-    access {
       action   = "read"
       resource = "artifact-addition"
     }
@@ -809,10 +805,6 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "read"
       resource = "artifact"
-    }
-    access {
-      action   = "create"
-      resource = "artifact-addition"
     }
     access {
       action   = "read"
