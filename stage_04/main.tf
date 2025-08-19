@@ -42,26 +42,26 @@ locals {
   prometheus_oauth2_proxy_values_parsed = yamldecode(local.prometheus_oauth2_proxy_values)
   prometheus_url                        = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
 
-  matomo_values = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml") 
+  matomo_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml")
   matomo_values_parsed = yamldecode(local.matomo_values)
-  matomo_url = "https://${local.matomo_values_parsed.matomo.ingress.hostname}"
+  matomo_url           = "https://${local.matomo_values_parsed.matomo.ingress.hostname}"
 
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
   backend_values_parsed = yamldecode(local.backend_values)
   backend_url           = "https://${local.backend_values_parsed.ingress.host}"
-  backend_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/config.json")).namespace
+  backend_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/config.json")).namespace
   backend_secrets_content = templatefile("${path.module}/backend_secrets.tmpl",
     {
-      daemon_jwt_secret = random_password.jwt_signature.result
-      daemon_metrics_authentication_enabled = "true"
+      daemon_jwt_secret                      = random_password.jwt_signature.result
+      daemon_metrics_authentication_enabled  = "true"
       daemon_metrics_authentication_username = "prometheus"
       daemon_metrics_authentication_password = random_password.metrics_password.result
-      daemon_private_key = trimspace(tls_private_key.chorus_backend_daemon.private_key_pem)
-      storage_datastores_chorus_password = random_password.datastores_password.result
-      k8s_client_is_watcher = "true"
-      k8s_client_api_server = var.remote_cluster_server
-      k8s_client_ca = var.remote_cluster_ca_data
-      k8s_client_token = var.remote_cluster_bearer_token
+      daemon_private_key                     = trimspace(tls_private_key.chorus_backend_daemon.private_key_pem)
+      storage_datastores_chorus_password     = random_password.datastores_password.result
+      k8s_client_is_watcher                  = "true"
+      k8s_client_api_server                  = var.remote_cluster_server
+      k8s_client_ca                          = var.remote_cluster_ca_data
+      k8s_client_token                       = var.remote_cluster_bearer_token
       k8s_client_image_pull_secrets = [
         {
           registry = "harbor.${var.cluster_name}.chorus-tre.ch"
@@ -75,16 +75,16 @@ locals {
         }
       ]
       keycloak_openid_client_secret = random_password.backend_keycloak_client_secret.result
-      steward_user_password = random_password.steward_password.result
+      steward_user_password         = random_password.steward_password.result
     }
   )
 
-  backend_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json")).namespace
-  backend_db_values = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml")
-  backend_db_values_parsed = yamldecode(local.backend_db_values)
-  backend_db_secret_name = local.backend_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  backend_db_namespace        = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json")).namespace
+  backend_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml")
+  backend_db_values_parsed    = yamldecode(local.backend_db_values)
+  backend_db_secret_name      = local.backend_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   backend_db_admin_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-  backend_db_user_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  backend_db_user_secret_key  = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
 }
 
@@ -322,9 +322,9 @@ module "harbor_config" {
 module "backend_db_secret" {
   source = "../modules/db_secret"
 
-  namespace = local.backend_db_namespace
-  secret_name = local.backend_db_secret_name
-  db_user_secret_key = local.backend_db_user_secret_key
+  namespace           = local.backend_db_namespace
+  secret_name         = local.backend_db_secret_name
+  db_user_secret_key  = local.backend_db_user_secret_key
   db_admin_secret_key = local.backend_db_admin_secret_key
 
   depends_on = [kubernetes_secret.remote_clusters]
@@ -368,7 +368,7 @@ resource "kubernetes_secret" "backend_secrets" {
   }
 
   data = {
-      "secret.yaml" = local.backend_secrets_content
+    "secret.yaml" = local.backend_secrets_content
   }
 
   depends_on = [kubernetes_secret.remote_clusters]

@@ -11,6 +11,6 @@ resource "keycloak_realm" "backend" {
   revoke_refresh_token        = true
   refresh_token_max_reuse     = 0
 
-  registration_allowed = true
+  registration_allowed     = true
   login_with_email_allowed = true
 }
