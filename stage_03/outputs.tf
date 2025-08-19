@@ -9,12 +9,12 @@ output "harbor_url_admin_login" {
 }
 
 output "harbor_username" {
-  value = try(module.harbor.harbor_username,
+  value = try(module.harbor_secret.harbor_username,
   "Failed to retrieve Harbor URL")
 }
 
 output "harbor_password" {
-  value     = module.harbor.harbor_password
+  value     = module.harbor_secret.harbor_password
   sensitive = true
 }
 
