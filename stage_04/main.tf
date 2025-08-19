@@ -326,8 +326,6 @@ module "backend_db_secret" {
   secret_name         = local.backend_db_secret_name
   db_user_secret_key  = local.backend_db_user_secret_key
   db_admin_secret_key = local.backend_db_admin_secret_key
-
-  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 resource "random_password" "jwt_signature" {
@@ -370,8 +368,6 @@ resource "kubernetes_secret" "backend_secrets" {
   data = {
     "secret.yaml" = local.backend_secrets_content
   }
-
-  depends_on = [kubernetes_secret.remote_clusters]
 }
 
 # Matomo
