@@ -228,14 +228,6 @@ resource "harbor_robot_account" "build" {
       resource = "project"
     }
     access {
-      action   = "read"
-      resource = "project"
-    }
-    access {
-      action   = "update"
-      resource = "project"
-    }
-    access {
       action   = "create"
       resource = "purge-audit"
     }
@@ -465,7 +457,7 @@ resource "harbor_robot_account" "build" {
       resource = "preheat-policy"
     }
     access {
-      action   = "create"
+      action   = "delete"
       resource = "project"
     }
     access {
@@ -682,7 +674,7 @@ resource "harbor_robot_account" "build" {
       resource = "preheat-policy"
     }
     access {
-      action   = "create"
+      action   = "delete"
       resource = "project"
     }
     access {
@@ -899,7 +891,7 @@ resource "harbor_robot_account" "build" {
       resource = "preheat-policy"
     }
     access {
-      action   = "create"
+      action   = "delete"
       resource = "project"
     }
     access {
