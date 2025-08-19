@@ -115,14 +115,3 @@ resource "helm_release" "harbor" {
     value = "false"
   }
 }
-
-# Retrieve data for outputs
-
-data "kubernetes_secret" "harbor_admin_password" {
-  metadata {
-    name      = var.harbor_admin_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  depends_on = [helm_release.harbor]
-}
