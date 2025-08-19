@@ -230,7 +230,7 @@ module "keycloak_backend_client_config" {
   base_url            = var.backend_keycloak_base_url
   admin_url           = local.backend_url
   web_origins         = [local.backend_url]
-  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${var.cluster_name}", "chorus-tre.ch", "*"])]
+  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${var.remote_cluster_name}.chorus-tre.ch", "*"])]
 }
 
 module "keycloak_matomo_client_config" {
