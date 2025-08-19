@@ -45,6 +45,11 @@ locals {
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
   backend_values_parsed = yamldecode(local.backend_values)
   backend_url           = "https://${local.backend_values_parsed.ingress.host}"
+
+  matomo_values = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml") 
+  matomo_values_parsed = yamldecode(local.matomo_values)
+  matomo_url = "https://${local.matomo_values_parsed.matomo.ingress.hostname}"
+
 }
 
 # Providers
@@ -97,6 +102,11 @@ resource "random_password" "prometheus_keycloak_client_secret" {
 }
 
 resource "random_password" "backend_keycloak_client_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "matomo_keycloak_client_secret" {
   length  = 32
   special = false
 }
@@ -221,6 +231,23 @@ module "keycloak_backend_client_config" {
   admin_url           = local.backend_url
   web_origins         = [local.backend_url]
   valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${var.cluster_name}", "chorus-tre.ch", "*"])]
+}
+
+module "keycloak_matomo_client_config" {
+  source = "../modules/keycloak_generic_client_config"
+
+  providers = {
+    keycloak = keycloak.kcadmin-provider
+  }
+
+  realm_id            = module.remote_cluster_keycloak_config.infra_realm_id
+  client_id           = var.matomo_keycloak_client_id
+  client_secret       = random_password.matomo_keycloak_client_secret.result
+  root_url            = local.matomo_url
+  base_url            = var.matomo_keycloak_base_url
+  admin_url           = local.matomo_url
+  web_origins         = [local.matomo_url]
+  valid_redirect_uris = [join("/", [local.matomo_url, "index.php?module=LoginOIDC&action=callback&provider=oidc"])]
 }
 
 # Harbor

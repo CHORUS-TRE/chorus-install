@@ -187,6 +187,24 @@ variable "backend_chart_name" {
   default     = "backend"
 }
 
+variable "matomo_keycloak_client_id" {
+  description = "Keycloak client ID assigned to Matomo"
+  type        = string
+  default     = "matomo"
+}
+
+variable "matomo_keycloak_base_url" {
+  description = "Matomo base URL or home URL for the Keycloak auth server to redirect to"
+  type        = string
+  default     = "/"
+}
+
+variable "matomo_chart_name" {
+  description = "Matomo Helm chart name"
+  type        = string
+  default     = "matomo"
+}
+
 variable "kube_prometheus_stack_chart_name" {
   description = "Kube Prometheus stack Helm chart name (i.e. Prometheus, Alertmanager, Grafana)"
   type        = string
