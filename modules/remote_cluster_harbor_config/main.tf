@@ -545,10 +545,6 @@ resource "harbor_robot_account" "build" {
       resource = "tag"
     }
     access {
-      action   = "update"
-      resource = "tag"
-    }
-    access {
       action   = "create"
       resource = "tag-retention"
     }
@@ -770,10 +766,6 @@ resource "harbor_robot_account" "build" {
       resource = "tag"
     }
     access {
-      action   = "update"
-      resource = "tag"
-    }
-    access {
       action   = "create"
       resource = "tag-retention"
     }
@@ -992,10 +984,6 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "list"
-      resource = "tag"
-    }
-    access {
-      action   = "update"
       resource = "tag"
     }
     access {
