@@ -21,7 +21,7 @@ resource "keycloak_openid_client" "openid_client" {
   # option does not seem to be available yet
 }
 
-data "keycloak_openid_client" "openid_cliend" {
+data "keycloak_openid_client" "openid_client" {
   realm_id   = var.realm_id
   client_id  = var.client_id
   depends_on = [keycloak_openid_client.openid_client]
@@ -29,7 +29,7 @@ data "keycloak_openid_client" "openid_cliend" {
 
 resource "keycloak_openid_client_optional_scopes" "client_optional_scopes" {
   realm_id  = var.realm_id
-  client_id = data.keycloak_openid_client.openid_cliend.id
+  client_id = data.keycloak_openid_client.openid_client.id
 
   optional_scopes = [
     "offline_access",
@@ -39,6 +39,6 @@ resource "keycloak_openid_client_optional_scopes" "client_optional_scopes" {
 
 resource "keycloak_group" "backend_uma_protection" {
   realm_id  = var.realm_id
-  parent_id = module.keycloak_generic_client_config.group_id
+  parent_id = keycloak_group.openid_client_group[0].id
   name      = "uma_protection"
 }
