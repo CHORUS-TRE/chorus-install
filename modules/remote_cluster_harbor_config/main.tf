@@ -155,12 +155,25 @@ resource "harbor_robot_account" "build" {
   level       = "system"
   secret      = random_password.cluster_robot_password.result
   permissions {
+    # Audit Log
     access {
       action   = "list"
       resource = "audit-log"
     }
+
+    # Catalog
+    access {
+      action   = "read"
+      resource = "catalog"
+    }
+
+    # Garbage Collection
     access {
       action   = "create"
+      resource = "garbage-collection"
+    }
+    access {
+      action   = "list"
       resource = "garbage-collection"
     }
     access {
@@ -174,21 +187,29 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "update"
       resource = "garbage-collection"
+    }
+
+    # Job Service Monitor
+    access {
+      action   = "list"
+      resource = "jobservice-monitor"
     }
     access {
       action   = "read"
       resource = "jobservice-monitor"
     }
     access {
+      action   = "stop"
+      resource = "jobservice-monitor"
+    }
+
+    # Label
+    access {
       action   = "create"
       resource = "label"
     }
     access {
       action   = "delete"
-      resource = "label"
-    }
-    access {
-      action   = "list"
       resource = "label"
     }
     access {
@@ -199,6 +220,8 @@ resource "harbor_robot_account" "build" {
       action   = "update"
       resource = "label"
     }
+
+    # Preheat Instance
     access {
       action   = "create"
       resource = "preheat-instance"
@@ -219,6 +242,8 @@ resource "harbor_robot_account" "build" {
       action   = "update"
       resource = "preheat-instance"
     }
+
+    # Project
     access {
       action   = "create"
       resource = "project"
@@ -227,8 +252,14 @@ resource "harbor_robot_account" "build" {
       action   = "list"
       resource = "project"
     }
+
+    # Purge Audit
     access {
       action   = "create"
+      resource = "purge-audit"
+    }
+    access {
+      action   = "list"
       resource = "purge-audit"
     }
     access {
@@ -243,6 +274,18 @@ resource "harbor_robot_account" "build" {
       action   = "update"
       resource = "purge-audit"
     }
+
+    # Quota
+    access {
+      action   = "list"
+      resource = "quota"
+    }
+    access {
+      action   = "read"
+      resource = "quota"
+    }
+
+    # Registry
     access {
       action   = "create"
       resource = "registry"
@@ -260,6 +303,12 @@ resource "harbor_robot_account" "build" {
       resource = "registry"
     }
     access {
+      action   = "update"
+      resource = "registry"
+    }
+
+    # Replication
+    access {
       action   = "create"
       resource = "replication"
     }
@@ -267,10 +316,18 @@ resource "harbor_robot_account" "build" {
       action   = "list"
       resource = "replication"
     }
+    access {
+      action   = "read"
+      resource = "replication"
+    }
+
+    # Replication Adapter
     access {
       action   = "list"
       resource = "replication-adapter"
     }
+
+    # Replication Policy
     access {
       action   = "create"
       resource = "replication-policy"
@@ -284,15 +341,25 @@ resource "harbor_robot_account" "build" {
       resource = "replication-policy"
     }
     access {
+      action   = "read"
+      resource = "replication-policy"
+    }
+    access {
       action   = "update"
       resource = "replication-policy"
     }
+
+    # Scan All
     access {
       action   = "create"
       resource = "scan-all"
     }
     access {
       action   = "list"
+      resource = "scan-all"
+    }
+    access {
+      action   = "read"
       resource = "scan-all"
     }
     access {
@@ -303,687 +370,54 @@ resource "harbor_robot_account" "build" {
       action   = "update"
       resource = "scan-all"
     }
+
+    # Scanner
     access {
       action   = "create"
       resource = "scanner"
     }
     access {
+      action   = "delete"
+      resource = "scanner"
+    }
+    access {
+      action   = "list"
+      resource = "scanner"
+    }
+    access {
+      action   = "read"
+      resource = "scanner"
+    }
+    access {
       action   = "update"
       resource = "scanner"
+    }
+
+    # Security Hub
+    access {
+      action   = "list"
+      resource = "security-hub"
     }
     access {
       action   = "read"
       resource = "security-hub"
     }
+
+    # System Volumes
     access {
-      action   = "list"
+      action   = "read"
       resource = "system-volumes"
     }
-    access {
-      action = "list"
-      resource = "quota"
-    }
-    access {
-      action = "read"
-      resource = "quota"
-    }
+
     kind      = "system"
     namespace = "/"
   }
 
+/*
   permissions {
-    access {
-      action   = "list"
-      resource = "accessory"
-    }
-    access {
-      action   = "create"
-      resource = "artifact"
-    }
-    access {
-      action   = "list"
-      resource = "artifact"
-    }
-    access {
-      action   = "read"
-      resource = "artifact"
-    }
-    access {
-      action   = "read"
-      resource = "artifact-addition"
-    }
-    access {
-      action   = "create"
-      resource = "artifact-label"
-    }
-    access {
-      action   = "delete"
-      resource = "artifact-label"
-    }
-    access {
-      action   = "create"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "list"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "update"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "create"
-      resource = "label"
-    }
-    access {
-      action   = "delete"
-      resource = "label"
-    }
-    access {
-      action   = "list"
-      resource = "label"
-    }
-    access {
-      action   = "read"
-      resource = "label"
-    }
-    access {
-      action   = "update"
-      resource = "label"
-    }
-    access {
-      action   = "list"
-      resource = "log"
-    }
-    access {
-      action   = "create"
-      resource = "metadata"
-    }
-    access {
-      action   = "delete"
-      resource = "metadata"
-    }
-    access {
-      action   = "list"
-      resource = "metadata"
-    }
-    access {
-      action   = "read"
-      resource = "metadata"
-    }
-    access {
-      action   = "update"
-      resource = "metadata"
-    }
-    access {
-      action   = "create"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "list"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "read"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "update"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "create"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "list"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "read"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "update"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "project"
-    }
-    access {
-      action   = "read"
-      resource = "project"
-    }
-    access {
-      action   = "update"
-      resource = "project"
-    }
-    access {
-      action   = "delete"
-      resource = "repository"
-    }
-    access {
-      action   = "list"
-      resource = "repository"
-    }
-    access {
-      action   = "pull"
-      resource = "repository"
-    }
-    access {
-      action   = "push"
-      resource = "repository"
-    }
-    access {
-      action   = "read"
-      resource = "repository"
-    }
-    access {
-      action   = "update"
-      resource = "repository"
-    }
-    access {
-      action   = "create"
-      resource = "sbom"
-    }
-    access {
-      action   = "read"
-      resource = "sbom"
-    }
-    access {
-      action   = "create"
-      resource = "scan"
-    }
-    access {
-      action   = "read"
-      resource = "scan"
-    }
-    access {
-      action   = "stop"
-      resource = "scan"
-    }
-    access {
-      action   = "create"
-      resource = "scanner"
-    }
-    access {
-      action   = "create"
-      resource = "tag"
-    }
-    access {
-      action   = "delete"
-      resource = "tag"
-    }
-    access {
-      action   = "list"
-      resource = "tag"
-    }
-    access {
-      action   = "create"
-      resource = "tag-retention"
-    }
-    access {
-      action   = "list"
-      resource = "tag-retention"
-    }
-    access {
-      action   = "update"
-      resource = "tag-retention"
-    }
-    access {
-      action = "read"
-      resource = "quota"
-    }
+
     kind      = "project"
     namespace = "chorus"
   }
-
-  permissions {
-    access {
-      action   = "list"
-      resource = "accessory"
-    }
-    access {
-      action   = "create"
-      resource = "artifact"
-    }
-    access {
-      action   = "list"
-      resource = "artifact"
-    }
-    access {
-      action   = "read"
-      resource = "artifact"
-    }
-    access {
-      action   = "read"
-      resource = "artifact-addition"
-    }
-    access {
-      action   = "create"
-      resource = "artifact-label"
-    }
-    access {
-      action   = "delete"
-      resource = "artifact-label"
-    }
-    access {
-      action   = "create"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "list"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "update"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "create"
-      resource = "label"
-    }
-    access {
-      action   = "delete"
-      resource = "label"
-    }
-    access {
-      action   = "list"
-      resource = "label"
-    }
-    access {
-      action   = "read"
-      resource = "label"
-    }
-    access {
-      action   = "update"
-      resource = "label"
-    }
-    access {
-      action   = "list"
-      resource = "log"
-    }
-    access {
-      action   = "create"
-      resource = "metadata"
-    }
-    access {
-      action   = "delete"
-      resource = "metadata"
-    }
-    access {
-      action   = "list"
-      resource = "metadata"
-    }
-    access {
-      action   = "read"
-      resource = "metadata"
-    }
-    access {
-      action   = "update"
-      resource = "metadata"
-    }
-    access {
-      action   = "create"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "list"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "read"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "update"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "create"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "list"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "read"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "update"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "project"
-    }
-    access {
-      action   = "read"
-      resource = "project"
-    }
-    access {
-      action   = "update"
-      resource = "project"
-    }
-    access {
-      action   = "delete"
-      resource = "repository"
-    }
-    access {
-      action   = "list"
-      resource = "repository"
-    }
-    access {
-      action   = "pull"
-      resource = "repository"
-    }
-    access {
-      action   = "push"
-      resource = "repository"
-    }
-    access {
-      action   = "read"
-      resource = "repository"
-    }
-    access {
-      action   = "update"
-      resource = "repository"
-    }
-    access {
-      action   = "create"
-      resource = "sbom"
-    }
-    access {
-      action   = "read"
-      resource = "sbom"
-    }
-    access {
-      action   = "create"
-      resource = "scan"
-    }
-    access {
-      action   = "read"
-      resource = "scan"
-    }
-    access {
-      action   = "stop"
-      resource = "scan"
-    }
-    access {
-      action   = "create"
-      resource = "scanner"
-    }
-    access {
-      action   = "create"
-      resource = "tag"
-    }
-    access {
-      action   = "delete"
-      resource = "tag"
-    }
-    access {
-      action   = "list"
-      resource = "tag"
-    }
-    access {
-      action   = "create"
-      resource = "tag-retention"
-    }
-    access {
-      action   = "list"
-      resource = "tag-retention"
-    }
-    access {
-      action   = "update"
-      resource = "tag-retention"
-    }
-    access {
-      action = "read"
-      resource = "quota"
-    }
-    kind      = "project"
-    namespace = "services"
-  }
-
-  permissions {
-    access {
-      action   = "list"
-      resource = "accessory"
-    }
-    access {
-      action   = "create"
-      resource = "artifact"
-    }
-    access {
-      action   = "list"
-      resource = "artifact"
-    }
-    access {
-      action   = "read"
-      resource = "artifact"
-    }
-    access {
-      action   = "read"
-      resource = "artifact-addition"
-    }
-    access {
-      action   = "create"
-      resource = "artifact-label"
-    }
-    access {
-      action   = "delete"
-      resource = "artifact-label"
-    }
-    access {
-      action   = "create"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "list"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "update"
-      resource = "immutable-tag"
-    }
-    access {
-      action   = "create"
-      resource = "label"
-    }
-    access {
-      action   = "delete"
-      resource = "label"
-    }
-    access {
-      action   = "list"
-      resource = "label"
-    }
-    access {
-      action   = "read"
-      resource = "label"
-    }
-    access {
-      action   = "update"
-      resource = "label"
-    }
-    access {
-      action   = "list"
-      resource = "log"
-    }
-    access {
-      action   = "create"
-      resource = "metadata"
-    }
-    access {
-      action   = "delete"
-      resource = "metadata"
-    }
-    access {
-      action   = "list"
-      resource = "metadata"
-    }
-    access {
-      action   = "read"
-      resource = "metadata"
-    }
-    access {
-      action   = "update"
-      resource = "metadata"
-    }
-    access {
-      action   = "create"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "list"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "read"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "update"
-      resource = "notification-policy"
-    }
-    access {
-      action   = "create"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "list"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "read"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "update"
-      resource = "preheat-policy"
-    }
-    access {
-      action   = "delete"
-      resource = "project"
-    }
-    access {
-      action   = "read"
-      resource = "project"
-    }
-    access {
-      action   = "update"
-      resource = "project"
-    }
-    access {
-      action   = "delete"
-      resource = "repository"
-    }
-    access {
-      action   = "list"
-      resource = "repository"
-    }
-    access {
-      action   = "pull"
-      resource = "repository"
-    }
-    access {
-      action   = "push"
-      resource = "repository"
-    }
-    access {
-      action   = "read"
-      resource = "repository"
-    }
-    access {
-      action   = "update"
-      resource = "repository"
-    }
-    access {
-      action   = "create"
-      resource = "sbom"
-    }
-    access {
-      action   = "read"
-      resource = "sbom"
-    }
-    access {
-      action   = "create"
-      resource = "scan"
-    }
-    access {
-      action   = "read"
-      resource = "scan"
-    }
-    access {
-      action   = "stop"
-      resource = "scan"
-    }
-    access {
-      action   = "create"
-      resource = "scanner"
-    }
-    access {
-      action   = "create"
-      resource = "tag"
-    }
-    access {
-      action   = "delete"
-      resource = "tag"
-    }
-    access {
-      action   = "list"
-      resource = "tag"
-    }
-    access {
-      action   = "create"
-      resource = "tag-retention"
-    }
-    access {
-      action   = "list"
-      resource = "tag-retention"
-    }
-    access {
-      action   = "update"
-      resource = "tag-retention"
-    }
-    access {
-      action = "read"
-      resource = "quota"
-    }
-    kind      = "project"
-    namespace = "apps"
-  }
-
-  depends_on = [
-    harbor_project.projects,
-    harbor_project.proxy_cache
-  ]
+*/
 }
