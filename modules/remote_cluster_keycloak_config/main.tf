@@ -7,7 +7,6 @@ module "keycloak_config" {
 
 resource "keycloak_realm" "backend" {
   realm                       = var.backend_realm_name
-  organizations_enabled       = true
   default_signature_algorithm = "RS256"
   revoke_refresh_token        = true
   refresh_token_max_reuse     = 0
