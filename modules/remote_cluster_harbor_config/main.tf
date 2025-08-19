@@ -157,27 +157,27 @@ resource "harbor_robot_account" "build" {
   permissions {
     access {
       action   = "list"
-      resource = "audit_log"
+      resource = "audit-log"
     }
     access {
       action   = "create"
-      resource = "garbage_collection"
+      resource = "garbage-collection"
     }
     access {
       action   = "read"
-      resource = "garbage_collection"
+      resource = "garbage-collection"
     }
     access {
       action   = "stop"
-      resource = "garbage_collection"
+      resource = "garbage-collection"
     }
     access {
       action   = "update"
-      resource = "garbage_collection"
+      resource = "garbage-collection"
     }
     access {
       action   = "read"
-      resource = "job_service_monitor"
+      resource = "jobservice-monitor"
     }
     access {
       action   = "create"
@@ -201,23 +201,23 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "preheat_instance"
+      resource = "preheat-instance"
     }
     access {
       action   = "delete"
-      resource = "preheat_instance"
+      resource = "preheat-instance"
     }
     access {
       action   = "list"
-      resource = "preheat_instance"
+      resource = "preheat-instance"
     }
     access {
       action   = "read"
-      resource = "preheat_instance"
+      resource = "preheat-instance"
     }
     access {
       action   = "update"
-      resource = "preheat_instance"
+      resource = "preheat-instance"
     }
     access {
       action   = "create"
@@ -237,19 +237,19 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "purge_audit"
+      resource = "purge-audit"
     }
     access {
       action   = "read"
-      resource = "purge_audit"
+      resource = "purge-audit"
     }
     access {
       action   = "stop"
-      resource = "purge_audit"
+      resource = "purge-audit"
     }
     access {
       action   = "update"
-      resource = "purge_audit"
+      resource = "purge-audit"
     }
     access {
       action   = "list"
@@ -285,39 +285,39 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "list"
-      resource = "replication_adapter"
+      resource = "replication-adapter"
     }
     access {
       action   = "create"
-      resource = "replication_policy"
+      resource = "replication-policy"
     }
     access {
       action   = "delete"
-      resource = "replication_policy"
+      resource = "replication-policy"
     }
     access {
       action   = "list"
-      resource = "replication_policy"
+      resource = "replication-policy"
     }
     access {
       action   = "update"
-      resource = "replication_policy"
+      resource = "replication-policy"
     }
     access {
       action   = "create"
-      resource = "scan_all"
+      resource = "scan-all"
     }
     access {
       action   = "list"
-      resource = "scan_all"
+      resource = "scan-all"
     }
     access {
       action   = "stop"
-      resource = "scan_all"
+      resource = "scan-all"
     }
     access {
       action   = "update"
-      resource = "scan_all"
+      resource = "scan-all"
     }
     access {
       action   = "create"
@@ -329,11 +329,11 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "read"
-      resource = "security_hub"
+      resource = "security-hub"
     }
     access {
       action   = "list"
-      resource = "system_volumes"
+      resource = "system-volumes"
     }
     kind      = "system"
     namespace = "/"
@@ -358,31 +358,31 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "artifact_addition"
+      resource = "artifact-addition"
     }
     access {
       action   = "read"
-      resource = "artifact_addition"
+      resource = "artifact-addition"
     }
     access {
       action   = "create"
-      resource = "artifact_label"
+      resource = "artifact-label"
     }
     access {
       action   = "delete"
-      resource = "artifact_label"
+      resource = "artifact-label"
     }
     access {
       action   = "create"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "list"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "update"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "create"
@@ -410,63 +410,63 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "delete"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "list"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "read"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "update"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "create"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "delete"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "list"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "read"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "update"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "create"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "delete"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "list"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "read"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "update"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "create"
@@ -554,15 +554,15 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     access {
       action   = "list"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     access {
       action   = "update"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     kind      = "project"
     namespace = "chorus"
@@ -587,31 +587,31 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "artifact_addition"
+      resource = "artifact-addition"
     }
     access {
       action   = "read"
-      resource = "artifact_addition"
+      resource = "artifact-addition"
     }
     access {
       action   = "create"
-      resource = "artifact_label"
+      resource = "artifact-label"
     }
     access {
       action   = "delete"
-      resource = "artifact_label"
+      resource = "artifact-label"
     }
     access {
       action   = "create"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "list"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "update"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "create"
@@ -639,63 +639,63 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "delete"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "list"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "read"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "update"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "create"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "delete"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "list"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "read"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "update"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "create"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "delete"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "list"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "read"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "update"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "create"
@@ -783,15 +783,15 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     access {
       action   = "list"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     access {
       action   = "update"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     kind      = "project"
     namespace = "services"
@@ -816,31 +816,31 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "artifact_addition"
+      resource = "artifact-addition"
     }
     access {
       action   = "read"
-      resource = "artifact_addition"
+      resource = "artifact-addition"
     }
     access {
       action   = "create"
-      resource = "artifact_label"
+      resource = "artifact-label"
     }
     access {
       action   = "delete"
-      resource = "artifact_label"
+      resource = "artifact-label"
     }
     access {
       action   = "create"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "list"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "update"
-      resource = "immutable_tag"
+      resource = "immutable-tag"
     }
     access {
       action   = "create"
@@ -868,63 +868,63 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "delete"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "list"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "read"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "update"
-      resource = "project_metadata"
+      resource = "metadata"
     }
     access {
       action   = "create"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "delete"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "list"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "read"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "update"
-      resource = "notification_policy"
+      resource = "notification-policy"
     }
     access {
       action   = "create"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "delete"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "list"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "read"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "update"
-      resource = "preheat_policy"
+      resource = "preheat-policy"
     }
     access {
       action   = "create"
@@ -1012,15 +1012,15 @@ resource "harbor_robot_account" "build" {
     }
     access {
       action   = "create"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     access {
       action   = "list"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     access {
       action   = "update"
-      resource = "tag_retention"
+      resource = "tag-retention"
     }
     kind      = "project"
     namespace = "apps"
