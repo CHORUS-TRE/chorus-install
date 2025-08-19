@@ -195,10 +195,6 @@ resource "harbor_robot_account" "build" {
       resource = "jobservice-monitor"
     }
     access {
-      action   = "read"
-      resource = "jobservice-monitor"
-    }
-    access {
       action   = "stop"
       resource = "jobservice-monitor"
     }
@@ -352,10 +348,6 @@ resource "harbor_robot_account" "build" {
     # Scan All
     access {
       action   = "create"
-      resource = "scan-all"
-    }
-    access {
-      action   = "list"
       resource = "scan-all"
     }
     access {
