@@ -252,10 +252,6 @@ resource "harbor_robot_account" "build" {
       resource = "purge-audit"
     }
     access {
-      action   = "update"
-      resource = "quota"
-    }
-    access {
       action   = "create"
       resource = "registry"
     }
@@ -330,6 +326,14 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "list"
       resource = "system-volumes"
+    }
+    access {
+      action = "list"
+      resource = "quota"
+    }
+    access {
+      action = "read"
+      resource = "quota"
     }
     kind      = "system"
     namespace = "/"
@@ -473,10 +477,6 @@ resource "harbor_robot_account" "build" {
       resource = "project"
     }
     access {
-      action   = "update"
-      resource = "quota"
-    }
-    access {
       action   = "delete"
       resource = "repository"
     }
@@ -547,6 +547,10 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "update"
       resource = "tag-retention"
+    }
+    access {
+      action = "read"
+      resource = "quota"
     }
     kind      = "project"
     namespace = "chorus"
@@ -690,10 +694,6 @@ resource "harbor_robot_account" "build" {
       resource = "project"
     }
     access {
-      action   = "update"
-      resource = "quota"
-    }
-    access {
       action   = "delete"
       resource = "repository"
     }
@@ -764,6 +764,10 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "update"
       resource = "tag-retention"
+    }
+    access {
+      action = "read"
+      resource = "quota"
     }
     kind      = "project"
     namespace = "services"
@@ -907,10 +911,6 @@ resource "harbor_robot_account" "build" {
       resource = "project"
     }
     access {
-      action   = "update"
-      resource = "quota"
-    }
-    access {
       action   = "delete"
       resource = "repository"
     }
@@ -981,6 +981,10 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "update"
       resource = "tag-retention"
+    }
+    access {
+      action = "read"
+      resource = "quota"
     }
     kind      = "project"
     namespace = "apps"
