@@ -434,7 +434,7 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "read"
       resource = "artifact-addition"
-    }   
+    }
 
     # Artifact Label
     access {
@@ -450,11 +450,11 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "create"
       resource = "immutable-tag"
-    }  
+    }
     access {
       action   = "delete"
       resource = "immutable-tag"
-    }  
+    }
     access {
       action   = "list"
       resource = "immutable-tag"
@@ -468,11 +468,11 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "create"
       resource = "label"
-    }  
+    }
     access {
       action   = "delete"
       resource = "label"
-    }  
+    }
     access {
       action   = "list"
       resource = "label"
@@ -711,7 +711,7 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "read"
       resource = "artifact-addition"
-    }   
+    }
 
     # Artifact Label
     access {
@@ -727,11 +727,11 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "create"
       resource = "immutable-tag"
-    }  
+    }
     access {
       action   = "delete"
       resource = "immutable-tag"
-    }  
+    }
     access {
       action   = "list"
       resource = "immutable-tag"
@@ -745,11 +745,11 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "create"
       resource = "label"
-    }  
+    }
     access {
       action   = "delete"
       resource = "label"
-    }  
+    }
     access {
       action   = "list"
       resource = "label"
@@ -988,7 +988,7 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "read"
       resource = "artifact-addition"
-    }   
+    }
 
     # Artifact Label
     access {
@@ -1004,11 +1004,11 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "create"
       resource = "immutable-tag"
-    }  
+    }
     access {
       action   = "delete"
       resource = "immutable-tag"
-    }  
+    }
     access {
       action   = "list"
       resource = "immutable-tag"
@@ -1022,11 +1022,11 @@ resource "harbor_robot_account" "build" {
     access {
       action   = "create"
       resource = "label"
-    }  
+    }
     access {
       action   = "delete"
       resource = "label"
-    }  
+    }
     access {
       action   = "list"
       resource = "label"
