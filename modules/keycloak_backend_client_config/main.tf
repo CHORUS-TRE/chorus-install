@@ -38,6 +38,9 @@ resource "keycloak_openid_client_optional_scopes" "client_optional_scopes" {
   ]
 }
 
+/*
+# TODO: check if the following roles are needed
+# or not during next install and remove if obsolete
 resource "keycloak_role" "client_role" {
   realm_id    = var.realm_id
   client_id = keycloak_openid_client.openid_client.id
@@ -63,3 +66,4 @@ resource "keycloak_user_roles" "user_roles" {
     keycloak_role.client_role.id
   ]
 }
+*/
