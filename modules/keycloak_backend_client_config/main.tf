@@ -16,6 +16,7 @@ resource "keycloak_openid_client" "openid_client" {
   implicit_flow_enabled        = true
   direct_access_grants_enabled = true
   frontchannel_logout_enabled  = true
+
   oauth2_device_authorization_grant_enabled = true
   # TODO: add oidc_ciba_grant_enablesd = true
   # option does not seem to be available yet
@@ -37,8 +38,13 @@ resource "keycloak_openid_client_optional_scopes" "client_optional_scopes" {
   ]
 }
 
-resource "keycloak_group" "backend_uma_protection" {
-  realm_id  = var.realm_id
-  parent_id = keycloak_group.openid_client_group[0].id
-  name      = "uma_protection"
+resource "keycloak_role" "client_role" {
+  realm_id    = var.realm_id
+  client_id = keycloak_openid_client.openid_client.id
+  name        = "uma_protection"
+}
+
+resource "keycloak_role" "realm_role" {
+  realm_id    = var.realm_id
+  name        = "uma_authorization"
 }
