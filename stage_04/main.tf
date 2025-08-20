@@ -60,7 +60,7 @@ locals {
   matomo_db_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml")
   matomo_db_values_parsed = yamldecode(local.matomo_db_values)
   matomo_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
-  matomo_db_secret_name   = local.matomo_values_parsed.matomo.existingSecret
+  matomo_db_secret_name   = local.matomo_db_values_parsed.matomo.existingSecret
 
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
   backend_values_parsed = yamldecode(local.backend_values)
