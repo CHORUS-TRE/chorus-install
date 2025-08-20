@@ -443,7 +443,7 @@ resource "kubernetes_secret" "matomo_secret" {
 
 data "kubernetes_secret" "mariadb_secret" {
   metadata {
-    name = "mariadb_secret"
+    name = "mariadb-secret"
     namespace = local.matomo_db_namespace
   }
 }
