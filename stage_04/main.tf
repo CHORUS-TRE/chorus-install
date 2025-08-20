@@ -421,17 +421,6 @@ resource "kubernetes_secret" "backend_secrets" {
 
 # Matomo
 
-# matomo-mariadb-secret secret in matomo namespace
-# db-password:
-
-# Web-UI / Frontend
-
-# regcred secret in frontend namespace
-# .dockerconfigjson
-# or is this created by reflector?!
-
-#secret "matomo-mariadb-secret" not found, secret "matomo-matomo-secret" not found
-
 resource "random_password" "matomo_password" {
   length  = 32
   special = true
@@ -450,6 +439,7 @@ resource "kubernetes_secret" "matomo_secret" {
   }
 }
 
+/*
 resource "random_password" "matomo_db_password" {
   length  = 32
   special = true
@@ -467,3 +457,44 @@ resource "kubernetes_secret" "matomo_db_secret" {
     db-password = random_password.matomo_db_password.result
   }
 }
+*/
+
+resource "random_password" "mariadb_password" {
+  length  = 32
+  special = true
+}
+
+resource "random_password" "mariadb_replication_password" {
+  length  = 32
+  special = true
+}
+
+resource "random_password" "mariadb_root_password" {
+  length  = 32
+  special = true
+}
+
+
+resource "kubernetes_secret" "mariadb_secret" {
+
+  metadata {
+    name      = local.matomo_db_secret_name
+    namespace = local.matomo_db_namespace
+
+  }
+
+  data = {
+    mariadb-password = random_password.mariadb_password.result
+    mariadb-replication-password = random_password.mariadb_replication_password.result
+    mariadb-root-password = random_password.mariadb_root_password.result
+  }
+}
+
+# matomo-db-tls-secret
+
+
+# Web-UI / Frontend
+
+# regcred secret in frontend namespace
+# .dockerconfigjson
+# or is this created by reflector?!
