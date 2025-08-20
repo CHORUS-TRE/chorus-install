@@ -216,3 +216,9 @@ variable "harbor_admin_username" {
   type        = string
   default     = "admin"
 }
+
+variable "oauth2_proxy_cache_chart_name" {
+  description = "OAuth2 proxy cache Helm chart name"
+  type        = string
+  default     = "oauth2-proxy-cache"
+}

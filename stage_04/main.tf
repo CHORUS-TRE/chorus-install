@@ -34,13 +34,18 @@ locals {
   kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)
   grafana_url                         = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
 
+  alertmanager_oauth2_proxy_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json")).namespace
   alertmanager_oauth2_proxy_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml")
   alertmanager_oauth2_proxy_values_parsed = yamldecode(local.alertmanager_oauth2_proxy_values)
   alertmanager_url                        = "https://${local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
 
+  prometheus_oauth2_proxy_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json")).namespace
   prometheus_oauth2_proxy_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml")
   prometheus_oauth2_proxy_values_parsed = yamldecode(local.prometheus_oauth2_proxy_values)
   prometheus_url                        = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
+
+  oauth2_proxy_cache_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json")).namespace
+  oauth2_proxy_cache_values    = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml")
 
   matomo_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml")
   matomo_values_parsed = yamldecode(local.matomo_values)
@@ -299,12 +304,25 @@ module "harbor_config" {
   cluster_robot_username = "chorus"
 }
 
-# need to upload the following charts
-# - backend 0.1.15
-# - matomo 0.0.9
-# - web-ui 1.3.4
-# - workbench-operator 0.3.17
-# helm pull oci://harbor.build.chorus-tre.ch/charts/workbench-operator --version 0.3.17
+# OAuth2 proxy
+
+module "oauth2_proxy" {
+  source = "../modules/oauth2_proxy"
+
+  alertmanager_oauth2_proxy_values = local.alertmanager_oauth2_proxy_values
+  prometheus_oauth2_proxy_values = local.prometheus_oauth2_proxy_values
+  oauth2_proxy_cache_values = local.oauth2_proxy_cache_values
+
+  prometheus_oauth2_proxy_namespace = local.prometheus_oauth2_proxy_namespace
+  alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
+  oauth2_proxy_cache_namespace = local.oauth2_proxy_cache_namespace
+
+  prometheus_keycloak_client_secret = random_password.prometheus_keycloak_client_secret.result
+  alertmanager_keycloak_client_secret = random_password.alertmanager_keycloak_client_secret.result
+
+  alertmanager_keycloak_client_id = var.alertmanager_keycloak_client_id
+  prometheus_keycloak_client_id = var.prometheus_keycloak_client_id
+}
 
 # Backend
 
