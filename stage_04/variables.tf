@@ -85,6 +85,12 @@ variable "keycloak_infra_realm" {
   default     = "infra"
 }
 
+variable "keycloak_backend_realm" {
+  description = "Keycloak chorus backend realm name"
+  type        = string
+  default     = "chorus"
+}
+
 variable "keycloak_admin_username" {
   description = "Keycloak admin username"
   type        = string

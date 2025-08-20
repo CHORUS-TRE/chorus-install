@@ -188,7 +188,7 @@ module "remote_cluster_keycloak_config" {
 
   admin_id           = var.keycloak_admin_username
   infra_realm_name   = var.keycloak_infra_realm
-  backend_realm_name = local.remote_cluster_name
+  backend_realm_name = var.backend_realm_name
 }
 
 module "keycloak_harbor_client_config" {
