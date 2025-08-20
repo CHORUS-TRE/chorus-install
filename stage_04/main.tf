@@ -314,11 +314,6 @@ resource "random_password" "grafana_admin_password" {
   special = false
 }
 
-resource "random_password" "grafana_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
 resource "kubernetes_secret" "grafana_oauth_client_secret" {
   metadata {
     name      = local.grafana_oauth_client_secret_name
