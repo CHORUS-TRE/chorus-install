@@ -61,6 +61,8 @@ locals {
   matomo_db_values_parsed = yamldecode(local.matomo_db_values)
   matomo_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
   matomo_db_secret_name   = local.matomo_db_values_parsed.mariadb.auth.existingSecret
+  matomo_db_configmap_name  = local.matomo_db_values_parsed.mariadb.initdbScriptsConfigMap
+
 
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
   backend_values_parsed = yamldecode(local.backend_values)
@@ -474,7 +476,24 @@ resource "kubernetes_secret" "mariadb_secret" {
   }
 }
 
-# matomo-db-tls-secret
+resource "kubernetes_config_map" "matomo_db_initdb" {
+  metadata {
+    name = local.matomo_db_configmap_name
+    namespace = local.matomo_db_namespace
+  }
+  data = {
+    "initdb.sh" =<<EOT
+      #!/bin/sh
+      set -eu
+      case "$(hostname)" in
+        *mariadb-0)
+          echo "Running DB init on primary node"
+          /opt/bitnami/mariadb/bin/mariadb -P 3306 -u root -p"$MARIADB_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS bitnami_matomo"
+          ;;
+      esac
+      EOT
+  }
+}
 
 
 # Web-UI / Frontend
