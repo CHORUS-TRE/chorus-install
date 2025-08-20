@@ -47,6 +47,9 @@ locals {
   oauth2_proxy_cache_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json")).namespace
   oauth2_proxy_cache_values    = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml")
 
+  grafana_namespace                        = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
+  grafana_oauth_client_secret_name     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
+
   matomo_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml")
   matomo_values_parsed = yamldecode(local.matomo_values)
   matomo_url           = "https://${local.matomo_values_parsed.matomo.ingress.hostname}"
@@ -302,6 +305,33 @@ module "harbor_config" {
 
   build_robot_username   = "harbor-build"
   cluster_robot_username = "chorus"
+}
+
+# Grafana
+
+resource "random_password" "grafana_admin_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "grafana_keycloak_client_secret" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "grafana_oauth_client_secret" {
+  metadata {
+    name      = local.grafana_oauth_client_secret_name
+    namespace = local.grafana_namespace
+  }
+
+  data = {
+    "admin-password"                                    = random_password.grafana_admin_password.result
+    "admin-user"                                        = var.grafana_admin_username
+    "${local.grafana_existing_oauth_client_secret_key}" = random_password.grafana_keycloak_client_secret.result
+  }
+
+  depends_on = [kubernetes_namespace.grafana]
 }
 
 # OAuth2 proxy

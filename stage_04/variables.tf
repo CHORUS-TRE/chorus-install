@@ -222,3 +222,9 @@ variable "oauth2_proxy_cache_chart_name" {
   type        = string
   default     = "oauth2-proxy-cache"
 }
+
+variable "grafana_admin_username" {
+  description = "Grafana admin username"
+  type        = string
+  default     = "admin"
+}
