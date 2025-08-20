@@ -47,8 +47,9 @@ locals {
   oauth2_proxy_cache_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json")).namespace
   oauth2_proxy_cache_values    = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml")
 
-  grafana_namespace                        = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
-  grafana_oauth_client_secret_name     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
+  grafana_namespace                = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
+  grafana_oauth_client_secret_name = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
+  grafana_oauth_client_secret_key  = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
 
   matomo_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml")
   matomo_values_parsed = yamldecode(local.matomo_values)
@@ -321,12 +322,10 @@ resource "kubernetes_secret" "grafana_oauth_client_secret" {
   }
 
   data = {
-    "admin-password"                                    = random_password.grafana_admin_password.result
-    "admin-user"                                        = var.grafana_admin_username
-    "${local.grafana_existing_oauth_client_secret_key}" = random_password.grafana_keycloak_client_secret.result
+    "admin-password"                           = random_password.grafana_admin_password.result
+    "admin-user"                               = var.grafana_admin_username
+    "${local.grafana_oauth_client_secret_key}" = random_password.grafana_keycloak_client_secret.result
   }
-
-  depends_on = [kubernetes_namespace.grafana]
 }
 
 # OAuth2 proxy
@@ -335,18 +334,18 @@ module "oauth2_proxy" {
   source = "../modules/oauth2_proxy"
 
   alertmanager_oauth2_proxy_values = local.alertmanager_oauth2_proxy_values
-  prometheus_oauth2_proxy_values = local.prometheus_oauth2_proxy_values
-  oauth2_proxy_cache_values = local.oauth2_proxy_cache_values
+  prometheus_oauth2_proxy_values   = local.prometheus_oauth2_proxy_values
+  oauth2_proxy_cache_values        = local.oauth2_proxy_cache_values
 
-  prometheus_oauth2_proxy_namespace = local.prometheus_oauth2_proxy_namespace
+  prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
   alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
-  oauth2_proxy_cache_namespace = local.oauth2_proxy_cache_namespace
+  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
 
-  prometheus_keycloak_client_secret = random_password.prometheus_keycloak_client_secret.result
+  prometheus_keycloak_client_secret   = random_password.prometheus_keycloak_client_secret.result
   alertmanager_keycloak_client_secret = random_password.alertmanager_keycloak_client_secret.result
 
   alertmanager_keycloak_client_id = var.alertmanager_keycloak_client_id
-  prometheus_keycloak_client_id = var.prometheus_keycloak_client_id
+  prometheus_keycloak_client_id   = var.prometheus_keycloak_client_id
 }
 
 # Backend
