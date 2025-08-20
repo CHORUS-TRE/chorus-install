@@ -439,26 +439,6 @@ resource "kubernetes_secret" "matomo_secret" {
   }
 }
 
-/*
-resource "random_password" "matomo_db_password" {
-  length  = 32
-  special = true
-}
-
-resource "kubernetes_secret" "matomo_db_secret" {
-
-  metadata {
-    name      = local.matomo_db_secret_name
-    namespace = local.matomo_db_namespace
-
-  }
-
-  data = {
-    db-password = random_password.matomo_db_password.result
-  }
-}
-*/
-
 resource "random_password" "mariadb_password" {
   length  = 32
   special = true
@@ -474,7 +454,10 @@ resource "random_password" "mariadb_root_password" {
   special = true
 }
 
-
+# TODO: Currently, the matomo chart looks for 
+# the key "db-password". Let's check if this 
+# can be changed so that we don't have to duplicate
+# the mariadb password twice
 resource "kubernetes_secret" "mariadb_secret" {
 
   metadata {
@@ -484,6 +467,7 @@ resource "kubernetes_secret" "mariadb_secret" {
   }
 
   data = {
+    db-password = random_password.mariadb_password.result
     mariadb-password = random_password.mariadb_password.result
     mariadb-replication-password = random_password.mariadb_replication_password.result
     mariadb-root-password = random_password.mariadb_root_password.result
