@@ -464,6 +464,6 @@ resource "kubernetes_secret" "matomo_db_secret" {
   }
 
   data = {
-    db-password = random_password.matomo_db_password
+    db-password = random_password.matomo_db_password.result
   }
 }
