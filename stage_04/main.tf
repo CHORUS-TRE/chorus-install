@@ -458,7 +458,7 @@ resource "kubernetes_secret" "matomo_db_secret" {
   }
 
   data = {
-    db-password = data.kubernetes_secret.mariadb_secret.madiadb_password
+    db-password = data.kubernetes_secret.mariadb_secret.data.madiadb_password
   }
 }
 
