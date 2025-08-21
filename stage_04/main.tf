@@ -505,7 +505,7 @@ resource "kubernetes_job" "matomo_db_init" {
   }
 
   spec {
-    backoff_limit = 3
+    backoff_limit = 100
 
     template {
       metadata {}
