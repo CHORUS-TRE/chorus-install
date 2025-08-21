@@ -524,7 +524,7 @@ resource "kubernetes_job" "matomo_db_init" {
                       --user=root \
                       --password="$MARIADB_ROOT_PASSWORD" <<'EOSQL'
                 CREATE DATABASE IF NOT EXISTS bitnami_matomo;
-                CREATE USER IF NOT EXISTS 'matomo'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';
+                CREATE USER IF NOT EXISTS 'matomo'@'%' IDENTIFIED BY '$${MARIADB_PASSWORD}';
                 GRANT ALL PRIVILEGES ON bitnami_matomo.* TO 'matomo'@'%';
                 FLUSH PRIVILEGES;
               EOSQL
