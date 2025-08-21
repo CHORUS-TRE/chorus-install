@@ -546,7 +546,7 @@ resource "kubernetes_job" "matomo_db_init" {
             value_from {
               secret_key_ref {
                 name = local.matomo_db_secret_name
-                key  = "mariadb_password"
+                key  = "mariadb-password"
               }
             }
           }
