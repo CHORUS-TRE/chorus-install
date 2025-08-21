@@ -105,6 +105,7 @@ locals {
   backend_db_admin_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   backend_db_user_secret_key  = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
+  i2b2_wildfly_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json")).namespace
   i2b2_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
 /*
   i2b2_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
@@ -558,7 +559,7 @@ resource "kubernetes_job" "matomo_db_init" {
 
 # i2b2
 
-resource "random_password" "i2b2_db_admin_password" {
+resource "random_password" "i2b2_pg_pass" {
   length  = 32
   special = false
 }
@@ -570,12 +571,59 @@ resource "kubernetes_secret" "i2b2_db_secret" {
   }
 
   data = {
-    "postgres-password" = random_password.i2b2_db_admin_password.result
+    "postgres-password" = random_password.i2b2_pg_pass.result
   }
 }
 
 # i2b2-postgresql, check if needed
 
+
+resource "random_password" "ds_crc_pass" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "ds_hive_pass" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "ds_ont_pass" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "ds_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "ds_pm_pass" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "ds_wd_pass" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "i2b2_wildfly" {
+  metadata {
+    name      = "i2b2-wildfly-secret"
+    namespace = local.i2b2_wildfly_namespace
+  }
+
+  data = {
+    ds_crc_pass = random_password.ds_crc_pass.result
+    ds_hive_pass = random_password.ds_hive_pass.result
+    ds_ont_pass = random_password.ds_ont_pass.result
+    ds_password = random_password.ds_password.result
+    ds_pm_pass = random_password.ds_pm_pass.result
+    ds_wd_pass = random_password.ds_wd_pass.result
+    pg_pass = random_password.i2b2_pg_pass.result
+  }
+}
 
 # Web-UI / Frontend
 
