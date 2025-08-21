@@ -514,7 +514,7 @@ resource "kubernetes_job" "matomo_db_init" {
 
         container {
           name  = "matomo-db-init"
-          image = "bitnami/mariadb:12.02"
+          image = "bitnami/mariadb:12.0.2"
 
           command = [
             "sh", "-c",
