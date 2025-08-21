@@ -105,6 +105,15 @@ locals {
   backend_db_admin_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   backend_db_user_secret_key  = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
+  i2b2_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
+/*
+  i2b2_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
+  i2b2_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/values.yaml")
+  i2b2_db_values_parsed    = yamldecode(local.i2b2_db_values)
+  i2b2_db_secret_name = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  i2b2_db_user_secret_key = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  i2b2_db_admin_secret_key = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
+*/
 }
 
 # Providers
@@ -546,6 +555,27 @@ resource "kubernetes_job" "matomo_db_init" {
     }
   }
 }
+
+# i2b2
+
+resource "random_password" "i2b2_db_admin_password" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "i2b2_db_secret" {
+  metadata {
+    name      = "i2b2-postgres-secret"
+    namespace = local.i2b2_db_namespace
+  }
+
+  data = {
+    "postgres-password" = random_password.i2b2_db_admin_password.result
+  }
+}
+
+# i2b2-postgresql, check if needed
+
 
 # Web-UI / Frontend
 

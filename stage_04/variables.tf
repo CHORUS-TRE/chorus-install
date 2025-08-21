@@ -228,3 +228,9 @@ variable "grafana_admin_username" {
   type        = string
   default     = "admin"
 }
+
+variable "i2b2_chart_name" {
+  description = "i2b2 Helm chart name"
+  type        = string
+  default     = "i2b2"
+}
