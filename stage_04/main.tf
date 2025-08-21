@@ -444,17 +444,14 @@ resource "kubernetes_secret" "matomo_secret" {
 
 resource "random_password" "mariadb_password" {
   length  = 32
-  special = true
 }
 
 resource "random_password" "mariadb_replication_password" {
   length  = 32
-  special = true
 }
 
 resource "random_password" "mariadb_root_password" {
   length  = 32
-  special = true
 }
 
 # TODO: Currently, the matomo chart looks for 
