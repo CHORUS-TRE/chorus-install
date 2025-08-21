@@ -477,27 +477,6 @@ resource "kubernetes_secret" "mariadb_secret" {
   }
 }
 
-/*
-resource "kubernetes_config_map" "matomo_db_initdb" {
-  metadata {
-    name = local.matomo_db_configmap_name
-    namespace = local.matomo_db_namespace
-  }
-  data = {
-    "initdb.sh" =<<EOT
-      #!/bin/sh
-      set -eu
-      case "$(hostname)" in
-        *mariadb-0)
-          echo "Running DB init on primary node"
-          /opt/bitnami/mariadb/bin/mariadb -P 3306 -u root -p"$MARIADB_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS bitnami_matomo"
-          ;;
-      esac
-      EOT
-  }
-}
-*/
-
 resource "kubernetes_job" "matomo_db_init" {
   metadata {
     name      = "matomo-db-init"
@@ -505,7 +484,7 @@ resource "kubernetes_job" "matomo_db_init" {
   }
 
   spec {
-    backoff_limit = 100
+    backoff_limit = 5
 
     template {
       metadata {}
@@ -517,7 +496,7 @@ resource "kubernetes_job" "matomo_db_init" {
           image = "bitnami/mariadb:12.0.2"
 
           command = [
-            "sh", "-c", 
+            "sh", "-c",
             <<EOT
               # Wait for MariaDB
               until mariadb-admin ping \
