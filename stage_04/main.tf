@@ -57,11 +57,12 @@ locals {
   matomo_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/config.json")).namespace
   matomo_secret_name   = local.matomo_values_parsed.matomo.existingSecret
 
-  matomo_db_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml")
-  matomo_db_values_parsed = yamldecode(local.matomo_db_values)
-  matomo_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
-  matomo_db_secret_name   = local.matomo_db_values_parsed.mariadb.auth.existingSecret
-  matomo_db_configmap_name  = local.matomo_db_values_parsed.mariadb.initdbScriptsConfigMap
+  matomo_db_values         = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml")
+  matomo_db_values_parsed  = yamldecode(local.matomo_db_values)
+  matomo_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
+  matomo_db_secret_name    = local.matomo_db_values_parsed.mariadb.auth.existingSecret
+  matomo_db_configmap_name = local.matomo_db_values_parsed.mariadb.initdbScriptsConfigMap
+  matomo_db_host           = local.matomo_values_parsed.matomo.externalDatabase.host
 
 
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
@@ -469,13 +470,14 @@ resource "kubernetes_secret" "mariadb_secret" {
   }
 
   data = {
-    db-password = random_password.mariadb_password.result
-    mariadb-password = random_password.mariadb_password.result
+    db-password                  = random_password.mariadb_password.result
+    mariadb-password             = random_password.mariadb_password.result
     mariadb-replication-password = random_password.mariadb_replication_password.result
-    mariadb-root-password = random_password.mariadb_root_password.result
+    mariadb-root-password        = random_password.mariadb_root_password.result
   }
 }
 
+/*
 resource "kubernetes_config_map" "matomo_db_initdb" {
   metadata {
     name = local.matomo_db_configmap_name
@@ -494,7 +496,65 @@ resource "kubernetes_config_map" "matomo_db_initdb" {
       EOT
   }
 }
+*/
 
+resource "kubernetes_job" "matomo_db_init" {
+  metadata {
+    name      = "matomo-db-init"
+    namespace = local.matomo_db_namespace
+  }
+
+  spec {
+    backoff_limit = 3
+
+    template {
+      metadata {}
+      spec {
+        restart_policy = "OnFailure"
+
+        container {
+          name  = "matomo-db-init"
+          image = "bitnami/mariadb:12.02"
+
+          command = [
+            "sh", "-c",
+            <<EOT
+              mariadb --host=${local.matomo_db_host} \
+                      --port=3306 \
+                      --user=root \
+                      --password="$MARIADB_ROOT_PASSWORD" <<'EOSQL'
+                CREATE DATABASE IF NOT EXISTS bitnami_matomo;
+                CREATE USER IF NOT EXISTS 'matomo'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';
+                GRANT ALL PRIVILEGES ON bitnami_matomo.* TO 'matomo'@'%';
+                FLUSH PRIVILEGES;
+              EOSQL
+            EOT
+          ]
+
+          env {
+            name = "MARIADB_ROOT_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = local.matomo_db_secret_name
+                key  = "mariadb-root-password"
+              }
+            }
+          }
+
+          env {
+            name = "MARIADB_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = local.matomo_db_secret_name
+                key  = "mariadb_password"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 # Web-UI / Frontend
 
