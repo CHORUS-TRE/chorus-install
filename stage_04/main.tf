@@ -517,17 +517,28 @@ resource "kubernetes_job" "matomo_db_init" {
           image = "bitnami/mariadb:12.0.2"
 
           command = [
-            "sh", "-c",
+            "sh", "-c", 
             <<EOT
+              # Wait for MariaDB
+              until mariadb-admin ping \
+                --host=${local.matomo_db_host} \
+                --port=3306 \
+                --user=root \
+                --password="$MARIADB_ROOT_PASSWORD" \
+                --silent; do
+                echo "Waiting for MariaDB to be ready..."
+                sleep 5
+              done
+
+              # Run init SQL
               mariadb --host=${local.matomo_db_host} \
                       --port=3306 \
                       --user=root \
-                      --password="$MARIADB_ROOT_PASSWORD" <<'EOSQL'
-                CREATE DATABASE IF NOT EXISTS bitnami_matomo;
-                CREATE USER IF NOT EXISTS 'matomo'@'%' IDENTIFIED BY '$${MARIADB_PASSWORD}';
-                GRANT ALL PRIVILEGES ON bitnami_matomo.* TO 'matomo'@'%';
-                FLUSH PRIVILEGES;
-              EOSQL
+                      --password="$MARIADB_ROOT_PASSWORD" \
+                      -e "CREATE DATABASE IF NOT EXISTS bitnami_matomo; \
+                          CREATE USER IF NOT EXISTS 'bn_matomo'@'%' IDENTIFIED BY '$$MATOMO_DB_PASSWORD'; \
+                          GRANT ALL PRIVILEGES ON bitnami_matomo.* TO 'bn_matomo'@'%'; \
+                          FLUSH PRIVILEGES;"
             EOT
           ]
 
