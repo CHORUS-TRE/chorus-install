@@ -236,7 +236,7 @@ variable "i2b2_chart_name" {
 }
 
 variable "didata_app_key" {
-  description = "DiData app key"
+  description = "DiData app key (base64 encoded)"
   type        = string
   default     = ""
 }
