@@ -234,3 +234,9 @@ variable "i2b2_chart_name" {
   type        = string
   default     = "i2b2"
 }
+
+variable "didata_app_key" {
+  description = "DiData app key"
+  type        = string
+  default     = ""
+}

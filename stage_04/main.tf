@@ -115,6 +115,19 @@ locals {
   i2b2_db_user_secret_key = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
   i2b2_db_admin_secret_key = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 */
+
+  didata_secrets_content = templatefile("${path.module}/didata_secrets.tmpl",
+    {
+      didata_app_name = "didata_chorus"
+      didata_app_key = var.didata_app_key
+      didata_app_url = "https://didata.${local.remote_cluster_name}.chorus-tre.ch/"
+      didata_db_host = "${local.remote_cluster_name}-didata-db-mariadb"
+      didata_db_database = "didata"
+      didata_db_username = "didata"
+      didata_db_password = random_password.didata_db_password.result
+      didata_jwt_secret = random_password.didata_jwt_secret.result
+    }
+  )
 }
 
 # Providers
@@ -577,7 +590,6 @@ resource "kubernetes_secret" "i2b2_db_secret" {
 
 # i2b2-postgresql, check if needed
 
-
 resource "random_password" "ds_crc_pass" {
   length  = 32
   special = false
@@ -622,6 +634,29 @@ resource "kubernetes_secret" "i2b2_wildfly" {
     ds_pm_pass = random_password.ds_pm_pass.result
     ds_wd_pass = random_password.ds_wd_pass.result
     pg_pass = random_password.i2b2_pg_pass.result
+  }
+}
+
+# didata
+
+resource "random_password" "didata_db_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "didata_jwt_secret" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "didata_env" {
+  metadata {
+    name      = "didata-env"
+    namespace = "didata"
+  }
+
+  data = {
+    "didata.env" = local.didata_secrets_content
   }
 }
 
