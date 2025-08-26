@@ -678,7 +678,7 @@ resource "kubernetes_secret" "regcred" {
     ".dockerconfigjson" = jsonencode({
       "auths" = {
         "${local.harbor_url}" = {
-          "auth" = join("", ["robot$", "${local.remote_cluster_name}", ":${module.harbor_config.cluster_robot_password}"])
+          "auth" = base64encode(join("", ["robot$", "${local.remote_cluster_name}", ":${module.harbor_config.cluster_robot_password}"]))
         }
       }
     })
