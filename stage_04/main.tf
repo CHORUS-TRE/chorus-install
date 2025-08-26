@@ -663,7 +663,7 @@ resource "kubernetes_secret" "didata_env" {
 
 # RegCred
 
-resource "kubernetes_secret" "didata_env" {
+resource "kubernetes_secret" "regcred" {
   metadata {
     name      = "regcred"
     namespace = "reflector"
