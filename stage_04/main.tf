@@ -669,7 +669,7 @@ resource "kubernetes_secret" "regcred" {
     namespace = "reflector"
     labels = {
       "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "workbench-operator-system,backend,frontend,workspace[0-9]+"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "workspace[0-9]+,workbench-operator-system,backend,frontend"
       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
     }
   }
