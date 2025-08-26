@@ -1,5 +1,6 @@
 locals {
   remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
+  build_cluster_name  = coalesce(var.cluster_name, var.kubeconfig_context)
 
   keycloak_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml")
   keycloak_values_parsed = yamldecode(local.keycloak_values)
@@ -83,13 +84,13 @@ locals {
       k8s_client_token                       = var.remote_cluster_bearer_token
       k8s_client_image_pull_secrets = [
         {
-          registry = "harbor.${var.cluster_name}.chorus-tre.ch"
-          username = join("", ["robot$", "${var.cluster_name}"])
+          registry = "harbor.${local.build_cluster_name}.chorus-tre.ch"
+          username = join("", ["robot$", "${local.build_cluster_name}"])
           password = module.harbor_config.build_robot_password
         },
         {
-          registry = "harbor.${var.remote_cluster_name}.chorus-tre.ch"
-          username = join("", ["robot$", "${var.remote_cluster_name}"])
+          registry = "harbor.${local.remote_cluster_name}.chorus-tre.ch"
+          username = join("", ["robot$", "${local.remote_cluster_name}"])
           password = module.harbor_config.cluster_robot_password
         }
       ]
@@ -106,8 +107,8 @@ locals {
   backend_db_user_secret_key  = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
   i2b2_wildfly_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json")).namespace
-  i2b2_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
-/*
+  i2b2_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
+  /*
   i2b2_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
   i2b2_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/values.yaml")
   i2b2_db_values_parsed    = yamldecode(local.i2b2_db_values)
@@ -118,14 +119,14 @@ locals {
 
   didata_secrets_content = templatefile("${path.module}/didata_secrets.tmpl",
     {
-      didata_app_name = "didata_chorus"
-      didata_app_key = var.didata_app_key
-      didata_app_url = "https://didata.${local.remote_cluster_name}.chorus-tre.ch/"
-      didata_db_host = "${local.remote_cluster_name}-didata-db-mariadb"
+      didata_app_name    = "didata_chorus"
+      didata_app_key     = var.didata_app_key
+      didata_app_url     = "https://didata.${local.remote_cluster_name}.chorus-tre.ch/"
+      didata_db_host     = "${local.remote_cluster_name}-didata-db-mariadb"
       didata_db_database = "didata"
       didata_db_username = "didata"
       didata_db_password = random_password.didata_db_password.result
-      didata_jwt_secret = random_password.didata_jwt_secret.result
+      didata_jwt_secret  = random_password.didata_jwt_secret.result
     }
   )
 }
@@ -308,7 +309,7 @@ module "keycloak_backend_client_config" {
   base_url            = var.backend_keycloak_base_url
   admin_url           = local.backend_url
   web_origins         = [local.backend_url]
-  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${var.remote_cluster_name}.chorus-tre.ch", "*"])]
+  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${local.remote_cluster_name}.chorus-tre.ch", "*"])]
 }
 
 module "keycloak_matomo_client_config" {
@@ -337,8 +338,8 @@ module "harbor_config" {
     harbor = harbor.harboradmin-provider
   }
 
-  build_robot_username   = "harbor-build"
-  cluster_robot_username = "chorus"
+  build_robot_username   = local.build_cluster_name
+  cluster_robot_username = var.remote_cluster_name
 }
 
 # Grafana
@@ -627,13 +628,13 @@ resource "kubernetes_secret" "i2b2_wildfly" {
   }
 
   data = {
-    ds_crc_pass = random_password.ds_crc_pass.result
+    ds_crc_pass  = random_password.ds_crc_pass.result
     ds_hive_pass = random_password.ds_hive_pass.result
-    ds_ont_pass = random_password.ds_ont_pass.result
-    ds_password = random_password.ds_password.result
-    ds_pm_pass = random_password.ds_pm_pass.result
-    ds_wd_pass = random_password.ds_wd_pass.result
-    pg_pass = random_password.i2b2_pg_pass.result
+    ds_ont_pass  = random_password.ds_ont_pass.result
+    ds_password  = random_password.ds_password.result
+    ds_pm_pass   = random_password.ds_pm_pass.result
+    ds_wd_pass   = random_password.ds_wd_pass.result
+    pg_pass      = random_password.i2b2_pg_pass.result
   }
 }
 
@@ -660,8 +661,28 @@ resource "kubernetes_secret" "didata_env" {
   }
 }
 
-# Web-UI / Frontend
+# RegCred
 
-# regcred secret in frontend namespace
-# .dockerconfigjson
-# or is this created by reflector?!
+resource "kubernetes_secret" "didata_env" {
+  metadata {
+    name      = "regcred"
+    namespace = "reflector"
+    labels = {
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "workbench-operator-system,backend,frontend,workspace[0-9]+"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
+    }
+  }
+
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      "auths" = {
+        "${local.harbor_url}" = {
+          "auth" = join("", ["robot$", "${local.remote_cluster_name}", ":${module.harbor_config.cluster_robot_password}"])
+        }
+      }
+    })
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
+}
