@@ -246,3 +246,14 @@ variable "didata_app_key" {
   type        = string
   default     = ""
 }
+
+variable "didata_registry_username" {
+  description = "Username used to fetch the DiData image"
+  type        = string
+  default     = "didatadevops"
+}
+
+variable "didata_registry_password" {
+  description = "Password used to fetch the DiData image"
+  type        = string
+}

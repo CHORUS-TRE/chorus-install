@@ -388,17 +388,6 @@ module "oauth2_proxy" {
 
 # Backend
 
-# backend-service-account service account in backend namespace
-# >> backend/values.deployment.serviceAccountName
-# secrets:
-# - name: backend-service-account-secret
-
-# backend-postgresql secret in backend namespace
-# admin-password:
-# postgres-password:
-# replication-password:
-# user-password:
-
 module "backend_db_secret" {
   source = "../modules/db_secret"
 
@@ -691,6 +680,30 @@ resource "kubernetes_secret" "didata_db_secret" {
     mariadb-replication-password = random_password.didata_db_replication_password.result
     mariadb-root-password        = random_password.didata_db_root_password.result
   }
+}
+
+resource "kubernetes_secret" "regcred_didata" {
+  metadata {
+    name      = "regcred-didata"
+    namespace = "reflector"
+    annotations = {
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "didata"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
+    }
+  }
+
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      "auths" = {
+        "https://index.docker.io/v1/" = {
+          "auth" = base64encode(join(":", [var.didata_registry_username, var.didata_registry_password]))
+        }
+      }
+    })
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
 }
 
 # RegCred
