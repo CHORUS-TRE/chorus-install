@@ -116,6 +116,8 @@ locals {
   i2b2_db_admin_secret_key = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 */
 
+  didata_registry_password = coalesce(var.var.didata_registry_password, "do-not-install")
+
   didata_secrets_content = templatefile("${path.module}/didata_secrets.tmpl",
     {
       didata_app_name    = "didata_chorus"
@@ -665,6 +667,8 @@ resource "kubernetes_secret" "didata_env" {
   data = {
     "didata.env" = local.didata_secrets_content
   }
+
+  count = local.didata_registry_password == "do-not-install" ? 0 : 1
 }
 
 resource "kubernetes_secret" "didata_db_secret" {
@@ -680,6 +684,8 @@ resource "kubernetes_secret" "didata_db_secret" {
     mariadb-replication-password = random_password.didata_db_replication_password.result
     mariadb-root-password        = random_password.didata_db_root_password.result
   }
+
+  count = local.didata_registry_password == "do-not-install" ? 0 : 1
 }
 
 resource "kubernetes_secret" "regcred_didata" {
@@ -697,13 +703,15 @@ resource "kubernetes_secret" "regcred_didata" {
     ".dockerconfigjson" = jsonencode({
       "auths" = {
         "https://index.docker.io/v1/" = {
-          "auth" = base64encode(join(":", [var.didata_registry_username, var.didata_registry_password]))
+          "auth" = base64encode(join(":", [var.didata_registry_username, local.didata_registry_password]))
         }
       }
     })
   }
 
   type = "kubernetes.io/dockerconfigjson"
+
+  count = local.didata_registry_password == "do-not-install" ? 0 : 1
 }
 
 # RegCred

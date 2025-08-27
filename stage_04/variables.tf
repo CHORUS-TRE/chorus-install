@@ -256,4 +256,5 @@ variable "didata_registry_username" {
 variable "didata_registry_password" {
   description = "Password used to fetch the DiData image"
   type        = string
+  default = ""
 }
