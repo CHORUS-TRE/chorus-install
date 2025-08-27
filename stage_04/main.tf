@@ -75,11 +75,11 @@ locals {
       daemon_metrics_authentication_enabled  = "true"
       daemon_metrics_authentication_username = "prometheus"
       daemon_metrics_authentication_password = random_password.metrics_password.result
-      daemon_private_key                     = trimspace(tls_private_key.chorus_backend_daemon.private_key_pem)
+      daemon_private_key                     = indent(2, trimspace(tls_private_key.chorus_backend_daemon.private_key_pem))
       storage_datastores_chorus_password     = random_password.datastores_password.result
       k8s_client_is_watcher                  = "true"
       k8s_client_api_server                  = var.remote_cluster_server
-      k8s_client_ca                          = base64decode(var.remote_cluster_ca_data)
+      k8s_client_ca                          = indent(6, trimspace(base64decode(var.remote_cluster_ca_data)))
       k8s_client_token                       = var.remote_cluster_bearer_token
       k8s_client_image_pull_secrets = [
         {
