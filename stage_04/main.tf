@@ -58,11 +58,11 @@ locals {
   matomo_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/config.json")).namespace
   matomo_secret_name   = local.matomo_values_parsed.matomo.existingSecret
 
-  matomo_db_values         = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml")
-  matomo_db_values_parsed  = yamldecode(local.matomo_db_values)
-  matomo_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
-  matomo_db_secret_name    = local.matomo_db_values_parsed.mariadb.auth.existingSecret
-  matomo_db_host           = local.matomo_values_parsed.matomo.externalDatabase.host
+  matomo_db_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml")
+  matomo_db_values_parsed = yamldecode(local.matomo_db_values)
+  matomo_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
+  matomo_db_secret_name   = local.matomo_db_values_parsed.mariadb.auth.existingSecret
+  matomo_db_host          = local.matomo_values_parsed.matomo.externalDatabase.host
 
 
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
@@ -131,10 +131,10 @@ locals {
     }
   )
 
-  didata_db_values         = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml")
-  didata_db_values_parsed  = yamldecode(local.didata_db_values)
-  didata_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json")).namespace
-  didata_db_secret_name    = local.didata_db_values_parsed.mariadb.auth.existingSecret
+  didata_db_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml")
+  didata_db_values_parsed = yamldecode(local.didata_db_values)
+  didata_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json")).namespace
+  didata_db_secret_name   = local.didata_db_values_parsed.mariadb.auth.existingSecret
 }
 
 # Providers
