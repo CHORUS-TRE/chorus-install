@@ -79,7 +79,7 @@ locals {
       storage_datastores_chorus_password     = random_password.datastores_password.result
       k8s_client_is_watcher                  = "true"
       k8s_client_api_server                  = var.remote_cluster_server
-      k8s_client_ca                          = var.remote_cluster_ca_data
+      k8s_client_ca                          = base64decode(var.remote_cluster_ca_data)
       k8s_client_token                       = var.remote_cluster_bearer_token
       k8s_client_image_pull_secrets = [
         {
@@ -125,7 +125,7 @@ locals {
       didata_db_database = "didata"
       didata_db_username = "didata"
       didata_db_password = random_password.didata_db_password.result
-      didata_jwt_secret  = random_password.didata_jwt_secret.result
+      didata_jwt_secret  = random_password.didata_jwt_secret.result # TODO: ASK YVES IF THIS CAS BE SET RANDOMLY EACH TIME OR NOT
     }
   )
 
@@ -593,7 +593,10 @@ resource "kubernetes_secret" "i2b2_db_secret" {
   }
 }
 
-# i2b2-postgresql, check if needed
+# i2b2-db: i2b2-postgresql, check if needed
+
+
+# i2b2-wildfly
 
 resource "random_password" "ds_crc_pass" {
   length  = 32
