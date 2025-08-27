@@ -235,6 +235,12 @@ variable "i2b2_chart_name" {
   default     = "i2b2"
 }
 
+variable "didata_chart_name" {
+  description = "didata Helm chart name"
+  type        = string
+  default     = "didata"
+}
+
 variable "didata_app_key" {
   description = "DiData app key (base64 encoded)"
   type        = string

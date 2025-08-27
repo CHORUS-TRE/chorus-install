@@ -62,7 +62,6 @@ locals {
   matomo_db_values_parsed  = yamldecode(local.matomo_db_values)
   matomo_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
   matomo_db_secret_name    = local.matomo_db_values_parsed.mariadb.auth.existingSecret
-  matomo_db_configmap_name = local.matomo_db_values_parsed.mariadb.initdbScriptsConfigMap
   matomo_db_host           = local.matomo_values_parsed.matomo.externalDatabase.host
 
 
@@ -129,6 +128,11 @@ locals {
       didata_jwt_secret  = random_password.didata_jwt_secret.result
     }
   )
+
+  didata_db_values         = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml")
+  didata_db_values_parsed  = yamldecode(local.didata_db_values)
+  didata_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json")).namespace
+  didata_db_secret_name    = local.didata_db_values_parsed.mariadb.auth.existingSecret
 }
 
 # Providers
@@ -466,17 +470,17 @@ resource "kubernetes_secret" "matomo_secret" {
   }
 }
 
-resource "random_password" "mariadb_password" {
+resource "random_password" "matomo_db_password" {
   length  = 32
   special = false
 }
 
-resource "random_password" "mariadb_replication_password" {
+resource "random_password" "matomo_db_replication_password" {
   length  = 32
   special = false
 }
 
-resource "random_password" "mariadb_root_password" {
+resource "random_password" "matomo_db_root_password" {
   length  = 32
   special = false
 }
@@ -485,7 +489,7 @@ resource "random_password" "mariadb_root_password" {
 # the key "db-password". Let's check if this 
 # can be changed so that we don't have to duplicate
 # the mariadb password twice
-resource "kubernetes_secret" "mariadb_secret" {
+resource "kubernetes_secret" "matomo_db_secret" {
 
   metadata {
     name      = local.matomo_db_secret_name
@@ -494,10 +498,10 @@ resource "kubernetes_secret" "mariadb_secret" {
   }
 
   data = {
-    db-password                  = random_password.mariadb_password.result
-    mariadb-password             = random_password.mariadb_password.result
-    mariadb-replication-password = random_password.mariadb_replication_password.result
-    mariadb-root-password        = random_password.mariadb_root_password.result
+    db-password                  = random_password.matomo_db_password.result
+    mariadb-password             = random_password.matomo_db_password.result
+    mariadb-replication-password = random_password.matomo_db_replication_password.result
+    mariadb-root-password        = random_password.matomo_db_root_password.result
   }
 }
 
@@ -645,6 +649,16 @@ resource "random_password" "didata_db_password" {
   special = false
 }
 
+resource "random_password" "didata_db_replication_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "didata_db_root_password" {
+  length  = 32
+  special = false
+}
+
 resource "random_password" "didata_jwt_secret" {
   length  = 32
   special = false
@@ -658,6 +672,21 @@ resource "kubernetes_secret" "didata_env" {
 
   data = {
     "didata.env" = local.didata_secrets_content
+  }
+}
+
+resource "kubernetes_secret" "didata_db_secret" {
+
+  metadata {
+    name      = local.didata_db_secret_name
+    namespace = local.didata_db_namespace
+
+  }
+
+  data = {
+    mariadb-password             = random_password.didata_db_password.result
+    mariadb-replication-password = random_password.didata_db_replication_password.result
+    mariadb-root-password        = random_password.didata_db_root_password.result
   }
 }
 
