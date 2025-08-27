@@ -425,12 +425,12 @@ resource "tls_private_key" "chorus_backend_daemon" {
 
 resource "random_password" "datastores_password" {
   length  = 32
-  special = true
+  special = false
 }
 
 resource "random_password" "steward_password" {
   length  = 32
-  special = true
+  special = false
 }
 
 # The secret name is hardcoded in the following
