@@ -177,32 +177,6 @@ module "harbor_secret" {
   depends_on = [kubernetes_namespace.harbor]
 }
 
-# need to upload the following charts
-# - backend 0.1.15
-# - matomo 0.0.9
-# - web-ui 1.3.4
-# - workbench-operator 0.3.17
-# helm pull oci://harbor.build.chorus-tre.ch/charts/workbench-operator --version 0.3.17
-
-# Backend
-
-# backend-service-account service account in backend namespace
-# >> backend/values.deployment.serviceAccountName
-# secrets:
-# - name: backend-service-account-secret
-
-# Matomo
-
-# matomo-mariadb-secret secret in matomo namespace
-# db-password:
-
-# Web-UI / Frontend
-
-# regcred secret in frontend namespace
-# .dockerconfigjson
-# or is this created by reflector?!
-
-
 # Remote Cluster Connection for ArgoCD running on chorus-build
 
 resource "kubernetes_secret" "remote_clusters" {
