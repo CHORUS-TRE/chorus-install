@@ -58,14 +58,14 @@ locals {
   harbor_oidc_secret_key  = local.harbor_oidc_secret.key
   harbor_oidc_endpoint    = join("/", [local.keycloak_url, "realms", var.keycloak_infra_realm])
 
-  harbor_oidc_config = templatefile("${var.templates_path}/harbor_oidc.tmpl",
+  harbor_oidc_config = jsondecode(templatefile("${var.templates_path}/harbor_oidc.tmpl",
     {
       oidc_endpoint      = local.harbor_oidc_endpoint
       oidc_client_id     = var.harbor_keycloak_client_id
       oidc_client_secret = random_password.harbor_keycloak_client_secret.result
       oidc_admin_group   = var.harbor_keycloak_oidc_admin_group
     }
-  )   #TODO: set oidc_verify_cert to "true"
+  ))   #TODO: set oidc_verify_cert to "true"
 
   kube_prometheus_stack_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
   kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)
@@ -172,7 +172,7 @@ module "harbor_secret" {
   registry_credentials_secret_name = local.harbor_registry_credentials_secret_name
   oidc_secret_name                 = local.harbor_oidc_secret_name
   oidc_secret_key                  = local.harbor_oidc_secret_key
-  oidc_config                      = local.harbor_oidc_config
+  oidc_config                      = jsonencode(local.harbor_oidc_config)
 
   depends_on = [kubernetes_namespace.harbor]
 }
