@@ -258,3 +258,9 @@ variable "didata_registry_password" {
   type        = string
   default     = ""
 }
+
+variable "templates_path" {
+  description = "Path to the templates directory"
+  type        = string
+  default     = "../templates"
+}

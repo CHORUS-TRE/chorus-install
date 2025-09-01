@@ -69,7 +69,7 @@ locals {
   backend_values_parsed = yamldecode(local.backend_values)
   backend_url           = "https://${local.backend_values_parsed.ingress.host}"
   backend_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/config.json")).namespace
-  backend_secrets_content = templatefile("${path.module}/backend_secrets.tmpl",
+  backend_secrets_content = templatefile("${var.templates_path}/backend_secrets.tmpl",
     {
       daemon_jwt_secret                      = random_password.jwt_signature.result
       daemon_metrics_authentication_enabled  = "true"
@@ -118,7 +118,7 @@ locals {
 
   didata_registry_password = coalesce(var.didata_registry_password, "do-not-install")
 
-  didata_secrets_content = templatefile("${path.module}/didata_secrets.tmpl",
+  didata_secrets_content = templatefile("${var.templates_path}/didata_secrets.tmpl",
     {
       didata_app_name    = "didata_chorus"
       didata_app_key     = var.didata_app_key
@@ -127,7 +127,7 @@ locals {
       didata_db_database = "didata"
       didata_db_username = "didata"
       didata_db_password = random_password.didata_db_password.result
-      didata_jwt_secret  = random_password.didata_jwt_secret.result # TODO: ASK YVES IF THIS CAS BE SET RANDOMLY EACH TIME OR NOT
+      didata_jwt_secret  = random_password.didata_jwt_secret.result
     }
   )
 
