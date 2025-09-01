@@ -75,6 +75,14 @@ locals {
   }
   EOT
   #TODO: set oidc_verify_cert to "true"
+  harbor_oidc_config2 = templatefile("${templates_path}/harbor_oidc.tmpl",
+    {
+      oidc_endpoint      = local.harbor_oidc_endpoint
+      oidc_client_id     = var.harbor_keycloak_client_id
+      oidc_client_secret = random_password.harbor_keycloak_client_secret.result
+      oidc_admin_group   = var.harbor_keycloak_oidc_admin_group
+    }
+  )
 
   kube_prometheus_stack_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
   kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)

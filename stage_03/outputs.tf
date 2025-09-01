@@ -27,3 +27,11 @@ output "keycloak_password" {
   value     = module.keycloak_secret.keycloak_password
   sensitive = true
 }
+
+output "harbor_oidc_config" {
+  value = local.harbor_oidc_config
+}
+
+output "harbor_oidc_config2" {
+  value = local.harbor_oidc_config2
+}
