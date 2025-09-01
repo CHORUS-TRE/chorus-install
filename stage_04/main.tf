@@ -76,7 +76,7 @@ locals {
       daemon_metrics_authentication_username = "prometheus"
       daemon_metrics_authentication_password = random_password.metrics_password.result
       daemon_private_key                     = indent(2, trimspace(tls_private_key.chorus_backend_daemon.private_key_pem))
-      storage_datastores_chorus_password     = module.backend_db_secret.output.db_password
+      storage_datastores_chorus_password     = module.backend_db_secret.db_password
       k8s_client_is_watcher                  = "true"
       k8s_client_api_server                  = var.remote_cluster_server
       k8s_client_ca                          = indent(6, trimspace(base64decode(var.remote_cluster_ca_data)))
@@ -116,7 +116,7 @@ locals {
   i2b2_db_admin_secret_key = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 */
 
-  didata_registry_password = coalesce(var.var.didata_registry_password, "do-not-install")
+  didata_registry_password = coalesce(var.didata_registry_password, "do-not-install")
 
   didata_secrets_content = templatefile("${path.module}/didata_secrets.tmpl",
     {
