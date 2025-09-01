@@ -96,7 +96,7 @@ locals {
       keycloak_openid_client_secret = random_password.backend_keycloak_client_secret.result
       steward_user_password         = random_password.steward_password.result
     }
-  )
+  ) # TODO: break down backend secret into multiple small secrets
 
   backend_db_namespace        = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json")).namespace
   backend_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml")
@@ -107,14 +107,6 @@ locals {
 
   i2b2_wildfly_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json")).namespace
   i2b2_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
-  /*
-  i2b2_db_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
-  i2b2_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/values.yaml")
-  i2b2_db_values_parsed    = yamldecode(local.i2b2_db_values)
-  i2b2_db_secret_name = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
-  i2b2_db_user_secret_key = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
-  i2b2_db_admin_secret_key = local.i2b2_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-*/
 
   didata_registry_password = coalesce(var.didata_registry_password, "do-not-install")
 
@@ -488,76 +480,6 @@ resource "kubernetes_secret" "matomo_db_secret" {
     mariadb-password             = random_password.matomo_db_password.result
     mariadb-replication-password = random_password.matomo_db_replication_password.result
     mariadb-root-password        = random_password.matomo_db_root_password.result
-  }
-}
-
-resource "kubernetes_job" "matomo_db_init" {
-  metadata {
-    name      = "matomo-db-init"
-    namespace = local.matomo_db_namespace
-  }
-
-  spec {
-    backoff_limit = 5
-
-    template {
-      metadata {}
-      spec {
-        restart_policy = "OnFailure"
-
-        container {
-          name  = "matomo-db-init"
-          image = "bitnami/mariadb:12.0.2"
-
-          command = [
-            "sh", "-c",
-            <<EOT
-              # Wait for MariaDB
-              until mariadb-admin ping \
-                --host=${local.matomo_db_host} \
-                --port=3306 \
-                --user=root \
-                --password="$MARIADB_ROOT_PASSWORD" \
-                --silent; do
-                echo "Waiting for MariaDB to be ready..."
-                sleep 5
-              done
-
-              # Run init SQL
-              mariadb --host=${local.matomo_db_host} \
-                      --port=3306 \
-                      --user=root \
-                      --password="$MARIADB_ROOT_PASSWORD" \
-                      -e "CREATE DATABASE IF NOT EXISTS bitnami_matomo; \
-                          CREATE USER IF NOT EXISTS 'bn_matomo'@'%'; \
-                          ALTER USER 'bn_matomo'@'%' IDENTIFIED BY '$${MARIADB_PASSWORD}'; \
-                          GRANT ALL PRIVILEGES ON bitnami_matomo.* TO 'bn_matomo'@'%'; \
-                          FLUSH PRIVILEGES;"
-            EOT
-          ]
-
-          env {
-            name = "MARIADB_ROOT_PASSWORD"
-            value_from {
-              secret_key_ref {
-                name = local.matomo_db_secret_name
-                key  = "mariadb-root-password"
-              }
-            }
-          }
-
-          env {
-            name = "MARIADB_PASSWORD"
-            value_from {
-              secret_key_ref {
-                name = local.matomo_db_secret_name
-                key  = "mariadb-password"
-              }
-            }
-          }
-        }
-      }
-    }
   }
 }
 
