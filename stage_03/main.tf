@@ -75,7 +75,7 @@ locals {
   }
   EOT
   #TODO: set oidc_verify_cert to "true"
-  harbor_oidc_config2 = templatefile("${templates_path}/harbor_oidc.tmpl",
+  harbor_oidc_config2 = templatefile("${var.templates_path}/harbor_oidc.tmpl",
     {
       oidc_endpoint      = local.harbor_oidc_endpoint
       oidc_client_id     = var.harbor_keycloak_client_id
