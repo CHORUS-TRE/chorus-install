@@ -57,23 +57,14 @@ locals {
   harbor_oidc_secret_key  = local.harbor_oidc_secret.key
   harbor_oidc_endpoint    = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
 
-  harbor_oidc_config = <<EOT
-  {
-  "auth_mode": "oidc_auth",
-  "primary_auth_mode": "true",
-  "oidc_name": "Keycloak",
-  "oidc_endpoint": "${local.harbor_oidc_endpoint}",
-  "oidc_client_id": "${var.harbor_keycloak_client_id}",
-  "oidc_client_secret": "${random_password.harbor_keycloak_client_secret.result}",
-  "oidc_groups_claim": "groups",
-  "oidc_admin_group": "${var.harbor_keycloak_oidc_admin_group}",
-  "oidc_scope": "openid,profile,offline_access,email,groups",
-  "oidc_verify_cert": "false",
-  "oidc_auto_onboard": "true",
-  "oidc_user_claim": "name"
-  }
-  EOT
-  #TODO: set oidc_verify_cert to "true"
+  harbor_oidc_config = jsondecode(templatefile("${var.templates_path}/harbor_oidc.tmpl",
+    {
+      oidc_endpoint      = local.harbor_oidc_endpoint
+      oidc_client_id     = var.harbor_keycloak_client_id
+      oidc_client_secret = random_password.harbor_keycloak_client_secret.result
+      oidc_admin_group   = var.harbor_keycloak_oidc_admin_group
+    }
+  ))   #TODO: set oidc_verify_cert to "true"
 }
 
 # Install charts
@@ -212,7 +203,7 @@ module "harbor" {
 
   harbor_oidc_secret_name = local.harbor_oidc_secret_name
   harbor_oidc_secret_key  = local.harbor_oidc_secret_key
-  harbor_oidc_config      = local.harbor_oidc_config
+  harbor_oidc_config      = jsonencode(local.harbor_oidc_config)
 
   depends_on = [
     module.certificate_authorities,

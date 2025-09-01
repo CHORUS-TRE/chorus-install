@@ -119,3 +119,9 @@ variable "harbor_admin_username" {
   type        = string
   default     = "admin"
 }
+
+variable "templates_path" {
+  description = "Path to the templates directory"
+  type        = string
+  default     = "../templates"
+}
