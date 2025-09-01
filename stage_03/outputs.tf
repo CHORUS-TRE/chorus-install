@@ -30,8 +30,10 @@ output "keycloak_password" {
 
 output "harbor_oidc_config" {
   value = local.harbor_oidc_config
+  sensitive = true
 }
 
 output "harbor_oidc_config2" {
   value = local.harbor_oidc_config2
+  sensitive = true
 }
