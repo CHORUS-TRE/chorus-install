@@ -1,5 +1,6 @@
 locals {
-  argocd_namespace    = jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
+  cluster_name        = coalesce(var.cluster_name, var.kubeconfig_context)
+  argocd_namespace    = jsondecode(file("${var.helm_values_path}/${local.cluster_name}/${var.argocd_chart_name}/config.json")).namespace
   remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
 
   remote_cluster_config = jsonencode({
