@@ -76,7 +76,7 @@ locals {
       daemon_metrics_authentication_username = "prometheus"
       daemon_metrics_authentication_password = random_password.metrics_password.result
       daemon_private_key                     = indent(2, trimspace(tls_private_key.chorus_backend_daemon.private_key_pem))
-      storage_datastores_chorus_password     = random_password.datastores_password.result
+      storage_datastores_chorus_password     = module.backend_db_secret.output.db_password
       k8s_client_is_watcher                  = "true"
       k8s_client_api_server                  = var.remote_cluster_server
       k8s_client_ca                          = indent(6, trimspace(base64decode(var.remote_cluster_ca_data)))
@@ -412,11 +412,6 @@ resource "random_password" "metrics_password" {
 resource "tls_private_key" "chorus_backend_daemon" {
   algorithm   = "ECDSA"
   ecdsa_curve = "P256"
-}
-
-resource "random_password" "datastores_password" {
-  length  = 32
-  special = false
 }
 
 resource "random_password" "steward_password" {
