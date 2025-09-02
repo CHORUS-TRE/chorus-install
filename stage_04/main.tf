@@ -501,9 +501,6 @@ resource "kubernetes_secret" "i2b2_db_secret" {
   }
 }
 
-# i2b2-db: i2b2-postgresql, check if needed
-
-
 # i2b2-wildfly
 
 resource "random_password" "ds_crc_pass" {
