@@ -65,7 +65,7 @@ locals {
       oidc_client_secret = random_password.harbor_keycloak_client_secret.result
       oidc_admin_group   = var.harbor_keycloak_oidc_admin_group
     }
-  )) #TODO: set oidc_verify_cert to "true"
+  ))
 }
 
 # Install charts
