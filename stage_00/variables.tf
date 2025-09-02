@@ -73,6 +73,7 @@ variable "helm_registry_password" {
 variable "remote_cluster_kubeconfig_context" {
   description = "Kubernetes context to use for the remote cluster"
   type        = string
+  default = ""
 }
 
 variable "remote_cluster_name" {

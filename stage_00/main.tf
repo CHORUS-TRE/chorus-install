@@ -1,6 +1,6 @@
 locals {
   cluster_name        = coalesce(var.cluster_name, var.kubeconfig_context)
-  remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
+  remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context, "no-remote")
 }
 
 module "build_cluster_helm_charts_values" {
@@ -38,4 +38,6 @@ module "remote_cluster_helm_charts_values" {
 
   # Wait to avoid potential git conflicts
   depends_on = [module.build_cluster_helm_charts_values]
+
+  count = local.remote_cluster_name == "no-remote" ? 0 : 1
 }
