@@ -20,12 +20,6 @@ variable "kubeconfig_context" {
   type        = string
 }
 
-variable "chorus_release" {
-  description = "CHORUS-TRE release to install"
-  type        = string
-  default     = "v0.1.0-alpha"
-}
-
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
   type        = string
