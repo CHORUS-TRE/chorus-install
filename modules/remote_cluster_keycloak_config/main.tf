@@ -23,6 +23,12 @@ resource "keycloak_realm_user_profile" "userprofile" {
 
   attribute {
     name = "username"
+    display_name = "$${username}"
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
 
     validator {
       name = "length"
@@ -43,6 +49,74 @@ resource "keycloak_realm_user_profile" "userprofile" {
 
   attribute {
     name = "email"
+    display_name = "$${email}"
+
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "email"
+      config = {}
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = 255
+      }
+    }
+  }
+
+  attribute {
+    name = "firstName"
+    display_name = "$${firstName}"
+    
+    enabled_when_scope = ["*"]
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = 255
+      }
+    }
+
+    validator {
+      name = "person-name-prohibited-characters"
+    }
+  }
+
+  attribute {
+    name = "lastName"
+    display_name = "$${lastName}"
+    
+    enabled_when_scope = ["*"]
+    required_for_roles = ["user"]
+
+    permissions {
+      view = ["admin", "user"]
+      edit = ["admin", "user"]
+    }
+
+    validator {
+      name = "length"
+      config = {
+        max = 255
+      }
+    }
+
+    validator {
+      name = "person-name-prohibited-characters"
+    }
   }
 }
 
