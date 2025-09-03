@@ -65,6 +65,7 @@
     ```
     cd stage_00
     terraform login
+    terraform workspace show
     terraform init
     terraform plan -out="stage_00.plan"
     terraform apply "stage_00.plan"
@@ -75,6 +76,7 @@
     ```
     cd ../stage_01
     terraform login
+    terraform workspace show
     terraform init
     terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
@@ -96,13 +98,23 @@
     ```
     cd ../stage_02
     terraform login
+    terraform workspace show
     terraform init
     terraform plan -out="stage_02.plan"
     terraform apply "stage_02.plan"
-    cd ..
     ```
 
-1. Make sure the ```output.yaml``` file appeared
+1. Make sure the ```output.yaml``` file appeared. At this stage, the build cluster is complete. You can proceed with stage 3 to add remote clusters.
+
+1. Initialize, plan and apply stage 3
+    ```
+    cd ../stage_03
+    terraform login
+    terraform workspace show
+    terraform init
+    terraform plan -out="stage_03.plan"
+    terraform apply "stage_03.plan"
+    ``` 
 
 1. Find all the URLs, usernames and passwords needed in the ```output.yaml``` file
 

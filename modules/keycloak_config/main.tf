@@ -20,8 +20,7 @@ resource "keycloak_group_roles" "chorus_admins_group_roles" {
 }
 
 resource "keycloak_realm" "infra" {
-  realm                       = var.realm_name
-  organizations_enabled       = true
+  realm                       = var.infra_realm_name
   default_signature_algorithm = "RS256"
   revoke_refresh_token        = true
   refresh_token_max_reuse     = 0

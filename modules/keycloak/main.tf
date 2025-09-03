@@ -8,44 +8,23 @@ resource "kubernetes_namespace" "keycloak" {
 
 # Secrets
 
-resource "random_password" "keycloak_db_password" {
-  length  = 32
-  special = false
-}
+module "db_secret" {
+  source = "../db_secret"
 
-resource "random_password" "keycloak_db_admin_password" {
-  length  = 32
-  special = false
-}
-
-resource "kubernetes_secret" "keycloak_db_secret" {
-  metadata {
-    name      = var.keycloak_db_secret_name
-    namespace = var.keycloak_namespace
-  }
-
-  data = {
-    "${var.keycloak_db_admin_secret_key}" = random_password.keycloak_db_admin_password.result
-    "${var.keycloak_db_user_secret_key}"  = random_password.keycloak_db_password.result
-  }
+  namespace           = var.keycloak_namespace
+  secret_name         = var.keycloak_db_secret_name
+  db_user_secret_key  = var.keycloak_db_user_secret_key
+  db_admin_secret_key = var.keycloak_db_admin_secret_key
 
   depends_on = [kubernetes_namespace.keycloak]
 }
 
-resource "random_password" "keycloak_password" {
-  length  = 32
-  special = false
-}
+module "keycloak_secret" {
+  source = "../keycloak_secret"
 
-resource "kubernetes_secret" "keycloak_secret" {
-  metadata {
-    name      = var.keycloak_secret_name
-    namespace = var.keycloak_namespace
-  }
-
-  data = {
-    "${var.keycloak_secret_key}" = random_password.keycloak_password.result
-  }
+  namespace   = var.keycloak_namespace
+  secret_name = var.keycloak_secret_name
+  secret_key  = var.keycloak_secret_key
 
   depends_on = [kubernetes_namespace.keycloak]
 }

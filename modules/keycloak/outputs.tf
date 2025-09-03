@@ -5,13 +5,13 @@ output "keycloak_password" {
 }
 
 output "keycloak_db_password" {
-  value       = try(random_password.keycloak_db_password.result, null)
+  value       = try(module.db_secret.db_password, null)
   description = "Keycloak DB password for Keycloak user"
   sensitive   = true
 }
 
 output "keycloak_db_admin_password" {
-  value       = try(random_password.keycloak_db_admin_password.result, null)
+  value       = try(module.db_secret.db_admin_password, null)
   description = "Keycloak DB password for Postgres user"
   sensitive   = true
 }

@@ -8,187 +8,35 @@ resource "kubernetes_namespace" "harbor" {
 
 # Secrets
 
-resource "random_password" "harbor_db_password" {
-  length  = 32
-  special = false
-}
+module "db_secret" {
+  source = "../db_secret"
 
-resource "random_password" "harbor_db_admin_password" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_secret" {
-  # Must be a string of 16 chars.
-  length  = 16
-  special = false
-}
-
-resource "random_password" "harbor_encryption_key" {
-  # Must be a string of 16 chars.
-  length  = 16
-  special = false
-}
-
-resource "random_password" "harbor_csrf_key" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_admin_password" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_jobservice_secret" {
-  # Must be a string of 16 chars.
-  length  = 16
-  special = false
-}
-
-resource "random_password" "harbor_registry_http_secret" {
-  # Must be a string of 16 chars.
-  length  = 16
-  special = false
-}
-
-resource "random_password" "harbor_registry_passwd" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "salt" {
-  length  = 8
-  special = false
-}
-
-resource "kubernetes_secret" "harbor_db_secret" {
-  metadata {
-    name      = var.harbor_db_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  data = {
-    "${var.harbor_db_admin_secret_key}" = random_password.harbor_db_admin_password.result
-    "${var.harbor_db_user_secret_key}"  = random_password.harbor_db_password.result
-  }
+  namespace           = var.harbor_namespace
+  secret_name         = var.harbor_db_secret_name
+  db_user_secret_key  = var.harbor_db_user_secret_key
+  db_admin_secret_key = var.harbor_db_admin_secret_key
 
   depends_on = [kubernetes_namespace.harbor]
 }
 
-resource "kubernetes_secret" "harbor_secret" {
-  metadata {
-    name      = var.harbor_secret_name
-    namespace = var.harbor_namespace
-  }
+module "harbor_secret" {
+  source = "../harbor_secret"
 
-  # Harbor Helm chart does not allow to change the secret key
-  # which is why "secret" is hardoced here
-  data = {
-    "secret" = random_password.harbor_secret.result
-  }
-
-  depends_on = [kubernetes_namespace.harbor]
-}
-
-resource "kubernetes_secret" "harbor_encryption_key_secret" {
-  metadata {
-    name      = var.harbor_encryption_key_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  # Harbor Helm chart does not allow to change the secret key
-  # which is why "secretKey" is hardoced here
-  data = {
-    "secretKey" = random_password.harbor_encryption_key.result
-  }
-
-  depends_on = [kubernetes_namespace.harbor]
-}
-
-resource "kubernetes_secret" "harbor_xsrf_secret" {
-  metadata {
-    name      = var.harbor_xsrf_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  data = {
-    "${var.harbor_xsrf_secret_key}" = random_password.harbor_csrf_key.result
-  }
-
-  depends_on = [kubernetes_namespace.harbor]
-}
-
-resource "kubernetes_secret" "harbor_admin_secret" {
-  metadata {
-    name      = var.harbor_admin_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  data = {
-    "${var.harbor_admin_secret_key}" = random_password.harbor_admin_password.result
-  }
-
-  depends_on = [kubernetes_namespace.harbor]
-}
-
-resource "kubernetes_secret" "harbor_jobservice_secret" {
-  metadata {
-    name      = var.harbor_jobservice_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  data = {
-    "${var.harbor_jobservice_secret_key}" = random_password.harbor_jobservice_secret.result
-  }
-
-  depends_on = [kubernetes_namespace.harbor]
-}
-
-resource "kubernetes_secret" "harbor_registry_http_secret" {
-  metadata {
-    name      = var.harbor_registry_http_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  data = {
-    "${var.harbor_registry_http_secret_key}" = random_password.harbor_registry_http_secret.result
-  }
-
-  depends_on = [kubernetes_namespace.harbor]
-}
-
-resource "htpasswd_password" "harbor_registry" {
-  password = random_password.harbor_registry_passwd.result
-  salt     = random_password.salt.result
-}
-
-resource "kubernetes_secret" "harbor_registry_credentials_secret" {
-  metadata {
-    name      = var.harbor_registry_credentials_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  # Harbor Helm chart does not allow to change the secret key
-  # which is why "REGISTRY_PASSWD" and
-  # "REGISTRY_HTPASSWD" are hardoced here
-  data = {
-    "REGISTRY_PASSWD"   = random_password.harbor_registry_passwd.result
-    "REGISTRY_HTPASSWD" = "admin:${htpasswd_password.harbor_registry.bcrypt}"
-  }
-
-  depends_on = [kubernetes_namespace.harbor]
-}
-
-resource "kubernetes_secret" "oidc_secret" {
-  metadata {
-    name      = var.harbor_oidc_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  data = {
-    "${var.harbor_oidc_secret_key}" = var.harbor_oidc_config
-  }
+  namespace                        = var.harbor_namespace
+  core_secret_name                 = var.harbor_core_secret_name
+  encryption_key_secret_name       = var.harbor_encryption_key_secret_name
+  xsrf_secret_name                 = var.harbor_xsrf_secret_name
+  xsrf_secret_key                  = var.harbor_xsrf_secret_key
+  admin_secret_name                = var.harbor_admin_secret_name
+  admin_secret_key                 = var.harbor_admin_secret_key
+  jobservice_secret_name           = var.harbor_jobservice_secret_name
+  jobservice_secret_key            = var.harbor_jobservice_secret_key
+  registry_secret_name             = var.harbor_registry_http_secret_name
+  registry_secret_key              = var.harbor_registry_http_secret_key
+  registry_credentials_secret_name = var.harbor_registry_credentials_secret_name
+  oidc_secret_name                 = var.harbor_oidc_secret_name
+  oidc_secret_key                  = var.harbor_oidc_secret_key
+  oidc_config                      = var.harbor_oidc_config
 
   depends_on = [kubernetes_namespace.harbor]
 }
@@ -266,15 +114,4 @@ resource "helm_release" "harbor" {
     name  = "harbor.metrics.serviceMonitor.enabled"
     value = "false"
   }
-}
-
-# Retrieve data for outputs
-
-data "kubernetes_secret" "harbor_admin_password" {
-  metadata {
-    name      = var.harbor_admin_secret_name
-    namespace = var.harbor_namespace
-  }
-
-  depends_on = [helm_release.harbor]
 }

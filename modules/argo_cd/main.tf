@@ -98,39 +98,6 @@ resource "kubernetes_secret" "oci-build" {
   depends_on = [kubernetes_namespace.argocd]
 }
 
-/*
-# Note: in-cluster is created by default in ArgoCD
-Remote cluster configuration will be done in a second development round
-
-resource "kubernetes_secret" "remote_cluster" {
-  metadata {
-    name = TODO
-    namespace = var.argocd_namespace
-    labels = {
-      "argocd.argoproj.io/secret-type" = "cluster"
-    }
-
-    data = {
-      name = TODO
-      server = TODO
-      config = TODO
-    }
-  }
-}
-IDEA: take the path to the config.json file as module input,
-read the file in the locals block at the top of this file and
-inject it in the secret
-
-{
-  "bearerToken": "<token>",
-  "tlsClientConfig": {
-    "insecure": false,
-    "caData": "<base64-encoded-ca-cert>"
-  }
-}
-
-*/
-
 # ArgoCD Cache (Valkey)
 
 resource "helm_release" "argocd_cache" {

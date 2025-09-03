@@ -11,17 +11,10 @@ resource "kubernetes_namespace" "cert_manager" {
 
 # Cert-Manager CRDs
 
-resource "kubernetes_manifest" "cert_manager_crds" {
-  for_each = {
-    for manifest in provider::kubernetes::manifest_decode_multi(
-      local.cert_manager_crds_content
-    ) :
-    manifest.metadata.name => manifest
-  }
+module "cert_manager_crds" {
+  source = "../cert_manager_crds"
 
-  manifest = each.value
-
-  depends_on = [kubernetes_namespace.cert_manager]
+  cert_manager_crds_content = local.cert_manager_crds_content
 }
 
 # Cert-Manager

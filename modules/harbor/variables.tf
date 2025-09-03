@@ -78,7 +78,7 @@ variable "harbor_db_admin_secret_key" {
   type        = string
 }
 
-variable "harbor_secret_name" {
+variable "harbor_core_secret_name" {
   description = "Name of the Kubernetes Secret used for general Harbor credentials"
   type        = string
 }

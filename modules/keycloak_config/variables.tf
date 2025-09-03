@@ -3,7 +3,7 @@ variable "admin_id" {
   type        = string
 }
 
-variable "realm_name" {
-  description = "Keycloak realm name"
+variable "infra_realm_name" {
+  description = "Keycloak infrastructure realm name"
   type        = string
 }
