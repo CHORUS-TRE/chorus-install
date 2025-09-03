@@ -5,12 +5,7 @@ module "keycloak_config" {
   admin_id         = var.admin_id
 }
 
-resource "keycloak_realm" "backend" {
-  realm                       = var.backend_realm_name
-  default_signature_algorithm = "RS256"
-  revoke_refresh_token        = true
-  refresh_token_max_reuse     = 0
-
-  registration_allowed     = true
-  login_with_email_allowed = true
+module "keycloak_realm" {
+  source     = "../keycloak_realm"
+  realm_name = var.backend_realm_name
 }

@@ -19,17 +19,15 @@ resource "keycloak_group_roles" "chorus_admins_group_roles" {
   role_ids = [data.keycloak_role.admin.id]
 }
 
-resource "keycloak_realm" "infra" {
-  realm                       = var.infra_realm_name
-  default_signature_algorithm = "RS256"
-  revoke_refresh_token        = true
-  refresh_token_max_reuse     = 0
+module "keycloak_realm" {
+  source     = "../keycloak_realm"
+  realm_name = var.infra_realm_name
 }
 
 # Client scope
 
 resource "keycloak_openid_client_scope" "groups_client_scope" {
-  realm_id               = keycloak_realm.infra.id
+  realm_id               = module.keycloak_realm.realm_id
   name                   = "groups"
   description            = "When requested, this scope will map a user's group memberships to a claim"
   include_in_token_scope = true
@@ -38,7 +36,7 @@ resource "keycloak_openid_client_scope" "groups_client_scope" {
 # Group membership mapper
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {
-  realm_id        = keycloak_realm.infra.id
+  realm_id        = module.keycloak_realm.realm_id
   client_scope_id = keycloak_openid_client_scope.groups_client_scope.id
   name            = "groups"
 

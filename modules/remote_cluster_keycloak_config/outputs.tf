@@ -3,5 +3,5 @@ output "infra_realm_id" {
 }
 
 output "backend_realm_id" {
-  value = try(keycloak_realm.backend.id, null)
+  value = try(module.keycloak_realm.realm_id, null)
 }
