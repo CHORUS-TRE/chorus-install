@@ -20,7 +20,7 @@ resource "keycloak_group_roles" "chorus_admins_group_roles" {
 }
 
 module "keycloak_realm" {
-  source = "../keycloak_realm"
+  source     = "../keycloak_realm"
   realm_name = var.infra_realm_name
 }
 

@@ -6,6 +6,6 @@ module "keycloak_config" {
 }
 
 module "keycloak_realm" {
-  source = "../keycloak_realm"
+  source     = "../keycloak_realm"
   realm_name = var.backend_realm_name
 }
