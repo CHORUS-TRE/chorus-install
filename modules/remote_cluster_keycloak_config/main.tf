@@ -13,6 +13,7 @@ resource "keycloak_realm" "backend" {
 
   registration_allowed     = true
   login_with_email_allowed = true
+  password_policy = "length(8) and special(1) and upperCase(1) and lowerCase(1) and digits(1) and notUsername and notEmail and notContainsUsername"
 }
 
 # User profile
@@ -75,7 +76,6 @@ resource "keycloak_realm_user_profile" "userprofile" {
     name = "firstName"
     display_name = "$${firstName}"
     
-    # enabled_when_scope = ["*"]
     required_for_roles = ["user"]
 
     permissions {
@@ -99,7 +99,6 @@ resource "keycloak_realm_user_profile" "userprofile" {
     name = "lastName"
     display_name = "$${lastName}"
     
-    # enabled_when_scope = ["*"]
     required_for_roles = ["user"]
 
     permissions {
@@ -119,8 +118,3 @@ resource "keycloak_realm_user_profile" "userprofile" {
     }
   }
 }
-
-
-# Password policy
-
-# TODO
