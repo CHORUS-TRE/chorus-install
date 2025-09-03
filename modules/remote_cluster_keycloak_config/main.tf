@@ -13,7 +13,7 @@ resource "keycloak_realm" "backend" {
 
   registration_allowed     = true
   login_with_email_allowed = true
-  password_policy = "length(8) and specialChars(1) and upperCase(1) and lowerCase(1) and digits(1) and notUsername and notEmail and notContainsUsername"
+  password_policy          = "length(8) and specialChars(1) and upperCase(1) and lowerCase(1) and digits(1) and notUsername and notEmail and notContainsUsername"
 }
 
 # User profile
@@ -23,7 +23,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
   #unmanaged_attribute_policy = "ENABLED"
 
   attribute {
-    name = "username"
+    name         = "username"
     display_name = "$${username}"
 
     permissions {
@@ -42,14 +42,14 @@ resource "keycloak_realm_user_profile" "userprofile" {
     validator {
       name = "pattern"
       config = {
-        pattern = "^(?!(root|bin|daemon|adm|lp|sync|shutdown|halt|mail|news|uucp|operator|games|gopher|nobody|www-data|proxy|backup|sys|man|postfix|sshd|ftp|mysql|postgres|dnsmasq|ntp|messagebus|haldaemon|rpc|avahi|saned|usbmux|kernoops|admin|sysadmin|user|guest|test|administrator|rootuser|default|system|superuser)$)[a-z_][a-z0-9_-]*$"
+        pattern       = "^(?!(root|bin|daemon|adm|lp|sync|shutdown|halt|mail|news|uucp|operator|games|gopher|nobody|www-data|proxy|backup|sys|man|postfix|sshd|ftp|mysql|postgres|dnsmasq|ntp|messagebus|haldaemon|rpc|avahi|saned|usbmux|kernoops|admin|sysadmin|user|guest|test|administrator|rootuser|default|system|superuser)$)[a-z_][a-z0-9_-]*$"
         error-message = "Invalid username"
       }
     }
   }
 
   attribute {
-    name = "email"
+    name         = "email"
     display_name = "$${email}"
 
     required_for_roles = ["user"]
@@ -60,7 +60,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
     }
 
     validator {
-      name = "email"
+      name   = "email"
       config = {}
     }
 
@@ -73,9 +73,9 @@ resource "keycloak_realm_user_profile" "userprofile" {
   }
 
   attribute {
-    name = "firstName"
+    name         = "firstName"
     display_name = "$${firstName}"
-    
+
     required_for_roles = ["user"]
 
     permissions {
@@ -96,9 +96,9 @@ resource "keycloak_realm_user_profile" "userprofile" {
   }
 
   attribute {
-    name = "lastName"
+    name         = "lastName"
     display_name = "$${lastName}"
-    
+
     required_for_roles = ["user"]
 
     permissions {
