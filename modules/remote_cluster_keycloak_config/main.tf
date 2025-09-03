@@ -13,7 +13,7 @@ resource "keycloak_realm" "backend" {
 
   registration_allowed     = true
   login_with_email_allowed = true
-  password_policy = "length(8) and special(1) and upperCase(1) and lowerCase(1) and digits(1) and notUsername and notEmail and notContainsUsername"
+  password_policy = "minLength(8) and specialChars(1) and upperCase(1) and lowerCase(1) and digits(1) and notUsername and notEmail and notContainsUsername"
 }
 
 # User profile
