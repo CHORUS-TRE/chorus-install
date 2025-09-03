@@ -75,7 +75,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
     name = "firstName"
     display_name = "$${firstName}"
     
-    enabled_when_scope = ["*"]
+    # enabled_when_scope = ["*"]
     required_for_roles = ["user"]
 
     permissions {
@@ -99,7 +99,7 @@ resource "keycloak_realm_user_profile" "userprofile" {
     name = "lastName"
     display_name = "$${lastName}"
     
-    enabled_when_scope = ["*"]
+    # enabled_when_scope = ["*"]
     required_for_roles = ["user"]
 
     permissions {
