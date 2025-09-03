@@ -19,6 +19,7 @@ resource "keycloak_realm" "backend" {
 
 resource "keycloak_realm_user_profile" "userprofile" {
   realm_id = keycloak_realm.backend.id
+  unmanaged_attribute_policy = "ENABLED"
 
   attribute {
     name = "username"
