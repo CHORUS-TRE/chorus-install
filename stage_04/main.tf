@@ -82,8 +82,6 @@ locals {
       storage_datastores_chorus_password     = module.backend_db_secret.db_password
       k8s_client_is_watcher                  = "true"
       k8s_client_api_server                  = var.remote_cluster_server
-      k8s_client_ca                          = indent(6, trimspace(base64decode(var.remote_cluster_ca_data)))
-      k8s_client_token                       = var.remote_cluster_bearer_token
       k8s_client_image_pull_secrets = [
         {
           registry = "harbor.${local.build_cluster_name}.chorus-tre.ch"
