@@ -9,7 +9,7 @@ resource "harbor_registry" "docker_hub" {
 # Projects
 
 resource "harbor_project" "projects" {
-  for_each = toset(["apps", "cache", "charts", "chorus", "services"])
+  for_each = toset(["apps", "chorus", "services"])
 
   name                   = each.key
   vulnerability_scanning = "false"
