@@ -16,15 +16,6 @@ resource "harbor_project" "projects" {
   force_destroy          = true
 }
 
-# Proxy cache projects
-
-resource "harbor_project" "proxy_cache" {
-  name                   = "docker_proxy"
-  registry_id            = harbor_registry.docker_hub.registry_id
-  vulnerability_scanning = "false"
-  force_destroy          = true
-}
-
 # Cluster robot account
 
 resource "random_password" "cluster_robot_password" {
