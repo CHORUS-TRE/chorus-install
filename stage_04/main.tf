@@ -64,6 +64,9 @@ locals {
   matomo_db_secret_name   = local.matomo_db_values_parsed.mariadb.auth.existingSecret
   matomo_db_host          = local.matomo_values_parsed.matomo.externalDatabase.host
 
+  frontend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.frontend_chart_name}/values.yaml")
+  frontend_values_parsed = yamldecode(local.frontend_values)
+  frontend_url           = "https://${local.frontend_values_parsed.ingress.hosts.0.host}"
 
   backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
   backend_values_parsed = yamldecode(local.backend_values)
@@ -307,7 +310,7 @@ module "keycloak_backend_client_config" {
   base_url            = var.backend_keycloak_base_url
   admin_url           = local.backend_url
   web_origins         = [local.backend_url]
-  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", ["https://${local.remote_cluster_name}.chorus-tre.ch", "*"])]
+  valid_redirect_uris = [join("/", [local.backend_url, "*"]), join("/", [local.frontend_url, "*"])]
 }
 
 module "keycloak_matomo_client_config" {
@@ -398,7 +401,7 @@ resource "random_password" "jwt_signature" {
 
 resource "random_password" "metrics_password" {
   length  = 32
-  special = true
+  special = false
 }
 
 resource "tls_private_key" "chorus_backend_daemon" {

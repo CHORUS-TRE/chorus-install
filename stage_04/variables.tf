@@ -264,3 +264,9 @@ variable "templates_path" {
   type        = string
   default     = "../templates"
 }
+
+variable "frontend_chart_name" {
+  description = "frontend chart name"
+  type        = string
+  default     = "web-ui"
+}
