@@ -84,7 +84,7 @@ locals {
       k8s_client_api_server                  = var.remote_cluster_server
       k8s_client_image_pull_secrets = [
         {
-          registry = "local.harbor_values_parsed.harbor.expose.ingress.hosts.core"
+          registry = "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}"
           username = join("", ["robot$", "${local.remote_cluster_name}"])
           password = module.harbor_config.cluster_robot_password
         }
