@@ -398,7 +398,7 @@ resource "random_password" "jwt_signature" {
 
 resource "random_password" "metrics_password" {
   length  = 32
-  special = true
+  special = false
 }
 
 resource "tls_private_key" "chorus_backend_daemon" {
