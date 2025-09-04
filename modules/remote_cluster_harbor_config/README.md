@@ -6,7 +6,6 @@ This module configures [Harbor](https://goharbor.io/) projects, robot accounts, 
 
 - Creates and manages Harbor projects for different workloads
 - Provisions robot account for ArgoCD with appropriate permissions
-- Adds external registries (e.g., Docker Hub) to Harbor
 - Automates the initial population of the Harbor registry with Helm charts
 - Exposes robot account passwords as Terraform outputs
 

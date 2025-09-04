@@ -1,11 +1,3 @@
-# Registries
-
-resource "harbor_registry" "docker_hub" {
-  provider_name = "docker-hub"
-  name          = "Docker Hub"
-  endpoint_url  = "https://hub.docker.com"
-}
-
 # Projects
 
 resource "harbor_project" "projects" {
@@ -107,26 +99,7 @@ resource "harbor_robot_account" "cluster" {
     kind      = "project"
     namespace = "services"
   }
-  permissions {
-    access {
-      action   = "list"
-      resource = "repository"
-    }
-    access {
-      action   = "pull"
-      resource = "repository"
-    }
-    access {
-      action   = "read"
-      resource = "repository"
-    }
-    kind      = "project"
-    namespace = "docker_proxy"
-  }
-  depends_on = [
-    harbor_project.projects,
-    harbor_project.proxy_cache
-  ]
+  depends_on = [harbor_project.projects]
 }
 
 
