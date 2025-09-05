@@ -496,36 +496,6 @@ resource "kubernetes_secret" "i2b2_db_secret" {
 
 # i2b2-wildfly
 
-resource "random_password" "ds_crc_pass" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "ds_hive_pass" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "ds_ont_pass" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "ds_password" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "ds_pm_pass" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "ds_wd_pass" {
-  length  = 32
-  special = false
-}
-
 resource "kubernetes_secret" "i2b2_wildfly" {
   metadata {
     name      = "i2b2-wildfly-secret"
@@ -533,13 +503,13 @@ resource "kubernetes_secret" "i2b2_wildfly" {
   }
 
   data = {
-    ds_crc_pass  = random_password.ds_crc_pass.result
-    ds_hive_pass = random_password.ds_hive_pass.result
-    ds_ont_pass  = random_password.ds_ont_pass.result
-    ds_password  = random_password.ds_password.result
-    ds_pm_pass   = random_password.ds_pm_pass.result
-    ds_wd_pass   = random_password.ds_wd_pass.result
-    pg_pass      = random_password.i2b2_pg_pass.result
+    ds_crc_pass  = var.i2b2_db_password
+    ds_hive_pass = var.i2b2_db_password
+    ds_ont_pass  = var.i2b2_db_password
+    ds_password  = var.i2b2_db_password
+    ds_pm_pass   = var.i2b2_db_password
+    ds_wd_pass   = var.i2b2_db_password
+    pg_pass      = var.i2b2_db_password
   }
 }
 
