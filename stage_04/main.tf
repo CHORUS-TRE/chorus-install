@@ -480,13 +480,8 @@ resource "kubernetes_secret" "matomo_db_secret" {
 }
 
 # i2b2
-## TODO: address the fact that password seems hardcoded somewhere
-/*
-resource "random_password" "i2b2_pg_pass" {
-  length  = 32
-  special = false
-}
-*/
+# we do not generate the password
+# because it is harcoded in the container image
 
 resource "kubernetes_secret" "i2b2_db_secret" {
   metadata {

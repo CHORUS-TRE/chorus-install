@@ -263,5 +263,5 @@ variable "frontend_chart_name" {
 
 variable "i2b2_db_password" {
   description = "i2b2 database password"
-  type = string
+  type        = string
 }
