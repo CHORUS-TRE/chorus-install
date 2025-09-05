@@ -260,3 +260,8 @@ variable "frontend_chart_name" {
   type        = string
   default     = "web-ui"
 }
+
+variable "i2b2_db_password" {
+  description = "i2b2 database password"
+  type        = string
+}
