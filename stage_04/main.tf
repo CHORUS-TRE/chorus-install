@@ -481,10 +481,12 @@ resource "kubernetes_secret" "matomo_db_secret" {
 
 # i2b2
 ## TODO: address the fact that password seems hardcoded somewhere
+/*
 resource "random_password" "i2b2_pg_pass" {
   length  = 32
   special = false
 }
+*/
 
 resource "kubernetes_secret" "i2b2_db_secret" {
   metadata {
@@ -493,7 +495,7 @@ resource "kubernetes_secret" "i2b2_db_secret" {
   }
 
   data = {
-    "postgres-password" = random_password.i2b2_pg_pass.result
+    "postgres-password" = var.i2b2_db_password
   }
 }
 
