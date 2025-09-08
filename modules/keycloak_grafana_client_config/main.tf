@@ -33,7 +33,7 @@ resource "keycloak_role" "grafana_admin" {
   client_id = var.client_id
   name      = "admin"
 
-  depends_on = [ module.keycloak_generic_client_config ]
+  depends_on = [module.keycloak_generic_client_config]
 }
 
 resource "keycloak_role" "grafana_editor" {
@@ -41,7 +41,7 @@ resource "keycloak_role" "grafana_editor" {
   client_id = var.client_id
   name      = "editor"
 
-  depends_on = [ module.keycloak_generic_client_config ]
+  depends_on = [module.keycloak_generic_client_config]
 }
 
 resource "keycloak_group_roles" "grafana_editors_group_roles" {
