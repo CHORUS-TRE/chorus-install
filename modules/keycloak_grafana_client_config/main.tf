@@ -30,7 +30,7 @@ resource "keycloak_group" "grafana_admins_group" {
 
 resource "keycloak_role" "grafana_admin" {
   realm_id  = var.realm_id
-  client_id = module.client_id
+  client_id = module.keycloak_generic_client_config.client_id
   name      = "admin"
 
   depends_on = [module.keycloak_generic_client_config]
@@ -38,7 +38,7 @@ resource "keycloak_role" "grafana_admin" {
 
 resource "keycloak_role" "grafana_editor" {
   realm_id  = var.realm_id
-  client_id = module.client_id
+  client_id = module.keycloak_generic_client_config.client_id
   name      = "editor"
 
   depends_on = [module.keycloak_generic_client_config]
