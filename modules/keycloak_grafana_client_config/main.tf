@@ -29,13 +29,15 @@ resource "keycloak_group" "grafana_admins_group" {
 }
 
 resource "keycloak_role" "grafana_admin" {
-  realm_id = var.realm_id
-  name     = "grafana-admin"
+  realm_id  = var.realm_id
+  client_id = var.client_id
+  name      = "admin"
 }
 
 resource "keycloak_role" "grafana_editor" {
-  realm_id = var.realm_id
-  name     = "grafana-editor"
+  realm_id  = var.realm_id
+  client_id = var.client_id
+  name      = "editor"
 }
 
 resource "keycloak_group_roles" "grafana_editors_group_roles" {
