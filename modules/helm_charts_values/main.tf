@@ -60,14 +60,8 @@ data "external" "cert_manager_app_version" {
       mkdir -p "$tmp_dir"
       registry_password="${coalesce(var.helm_registry_password, "public")}"
       registry_username="${coalesce(var.helm_registry_username, "public")}"
-      if [ "$registry_password" != "public" ]; then
-        if [ "$registry_username" != "public" ]; then
-          echo "${var.helm_registry_password}" | helm registry login "${var.helm_registry}" -u "${var.helm_registry_username}" --password-stdin
-        else
-          helm registry login ${var.helm_registry}
-        fi
-      else
-        helm registry login ${var.helm_registry}
+      if [ "$registry_password" != "public" ] && [ "$registry_username" != "public" ]; then
+        echo "${var.helm_registry_password}" | helm registry login "${var.helm_registry}" -u "${var.helm_registry_username}" --password-stdin
       fi
       helm pull "oci://${var.helm_registry}/charts/${var.cert_manager_chart_name}" --version "${local.cert_manager_chart_version}" --destination "$tmp_dir"
       tar -xzf "$tmp_dir"/cert-manager-*.tgz -C "$tmp_dir"
