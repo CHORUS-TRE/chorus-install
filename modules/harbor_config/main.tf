@@ -788,9 +788,13 @@ resource "null_resource" "pull_charts" {
     destination=${path.module}/charts
     chart=${each.key}
     versions="${join(" ", each.value)}"
+    registry_password="${coalesce(var.source_helm_registry_password, "public")}"
+    registry_username="${coalesce(var.source_helm_registry_username, "public")}"
     mkdir -p "$destination"
     for version in $versions; do
-      helm registry login "${var.source_helm_registry}" --username="${var.source_helm_registry_username}" --password="${var.source_helm_registry_password}"
+      if [ "$registry_password" != "public" ] && [ "$registry_username" != "public" ]; then
+        helm registry login "${var.source_helm_registry}" --username="${var.source_helm_registry_username}" --password="${var.source_helm_registry_password}"
+      fi
       if [ ! -f "$destination/$chart-$version.tgz" ]; then
         helm pull "oci://${var.source_helm_registry}/charts/$chart" --version "$version" --destination "$destination"
       fi
