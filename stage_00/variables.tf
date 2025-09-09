@@ -62,14 +62,14 @@ variable "helm_registry" {
 variable "helm_registry_username" {
   description = "Username to connect to the CHORUS Helm chart registry"
   type        = string
-  default = ""
+  default     = ""
 }
 
 variable "helm_registry_password" {
   description = "Password to connect to the CHORUS Helm chart registry"
   type        = string
   sensitive   = true
-  default = ""
+  default     = ""
 }
 
 variable "remote_cluster_kubeconfig_context" {
