@@ -217,6 +217,9 @@ module "remote_cluster_keycloak_config" {
   admin_id           = var.keycloak_admin_username
   infra_realm_name   = var.keycloak_infra_realm
   backend_realm_name = var.keycloak_backend_realm
+
+  google_identity_provider_client_id     = var.google_identity_provider_client_id
+  google_identity_provider_client_secret = var.google_identity_provider_client_secret
 }
 
 module "keycloak_harbor_client_config" {
