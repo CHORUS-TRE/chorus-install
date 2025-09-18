@@ -1,3 +1,5 @@
+# Master realm
+
 data "keycloak_realm" "master" {
   realm = "master"
 }
@@ -19,9 +21,36 @@ resource "keycloak_group_roles" "chorus_admins_group_roles" {
   role_ids = [data.keycloak_role.admin.id]
 }
 
+resource "keycloak_oidc_google_identity_provider" "master" {
+  realm         = data.keycloak_realm.master.id
+  client_id     = var.google_identity_provider_client_id
+  client_secret = var.google_identity_provider_client_secret
+
+  request_refresh_token = true
+  disable_user_info     = true
+  sync_mode             = "LEGACY"
+
+  count = coalesce(var.google_identity_provider_client_id, "no_google_identity_provider") == "no_google_identity_provider" ? 0 : 1
+}
+
+# Infra realm
+
 module "keycloak_realm" {
   source     = "../keycloak_realm"
   realm_name = var.infra_realm_name
+}
+
+resource "keycloak_oidc_google_identity_provider" "infra" {
+  realm         = module.keycloak_realm.realm_id
+  client_id     = var.google_identity_provider_client_id
+  client_secret = var.google_identity_provider_client_secret
+
+  request_refresh_token = "false"
+  default_scopes        = ["openid", "email"]
+  trust_email           = true
+  sync_mode             = "LEGACY"
+
+  count = coalesce(var.google_identity_provider_client_id, "no_google_identity_provider") == "no_google_identity_provider" ? 0 : 1
 }
 
 # Client scope
