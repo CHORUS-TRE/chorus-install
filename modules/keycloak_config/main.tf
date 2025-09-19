@@ -46,7 +46,7 @@ resource "keycloak_oidc_google_identity_provider" "infra" {
   client_secret = var.google_identity_provider_client_secret
 
   request_refresh_token = "false"
-  default_scopes        = ["openid", "email"]
+  default_scopes        = "openid email"
   trust_email           = true
   sync_mode             = "LEGACY"
 
