@@ -46,6 +46,10 @@ locals {
   grafana_existing_oauth_client_secret     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
   grafana_existing_oauth_client_secret_key = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
 
+  alertmanager_namespace         = jsondecode(file("${var.helm_values_path}/${local.cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
+  alertmanager_webex_secret_name = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.name, "")
+  alertmanager_webex_secret_key  = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.key, "")
+
   argo_workflows_values                                 = file("${var.helm_values_path}/${local.cluster_name}/${var.argo_workflows_chart_name}/values.yaml")
   argo_workflows_values_parsed                          = yamldecode(local.argo_workflows_values)
   argo_workflows_url                                    = "https://${local.argo_workflows_values_parsed.argo-workflows.server.ingress.hosts.0}"
@@ -547,4 +551,14 @@ locals {
 resource "local_file" "stage_02_output" {
   filename = "../output.yaml"
   content  = yamlencode(local.output)
+}
+
+# Alertmanager
+module "alertmanager" {
+  source = "../modules/alertmanager"
+
+  webex_secret_name      = local.alertmanager_webex_secret_name
+  webex_secret_key       = local.alertmanager_webex_secret_key
+  alertmanager_namespace = local.alertmanager_namespace
+  webex_access_token     = var.webex_access_token
 }
