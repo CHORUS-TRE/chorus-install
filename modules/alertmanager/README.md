@@ -21,6 +21,7 @@ module "alertmanager" {
 
   alertmanager_namespace = "prometheus"
   webex_secret_name      = "config-webex-secret"
+  webex_secret_key       = "access-token"
   webex_access_token     = "your-access-token"
 }
 ```
