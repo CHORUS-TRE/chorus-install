@@ -295,7 +295,7 @@ variable "juicefs_csi_driver_chart_name" {
 variable "juicefs_s3_gateway_chart_name" {
   description = "JuiceFS S3 gateway Helm chart name"
   type        = string
-  default     = "juicefs-s3-gateway-driver"
+  default     = "juicefs-s3-gateway"
 }
 
 variable "juicefs_dashboard_username" {
