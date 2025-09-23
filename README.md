@@ -35,15 +35,16 @@
 
 | Component          | Description                                                                                                        | Required |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------ | -------- |
-| Kubernetes cluster | An infrastructure with a working Kubernetes cluster | Required |
+| Kubernetes cluster | An infrastructure with a working Kubernetes cluster to run ArgoCD (named _build_ cluster in the following) | Required |
+| Kubernetes cluster | An infrastructure with a working Kubernetes cluster to run CHORUS and its workspaces (named _remote_ cluster in the following) | Required |
 | Domain name        | CHORUS-TRE is only accessible via HTTPS and it's essential to register a domain name via registrars like Cloudflare, Route53, etc. | Required |  
-| DNS Server         | CHORUS-TRE is only accessible via HTTPS and it's essential to have a DNS server via providers like Cloudflare, Route53, etc.                  | Required |
+| DNS Server         | CHORUS-TRE is only accessible via HTTPS and it's essential to have a DNS server via providers like Cloudflare, Route53, etc. | Required |
 
 ### Repositories
 
-| Repository                                                          | Description                                                                                                                                                                                                      |
+| Repository                                                         | Description                                          |
 | ------------------------------------------------------------------ | ---------------------------------------------------- |
-| [environment-template](https://github.com/CHORUS-TRE/environment-template)                               | Repository gathering all the Helm charts values files             |
+| [environment-template](https://github.com/CHORUS-TRE/environment-template) | Repository gathering all the Helm charts values files |
 
 ## Install
 
@@ -54,18 +55,25 @@
     ```
 
     Edit this file as needed.
+    You can find more information about each variable in the `VARIABLE.md` file.
+    Remote cluster related variables are only used in stages 03 and 04.
+    If you only intend to install the build cluster for now, you can leave the remote cluster related variables unset.
 
 1. Source your env file
     ```
     source .env
     ```
 
+1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspace) for each stage. Make sure to add the necessary tag (e.g. `stage_00` for the workspace used for stage_00).
+
 1. Initialize, plan and apply stage 0
+   This stage downloads the necessary overriding Helm values from the 
 
     ```
     cd stage_00
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_00
     terraform init
     terraform plan -out="stage_00.plan"
     terraform apply "stage_00.plan"
@@ -77,6 +85,7 @@
     cd ../stage_01
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_01
     terraform init
     terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
@@ -99,6 +108,7 @@
     cd ../stage_02
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_02
     terraform init
     terraform plan -out="stage_02.plan"
     terraform apply "stage_02.plan"
@@ -111,6 +121,7 @@
     cd ../stage_03
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_03
     terraform init
     terraform plan -out="stage_03.plan"
     terraform apply "stage_03.plan"
@@ -121,6 +132,7 @@
     cd ../stage_04
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_04
     terraform init
     terraform plan -out="stage_04.plan"
     terraform apply "stage_04.plan"
