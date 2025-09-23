@@ -256,7 +256,7 @@ variable "templates_path" {
 }
 
 variable "frontend_chart_name" {
-  description = "frontend chart name"
+  description = "Frontend Helm chart name"
   type        = string
   default     = "web-ui"
 }
@@ -284,4 +284,38 @@ variable "remote_cluster_webex_access_token" {
   type        = string
   sensitive   = true
   default     = ""
+}
+
+variable "juicefs_csi_driver_chart_name" {
+  description = "JuiceFS CSI driver Helm chart name"
+  type        = string
+  default     = "juicefs-csi-driver"
+}
+
+variable "juicefs_s3_gateway_chart_name" {
+  description = "JuiceFS S3 gateway Helm chart name"
+  type        = string
+  default     = "juicefs-s3-gateway-driver"
+}
+
+variable "juicefs_dashboard_username" {
+  description = "JuiceFS dashboard username"
+  type        = string
+  default     = "chorus"
+}
+
+variable "s3_bucket_name" {
+  description = "S3 access key"
+  type        = string
+}
+
+variable "s3_access_key" {
+  description = "S3 access key"
+  type        = string
+}
+
+variable "s3_secret_key" {
+  description = "S3 secret key"
+  type        = string
+  sensitive   = true
 }
