@@ -700,6 +700,6 @@ resource "kubernetes_secret" "juicefs" {
     secret-key = var.s3_secret_key
     metaurl    = "redis://:${urlencode(random_password.juicefs_cache_secret.result)}@${local.remote_cluster_name}-juicefs-cache-valkey-primary.${local.juicefs_cache_namespace}.svc.cluster.local:6379/1"
     storage    = "s3"
-    bucket     = local.remote_cluster_name
+    bucket     = var.s3_bucket_name
   }
 }
