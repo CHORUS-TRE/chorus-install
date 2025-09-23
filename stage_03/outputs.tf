@@ -9,8 +9,8 @@ output "harbor_url_admin_login" {
 }
 
 output "harbor_username" {
-  value = try(module.harbor_secret.harbor_username,
-  "Failed to retrieve Harbor URL")
+  value = try(local.harbor_admin_username,
+  "Failed to retrieve Harbor username")
 }
 
 output "harbor_password" {

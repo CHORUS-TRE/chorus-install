@@ -8,6 +8,11 @@ variable "core_secret_name" {
   description = "The name of the Kubernetes Secret that contains the core secrets for Harbor"
 }
 
+variable "admin_username" {
+  type        = string
+  description = "The username of the Harbor admin"
+}
+
 variable "admin_secret_name" {
   type        = string
   description = "The name of the Kubernetes Secret that contains the Harbor admin password"

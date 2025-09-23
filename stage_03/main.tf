@@ -48,6 +48,7 @@ locals {
   harbor_registry_http_secret_name        = local.harbor_values_parsed.harbor.registry.existingSecret
   harbor_registry_http_secret_key         = local.harbor_values_parsed.harbor.registry.existingSecretKey
   harbor_registry_credentials_secret_name = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
+  harbor_admin_username                   = "admin"
 
   harbor_oidc_secret = local.harbor_values_parsed.harbor.core.extraEnvVars[
     index(
@@ -164,6 +165,7 @@ module "harbor_secret" {
   encryption_key_secret_name       = local.harbor_encryption_key_secret_name
   xsrf_secret_name                 = local.harbor_xsrf_secret_name
   xsrf_secret_key                  = local.harbor_xsrf_secret_key
+  admin_username                   = local.harbor_admin_username
   admin_secret_name                = local.harbor_admin_secret_name
   admin_secret_key                 = local.harbor_admin_secret_key
   jobservice_secret_name           = local.harbor_jobservice_secret_name
