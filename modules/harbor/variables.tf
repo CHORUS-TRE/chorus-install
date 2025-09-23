@@ -58,11 +58,6 @@ variable "harbor_db_helm_values" {
   type        = string
 }
 
-variable "harbor_admin_username" {
-  description = "Harbor admin username"
-  type        = string
-}
-
 variable "harbor_db_secret_name" {
   description = "Name of the Kubernetes Secret containing Harbor database credentials"
   type        = string
@@ -95,6 +90,11 @@ variable "harbor_xsrf_secret_name" {
 
 variable "harbor_xsrf_secret_key" {
   description = "Key within the Harbor XSRF secret that stores the XSRF token"
+  type        = string
+}
+
+variable "harbor_admin_username" {
+  description = "Harbor admin username"
   type        = string
 }
 
