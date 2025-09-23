@@ -14,7 +14,7 @@ variable "helm_values_pat" {
   description = "Fine-grained personal access token (PAT) to access the Helm chart values repository (e.g. CHORUS-TRE/environment-template)"
   type        = string
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 variable "chorus_release" {
