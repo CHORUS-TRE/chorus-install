@@ -123,6 +123,19 @@ locals {
   didata_db_values_parsed = yamldecode(local.didata_db_values)
   didata_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json")).namespace
   didata_db_secret_name   = local.didata_db_values_parsed.mariadb.auth.existingSecret
+
+  juicefs_csi_driver_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/values.yaml")
+  juicefs_csi_driver_values_parsed = yamldecode(local.juicefs_csi_driver_values)
+  juicefs_csi_driver_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/config.json")).namespace
+
+  juicefs_s3_gateway_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/values.yaml")
+  juicefs_s3_gateway_values_parsed = yamldecode(local.juicefs_s3_gateway_values)
+  juicefs_s3_gateway_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json")).namespace
+
+  juicefs_cache_values_folder_name = "juicefs-cache"
+  juicefs_cache_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/values.yaml")
+  juicefs_cache_values_parsed      = yamldecode(local.juicefs_cache_values)
+  juicefs_cache_namespace          = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json")).namespace
 }
 
 # Providers
@@ -618,4 +631,60 @@ resource "kubernetes_secret" "regcred" {
   }
 
   type = "kubernetes.io/dockerconfigjson"
+}
+
+# JuiceFS
+
+resource "random_password" "juicefs_cache_secret" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "juicefs_cache" {
+  metadata {
+    name      = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
+    namespace = local.juicefs_cache_namespace
+  }
+
+  data = {
+    "${local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey}" = random_password.juicefs_cache_secret.result
+  }
+}
+
+resource "random_password" "juicefs_dashboard_secret" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "juicefs_dashboard" {
+  metadata {
+    name      = local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret
+    namespace = local.juicefs_csi_driver_namespace
+  }
+
+  data = {
+    password = random_password.juicefs_dashboard_secret.result
+    username = var.juicefs_dashboard_username
+  }
+}
+
+# The following secret name is hardcoded because
+# the chorus wrapper helm chart for juicefs-csi-driver
+# also hardcodes that secret name in the corresponding
+# template (i.e. juicefs-sc.yaml)
+
+resource "kubernetes_secret" "juicefs" {
+  metadata {
+    name      = "juicefs-secret"
+    namespace = local.juicefs_csi_driver_namespace
+  }
+
+  data = {
+    name       = "chorus-data"
+    access-key = var.s3_access_key
+    secret-key = var.s3_secret_key
+    metaurl    = "redis://:${urlencode(random_password.juicefs_cache_secret.result)}@${local.remote_cluster_name}-juicefs-cache-valkey-primary.${local.juicefs_cache_namespace}.svc.cluster.local:6379/1"
+    storage    = "s3"
+    bucket     = local.remote_cluster_name
+  }
 }
