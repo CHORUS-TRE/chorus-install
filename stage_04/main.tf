@@ -132,7 +132,7 @@ locals {
   juicefs_csi_driver_values_parsed = yamldecode(local.juicefs_csi_driver_values)
   juicefs_csi_driver_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/config.json")).namespace
 
-  juicefs_s3_gateway_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json")).namespace
+  juicefs_s3_gateway_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json")).namespace
 
   juicefs_cache_values_folder_name = "juicefs-cache"
   juicefs_cache_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/values.yaml")
