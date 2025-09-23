@@ -304,6 +304,11 @@ variable "juicefs_dashboard_username" {
   default     = "chorus"
 }
 
+variable "s3_bucket_name" {
+  description = "S3 access key"
+  type        = string
+}
+
 variable "s3_access_key" {
   description = "S3 access key"
   type        = string
