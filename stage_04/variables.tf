@@ -279,6 +279,13 @@ variable "google_identity_provider_client_secret" {
   default     = ""
 }
 
+variable "remote_cluster_webex_access_token" {
+  description = "The Webex access token for the Alertmanager integration"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "juicefs_csi_driver_chart_name" {
   description = "JuiceFS CSI driver Helm chart name"
   type        = string

@@ -326,3 +326,10 @@ variable "google_identity_provider_client_secret" {
   sensitive   = true
   default     = ""
 }
+
+variable "webex_access_token" {
+  description = "The Webex access token for the Alertmanager integration"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
