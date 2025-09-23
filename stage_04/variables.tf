@@ -309,6 +309,11 @@ variable "s3_bucket_name" {
   type        = string
 }
 
+variable "s3_endpoint" {
+  description = "S3 endpoint"
+  type        = string
+}
+
 variable "s3_access_key" {
   description = "S3 access key"
   type        = string
