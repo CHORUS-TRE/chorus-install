@@ -517,6 +517,16 @@ module "argocd_config" {
   ]
 }
 
+# Alertmanager
+module "alertmanager" {
+  source = "../modules/alertmanager"
+
+  webex_secret_name      = local.alertmanager_webex_secret_name
+  webex_secret_key       = local.alertmanager_webex_secret_key
+  alertmanager_namespace = local.alertmanager_namespace
+  webex_access_token     = var.webex_access_token
+}
+
 locals {
   output = {
     harbor_admin_username = var.harbor_admin_username
@@ -549,14 +559,4 @@ locals {
 resource "local_file" "stage_02_output" {
   filename = "../output.yaml"
   content  = yamlencode(local.output)
-}
-
-# Alertmanager
-module "alertmanager" {
-  source = "../modules/alertmanager"
-
-  webex_secret_name      = local.alertmanager_webex_secret_name
-  webex_secret_key       = local.alertmanager_webex_secret_key
-  alertmanager_namespace = local.alertmanager_namespace
-  webex_access_token     = var.webex_access_token
 }
