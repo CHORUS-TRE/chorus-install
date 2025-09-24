@@ -557,6 +557,6 @@ locals {
 }
 
 resource "local_file" "stage_02_output" {
-  filename = "../output.yaml"
+  filename = "../${local.cluster_name}_output.yaml"
   content  = yamlencode(local.output)
 }
