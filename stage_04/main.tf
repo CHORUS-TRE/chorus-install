@@ -9,6 +9,12 @@ locals {
   keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_url           = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
+  keycloak_db_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml")
+  keycloak_db_values_parsed      = yamldecode(local.keycloak_db_values)
+  keycloak_db_existing_secret    = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  keycloak_db_user_password_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  keycloak_db_admin_password_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
+
   harbor_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed = yamldecode(local.harbor_values)
   harbor_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
@@ -30,6 +36,12 @@ locals {
 
   keycloak_admin_password = data.kubernetes_secret.keycloak_admin_password.data["${local.keycloak_secret_key}"]
   harbor_admin_password   = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_secret_key}"]
+
+  harbor_db_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
+  harbor_db_values_parsed      = yamldecode(local.harbor_db_values)
+  harbor_db_existing_secret    = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  harbor_db_user_password_key  = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  harbor_db_admin_password_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
   kube_prometheus_stack_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
   kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)
@@ -633,4 +645,64 @@ module "alertmanager" {
   webex_secret_key       = local.alertmanager_webex_secret_key
   alertmanager_namespace = local.alertmanager_namespace
   webex_access_token     = var.remote_cluster_webex_access_token
+}
+
+data "kubernetes_secret" "harbor_db_existing_secret" {
+  metadata {
+    name      = local.harbor_db_existing_secret
+    namespace = local.harbor_namespace
+  }
+}
+
+data "kubernetes_secret" "keycloak_db_existing_secret" {
+  metadata {
+    name      = local.keycloak_db_existing_secret
+    namespace = local.keycloak_namespace
+  }
+}
+
+locals {
+  output = {
+    harbor_admin_username = var.harbor_admin_username
+    harbor_admin_password = local.harbor_admin_password
+    harbor_url            = local.harbor_url
+    harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
+
+    harbor_cluster_robot_password = module.harbor_config.cluster_robot_password
+    harbor_build_robot_password   = module.harbor_config.build_robot_password
+    harbor_db_username            = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
+    harbor_db_password            = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_user_password_key}"]
+    harbor_db_admin_username      = "postgres"
+    harbor_db_admin_password      = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_admin_password_key}"]
+
+    keycloak_admin_username    = var.keycloak_admin_username
+    keycloak_admin_password    = local.keycloak_admin_password
+    keycloak_url               = local.keycloak_url
+    keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
+    keycloak_db_password       = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_user_password_key}"]
+    keycloak_db_admin_username = "postgres"
+    keycloak_db_admin_password = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_admin_password_key}"]
+
+    grafana_admin_username = var.grafana_admin_username
+    grafana_admin_password = random_password.grafana_admin_password.result
+
+    backend_jwt_signature    = random_password.jwt_signature.result
+    backend_metrics_password = random_password.metrics_password.result
+    backend_steward_password = random_password.steward_password.result
+
+    matomo_admin_password          = random_password.matomo_password.result
+    matomo_db_password             = random_password.matomo_db_password.result
+    matomo_db_replication_password = random_password.matomo_db_replication_password.result
+    matomo_db_root_password        = random_password.matomo_db_root_password.result
+
+    didata_db_password             = random_password.didata_db_password.result
+    didata_db_replication_password = random_password.didata_db_replication_password.result
+    didata_db_root_password        = random_password.didata_db_root_password.result
+    didata_jwt_secret              = random_password.didata_jwt_secret.result
+  }
+}
+
+resource "local_file" "stage_02_output" {
+  filename = "../${local.remote_cluster_name}_output.yaml"
+  content  = yamlencode(local.output)
 }
