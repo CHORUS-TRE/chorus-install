@@ -8,6 +8,11 @@ variable "core_secret_name" {
   description = "The name of the Kubernetes Secret that contains the core secrets for Harbor"
 }
 
+variable "admin_username" {
+  type        = string
+  description = "The username of the Harbor admin"
+}
+
 variable "admin_secret_name" {
   type        = string
   description = "The name of the Kubernetes Secret that contains the Harbor admin password"
@@ -71,9 +76,4 @@ variable "oidc_secret_key" {
 variable "oidc_config" {
   type        = string
   description = "A string containing the OIDC configuration in JSON format for Harbor integration"
-}
-
-variable "harbor_admin_username" {
-  description = "Harbor admin username"
-  type        = string
 }
