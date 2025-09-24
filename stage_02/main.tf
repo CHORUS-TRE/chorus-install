@@ -273,8 +273,6 @@ module "oauth2_proxy" {
   alertmanager_keycloak_client_secret = random_password.alertmanager_keycloak_client_secret.result
 }
 
-# Install charts
-
 module "keycloak_config" {
   source = "../modules/keycloak_config"
 
