@@ -72,3 +72,8 @@ variable "oidc_config" {
   type        = string
   description = "A string containing the OIDC configuration in JSON format for Harbor integration"
 }
+
+variable "harbor_admin_username" {
+  description = "Harbor admin username"
+  type        = string
+}

@@ -131,7 +131,7 @@ resource "kubernetes_secret" "harbor_registry_credentials_secret" {
   # "REGISTRY_HTPASSWD" are hardoced here
   data = {
     "REGISTRY_PASSWD"   = random_password.harbor_registry_passwd.result
-    "REGISTRY_HTPASSWD" = "admin:${htpasswd_password.harbor_registry.bcrypt}"
+    "REGISTRY_HTPASSWD" = "${var.harbor_admin_username}:${htpasswd_password.harbor_registry.bcrypt}"
   }
 }
 

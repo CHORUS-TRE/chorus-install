@@ -1,8 +1,3 @@
-output "harbor_username" {
-  value       = try(var.harbor_admin_username, null)
-  description = "Harbor username"
-}
-
 output "harbor_password" {
   value       = try(module.harbor_secret.harbor_password, null)
   description = "Harbor password"

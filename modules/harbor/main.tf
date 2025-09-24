@@ -27,6 +27,7 @@ module "harbor_secret" {
   encryption_key_secret_name       = var.harbor_encryption_key_secret_name
   xsrf_secret_name                 = var.harbor_xsrf_secret_name
   xsrf_secret_key                  = var.harbor_xsrf_secret_key
+  harbor_admin_username            = var.harbor_admin_username
   admin_secret_name                = var.harbor_admin_secret_name
   admin_secret_key                 = var.harbor_admin_secret_key
   jobservice_secret_name           = var.harbor_jobservice_secret_name
