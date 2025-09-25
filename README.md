@@ -48,6 +48,8 @@
 
 ## Install
 
+![chorus-install diagram](chorus-install-excalidraw.png)
+
 1. Copy over the environment variables example file and set all the necessary variables for your usecase.
 
     ```
