@@ -111,6 +111,8 @@ resource "random_password" "build_robot_password" {
   min_upper   = 1
   min_lower   = 1
   min_numeric = 1
+
+  count = var.build_robot_username == "" ? 0 : 1
 }
 
 resource "harbor_robot_account" "build" {
@@ -1199,4 +1201,28 @@ resource "harbor_robot_account" "build" {
     kind      = "project"
     namespace = "apps"
   }
+
+  count = var.build_robot_username == "" ? 0 : 1
+}
+
+# Replications
+
+resource "harbor_registry" "pull_registry" {
+  provider_name = "harbor"
+  name          = var.pull_replication_registry_name
+  endpoint_url  = var.pull_replication_registry_url
+
+  count = var.pull_replication_registry_name == "" ? 0 : 1
+}
+
+resource "harbor_replication" "pull_registry" {
+  name        = var.pull_replication_registry_name
+  action      = "pull"
+  registry_id = harbor_registry.pull_registry.registry_id
+  schedule    = "0 */5 * * * *"
+  filters {
+    name = "{apps,chorus,services}/**"
+  }
+
+  count = var.pull_replication_registry_name == "" ? 0 : 1
 }

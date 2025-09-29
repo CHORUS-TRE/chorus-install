@@ -21,7 +21,7 @@ variable "cert_manager_crds_path" {
 }
 
 variable "cluster_name" {
-  description = "The cluster name to be used as a prefix to release names"
+  description = "The build cluster name"
   type        = string
 }
 
