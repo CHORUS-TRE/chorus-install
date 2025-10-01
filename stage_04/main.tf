@@ -2,6 +2,10 @@ locals {
   remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
   build_cluster_name  = coalesce(var.cluster_name, var.kubeconfig_context)
 
+  build_cluster_harbor_values        = file("${var.helm_values_path}/${local.build_cluster_name}/${var.harbor_chart_name}/values.yaml")
+  build_cluster_harbor_values_parsed = yamldecode(local.build_cluster_harbor_values)
+  build_cluster_harbor_url           = local.build_cluster_harbor_values_parsed.harbor.externalURL
+
   keycloak_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml")
   keycloak_values_parsed = yamldecode(local.keycloak_values)
   keycloak_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
@@ -362,8 +366,9 @@ module "harbor_config" {
     harbor = harbor.harboradmin-provider
   }
 
-  build_robot_username   = local.build_cluster_name
-  cluster_robot_username = var.remote_cluster_name
+  cluster_robot_username         = var.remote_cluster_name
+  pull_replication_registry_name = local.build_cluster_name
+  pull_replication_registry_url  = local.build_cluster_harbor_url
 }
 
 # Grafana
@@ -458,7 +463,7 @@ resource "kubernetes_secret" "backend_secrets" {
 
 resource "random_password" "matomo_password" {
   length  = 32
-  special = true
+  special = false
 }
 
 resource "kubernetes_secret" "matomo_secret" {
