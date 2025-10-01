@@ -1218,7 +1218,7 @@ resource "harbor_registry" "pull_registry" {
 resource "harbor_replication" "pull_registry" {
   name        = var.pull_replication_registry_name
   action      = "pull"
-  registry_id = harbor_registry.pull_registry.registry_id
+  registry_id = var.pull_replication_registry_name == "" ? null : harbor_registry.pull_registry[0].registry_id
   schedule    = "0 */5 * * * *"
   filters {
     name = "{apps,chorus,services}/**"
