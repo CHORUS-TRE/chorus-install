@@ -451,7 +451,7 @@ resource "kubernetes_secret" "backend_secrets" {
 
 resource "random_password" "matomo_password" {
   length  = 32
-  special = true
+  special = false
 }
 
 resource "kubernetes_secret" "matomo_secret" {
