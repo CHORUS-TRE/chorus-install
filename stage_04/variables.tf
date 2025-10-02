@@ -307,20 +307,24 @@ variable "juicefs_dashboard_username" {
 variable "s3_bucket_name" {
   description = "S3 access key"
   type        = string
+  default     = ""
 }
 
 variable "s3_endpoint" {
   description = "S3 endpoint"
   type        = string
+  default     = ""
 }
 
 variable "s3_access_key" {
   description = "S3 access key"
   type        = string
+  default     = ""
 }
 
 variable "s3_secret_key" {
   description = "S3 secret key"
   type        = string
   sensitive   = true
+  default     = ""
 }
