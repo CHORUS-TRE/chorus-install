@@ -144,16 +144,40 @@ locals {
   didata_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json")).namespace
   didata_db_secret_name   = local.didata_db_values_parsed.mariadb.auth.existingSecret
 
-  juicefs_csi_driver_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/values.yaml")
-  juicefs_csi_driver_values_parsed = yamldecode(local.juicefs_csi_driver_values)
-  juicefs_csi_driver_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/config.json")).namespace
-
-  juicefs_s3_gateway_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json")).namespace
-
+  juicefs_csi_driver_values_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/values.yaml"
+  juicefs_csi_driver_values = (
+    fileexists(local.juicefs_csi_driver_values_path)
+    ? file(local.juicefs_csi_driver_values_path) : null
+  )
+  juicefs_csi_driver_values_parsed = (
+    fileexists(local.juicefs_csi_driver_values_path)
+    ? yamldecode(local.juicefs_csi_driver_values) : null
+  )
+  juicefs_csi_driver_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/config.json"
+  juicefs_csi_driver_namespace = (
+    fileexists(local.juicefs_csi_driver_config_path)
+    ? jsondecode(local.juicefs_csi_driver_config_path).namespace : null
+  )
+  juicefs_s3_gateway_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json"
+  juicefs_s3_gateway_namespace = (
+    fileexists(local.juicefs_s3_gateway_config_path)
+    ? jsondecode(file(local.juicefs_s3_gateway_config_path)).namespace : null
+  )
   juicefs_cache_values_folder_name = "juicefs-cache"
-  juicefs_cache_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/values.yaml")
-  juicefs_cache_values_parsed      = yamldecode(local.juicefs_cache_values)
-  juicefs_cache_namespace          = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json")).namespace
+  juicefs_cache_values_path        = "${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/values.yaml"
+  juicefs_cache_values = (
+    fileexists(local.juicefs_cache_values_path)
+    ? file(local.juicefs_cache_values_path) : null
+  )
+  juicefs_cache_values_parsed = (
+    fileexists(local.juicefs_cache_values_path)
+    ? yamldecode(local.juicefs_cache_values) : null
+  )
+  juicefs_cache_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json"
+  juicefs_cache_namespace = (
+    fileexists(local.juicefs_cache_config_path)
+    ? jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json")).namespace : null
+  )
 }
 
 # Providers
@@ -664,115 +688,23 @@ module "alertmanager" {
 }
 
 # JuiceFS
+ 
+module "juicefs" {
+  source = "../modules/juicefs"
 
-resource "random_password" "juicefs_cache_secret" {
-  length  = 32
-  special = false
-}
+  cluster_name                  = local.remote_cluster_name
+  juicefs_cache_secret_name     = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
+  juicefs_cache_secret_key      = local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey
+  juicefs_cache_namespace       = local.juicefs_cache_namespace
+  juicefs_dashboard_secret_name = local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret
+  juicefs_csi_driver_namespace  = local.juicefs_csi_driver_namespace
+  juicefs_dashboard_username    = var.juicefs_dashboard_username
+  s3_access_key                 = var.s3_access_key
+  s3_secret_key                 = var.s3_secret_key
+  s3_endpoint                   = var.s3_endpoint
+  s3_bucket_name                = var.s3_bucket_name
 
-resource "kubernetes_secret" "juicefs_cache" {
-  metadata {
-    name      = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
-    namespace = local.juicefs_cache_namespace
-  }
-
-  data = {
-    "${local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey}" = random_password.juicefs_cache_secret.result
-  }
-}
-
-resource "random_password" "juicefs_dashboard_secret" {
-  length  = 32
-  special = false
-}
-
-resource "kubernetes_secret" "juicefs_dashboard" {
-  metadata {
-    name      = local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret
-    namespace = local.juicefs_csi_driver_namespace
-  }
-
-  data = {
-    password = random_password.juicefs_dashboard_secret.result
-    username = var.juicefs_dashboard_username
-  }
-}
-
-# The following secret name is hardcoded because
-# the chorus wrapper helm chart for juicefs-csi-driver
-# also hardcodes that secret name in the corresponding
-# template (i.e. juicefs-sc.yaml)
-
-resource "kubernetes_secret" "juicefs" {
-  metadata {
-    name      = "juicefs-secret"
-    namespace = local.juicefs_csi_driver_namespace
-  }
-
-  data = {
-    name       = "chorus-data"
-    access-key = var.s3_access_key
-    secret-key = var.s3_secret_key
-    metaurl    = "redis://:${urlencode(random_password.juicefs_cache_secret.result)}@${local.remote_cluster_name}-juicefs-cache-valkey-primary.${local.juicefs_cache_namespace}.svc.cluster.local:6379/1"
-    storage    = "s3"
-    bucket     = join("/", [var.s3_endpoint, var.s3_bucket_name])
-  }
-}
-
-
-data "kubernetes_secret" "harbor_db_existing_secret" {
-  metadata {
-    name      = local.harbor_db_existing_secret
-    namespace = local.harbor_namespace
-  }
-}
-
-data "kubernetes_secret" "keycloak_db_existing_secret" {
-  metadata {
-    name      = local.keycloak_db_existing_secret
-    namespace = local.keycloak_namespace
-  }
-}
-
-locals {
-  output = {
-    harbor_admin_username = var.harbor_admin_username
-    harbor_admin_password = local.harbor_admin_password
-    harbor_url            = local.harbor_url
-    harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
-
-    harbor_cluster_robot_password = module.harbor_config.cluster_robot_password
-    harbor_build_robot_password   = module.harbor_config.build_robot_password
-    harbor_db_username            = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
-    harbor_db_password            = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_user_password_key}"]
-    harbor_db_admin_username      = "postgres"
-    harbor_db_admin_password      = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_admin_password_key}"]
-
-    keycloak_admin_username    = var.keycloak_admin_username
-    keycloak_admin_password    = local.keycloak_admin_password
-    keycloak_url               = local.keycloak_url
-    keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
-    keycloak_db_password       = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_user_password_key}"]
-    keycloak_db_admin_username = "postgres"
-    keycloak_db_admin_password = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_admin_password_key}"]
-
-    grafana_admin_username = var.grafana_admin_username
-    grafana_admin_password = random_password.grafana_admin_password.result
-
-    backend_jwt_signature    = random_password.jwt_signature.result
-    backend_metrics_password = random_password.metrics_password.result
-    backend_steward_password = random_password.steward_password.result
-
-    matomo_admin_password          = random_password.matomo_password.result
-    matomo_db_password             = random_password.matomo_db_password.result
-    matomo_db_replication_password = random_password.matomo_db_replication_password.result
-    matomo_db_root_password        = random_password.matomo_db_root_password.result
-
-    didata_db_password             = random_password.didata_db_password.result
-    didata_db_replication_password = random_password.didata_db_replication_password.result
-    didata_db_root_password        = random_password.didata_db_root_password.result
-    didata_jwt_secret              = random_password.didata_jwt_secret.result
-  }
+  count = var.s3_secret_key == "" ? 0 : 1
 }
 
 resource "local_file" "stage_02_output" {
