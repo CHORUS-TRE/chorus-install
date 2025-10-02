@@ -656,6 +656,8 @@ module "alertmanager" {
 resource "random_password" "juicefs_cache_secret" {
   length  = 32
   special = false
+
+  count = var.s3_secret_key == "" ? 0 : 1
 }
 
 resource "kubernetes_secret" "juicefs_cache" {
@@ -667,11 +669,15 @@ resource "kubernetes_secret" "juicefs_cache" {
   data = {
     "${local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey}" = random_password.juicefs_cache_secret.result
   }
+
+  count = var.s3_secret_key == "" ? 0 : 1
 }
 
 resource "random_password" "juicefs_dashboard_secret" {
   length  = 32
   special = false
+
+  count = var.s3_secret_key == "" ? 0 : 1
 }
 
 resource "kubernetes_secret" "juicefs_dashboard" {
@@ -684,6 +690,8 @@ resource "kubernetes_secret" "juicefs_dashboard" {
     password = random_password.juicefs_dashboard_secret.result
     username = var.juicefs_dashboard_username
   }
+
+  count = var.s3_secret_key == "" ? 0 : 1
 }
 
 # The following secret name is hardcoded because
@@ -705,4 +713,6 @@ resource "kubernetes_secret" "juicefs" {
     storage    = "s3"
     bucket     = join("/", [var.s3_endpoint, var.s3_bucket_name])
   }
+
+  count = var.s3_secret_key == "" ? 0 : 1
 }
