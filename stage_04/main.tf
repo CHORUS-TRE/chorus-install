@@ -653,66 +653,20 @@ module "alertmanager" {
 
 # JuiceFS
 
-resource "random_password" "juicefs_cache_secret" {
-  length  = 32
-  special = false
+module "juicefs" {
+  source = "../modules/juicefs"
 
-  count = var.s3_secret_key == "" ? 0 : 1
-}
-
-resource "kubernetes_secret" "juicefs_cache" {
-  metadata {
-    name      = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
-    namespace = local.juicefs_cache_namespace
-  }
-
-  data = {
-    "${local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey}" = random_password.juicefs_cache_secret.result
-  }
-
-  count = var.s3_secret_key == "" ? 0 : 1
-}
-
-resource "random_password" "juicefs_dashboard_secret" {
-  length  = 32
-  special = false
-
-  count = var.s3_secret_key == "" ? 0 : 1
-}
-
-resource "kubernetes_secret" "juicefs_dashboard" {
-  metadata {
-    name      = local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret
-    namespace = local.juicefs_csi_driver_namespace
-  }
-
-  data = {
-    password = random_password.juicefs_dashboard_secret.result
-    username = var.juicefs_dashboard_username
-  }
-
-  count = var.s3_secret_key == "" ? 0 : 1
-}
-
-# The following secret name is hardcoded because
-# the chorus wrapper helm chart for juicefs-csi-driver
-# also hardcodes that secret name in the corresponding
-# template (i.e. juicefs-sc.yaml)
-
-resource "kubernetes_secret" "juicefs" {
-  metadata {
-    name      = "juicefs-secret"
-    namespace = local.juicefs_csi_driver_namespace
-  }
-
-  data = {
-    name       = "chorus-data"
-    access-key = var.s3_access_key
-    secret-key = var.s3_secret_key
-    metaurl    = "redis://:${urlencode(random_password.juicefs_cache_secret.result)}@${local.remote_cluster_name}-juicefs-cache-valkey-primary.${local.juicefs_cache_namespace}.svc.cluster.local:6379/1"
-    storage    = "s3"
-    bucket     = join("/", [var.s3_endpoint, var.s3_bucket_name])
-  }
+  cluster_name                  = local.remote_cluster_name
+  juicefs_cache_secret_name     = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
+  juicefs_cache_secret_key      = local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey
+  juicefs_cache_namespace       = local.juicefs_cache_namespace
+  juicefs_dashboard_secret_name = local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret
+  juicefs_csi_driver_namespace  = local.juicefs_csi_driver_namespace
+  juicefs_dashboard_username    = var.juicefs_dashboard_username
+  s3_access_key                 = var.s3_access_key
+  s3_secret_key                 = var.s3_secret_key
+  s3_endpoint                   = var.s3_endpoint
+  s3_bucket_name                = var.s3_bucket_name
 
   count = var.s3_secret_key == "" ? 0 : 1
 }
