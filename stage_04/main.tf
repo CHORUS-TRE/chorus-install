@@ -688,7 +688,7 @@ module "alertmanager" {
 }
 
 # JuiceFS
- 
+
 module "juicefs" {
   source = "../modules/juicefs"
 
