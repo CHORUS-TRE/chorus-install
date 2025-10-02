@@ -132,16 +132,40 @@ locals {
   didata_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json")).namespace
   didata_db_secret_name   = local.didata_db_values_parsed.mariadb.auth.existingSecret
 
-  juicefs_csi_driver_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/values.yaml")
-  juicefs_csi_driver_values_parsed = yamldecode(local.juicefs_csi_driver_values)
-  juicefs_csi_driver_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/config.json")).namespace
-
-  juicefs_s3_gateway_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json")).namespace
-
+  juicefs_csi_driver_values_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/values.yaml"
+  juicefs_csi_driver_values = (
+    fileexists(local.juicefs_csi_driver_values_path)
+    ? file(local.juicefs_csi_driver_values_path) : null
+  )
+  juicefs_csi_driver_values_parsed = (
+    fileexists(local.juicefs_csi_driver_values_path)
+    ? yamldecode(local.juicefs_csi_driver_values) : null
+  )
+  juicefs_csi_driver_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/config.json"
+  juicefs_csi_driver_namespace = (
+    fileexists(local.juicefs_csi_driver_config_path)
+    ? jsondecode(local.juicefs_csi_driver_config_path).namespace : null
+  )
+  juicefs_s3_gateway_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json"
+  juicefs_s3_gateway_namespace = (
+    fileexists(local.juicefs_s3_gateway_config_path)
+    ? jsondecode(file(local.juicefs_s3_gateway_config_path)).namespace : null
+  )
   juicefs_cache_values_folder_name = "juicefs-cache"
-  juicefs_cache_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/values.yaml")
-  juicefs_cache_values_parsed      = yamldecode(local.juicefs_cache_values)
-  juicefs_cache_namespace          = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json")).namespace
+  juicefs_cache_values_path        = "${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/values.yaml"
+  juicefs_cache_values = (
+    fileexists(local.juicefs_cache_values_path)
+    ? file(local.juicefs_cache_values_path) : null
+  )
+  juicefs_cache_values_parsed = (
+    fileexists(local.juicefs_cache_values_path)
+    ? yamldecode(local.juicefs_cache_values) : null
+  )
+  juicefs_cache_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json"
+  juicefs_cache_namespace = (
+    fileexists(local.juicefs_cache_config_path)
+    ? jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json")).namespace : null
+  )
 }
 
 # Providers
