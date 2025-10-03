@@ -35,102 +35,143 @@
 
 | Component          | Description                                                                                                        | Required |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------ | -------- |
-| Kubernetes cluster | An infrastructure with a working Kubernetes cluster | Required |
+| Kubernetes cluster | An infrastructure with a working Kubernetes cluster to run ArgoCD (named _build_ cluster in the following) | Required |
+| Kubernetes cluster | An infrastructure with a working Kubernetes cluster to run CHORUS and its workspaces (named _remote_ cluster in the following) | Required |
 | Domain name        | CHORUS-TRE is only accessible via HTTPS and it's essential to register a domain name via registrars like Cloudflare, Route53, etc. | Required |  
-| DNS Server         | CHORUS-TRE is only accessible via HTTPS and it's essential to have a DNS server via providers like Cloudflare, Route53, etc.                  | Required |
+| DNS Server         | CHORUS-TRE is only accessible via HTTPS and it's essential to have a DNS server via providers like Cloudflare, Route53, etc. | Required |
 
 ### Repositories
 
-| Repository                                                          | Description                                                                                                                                                                                                      |
+| Repository                                                         | Description                                          |
 | ------------------------------------------------------------------ | ---------------------------------------------------- |
-| [environment-template](https://github.com/CHORUS-TRE/environment-template)                               | Repository gathering all the Helm charts values files             |
+| [environment-template](https://github.com/CHORUS-TRE/environment-template) | Repository gathering all the Helm charts values files |
 
 ## Install
 
-1. Set variables for your usecase
+![chorus-install diagram](chorus-install-excalidraw.png)
+
+1. Copy over the environment variables example file and set all the necessary variables for your usecase.
 
     ```
     cp .env.example .env
     ```
+    > You can find more information about each variable in the `VARIABLE.md` file.
+    > Remote cluster related variables are only used in stages 3 and 4.
+    > If you only intend to install the build cluster for now, you can leave the remote cluster related variables unset.
 
-    Edit this file as needed.
-
-1. Source your env file
+1. Source your env file.
     ```
     source .env
     ```
 
-1. Initialize, plan and apply stage 0
+1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspace) for each stage (e.g. workspace_stage_00, workspace_stage_01, ...). 
+    Make sure to add the necessary tag to your workspace (e.g. `stage_00` for the workspace used for stage_00).
+    > If you don't have access to Terraform Cloud, you can delete all the `backend.tf` files, hence using the default local backend. The local backend type stores state as a local file on disk.
+
+1. Initialize, plan and apply stage 0.
+   > This stage downloads the necessary overriding Helm values from the https://github.com/$TF_VAR_github_orga/$TF_VAR_helm_values_repo repository (e.g. https://github.com/CHORUS-TRE/environment-template).
 
     ```
     cd stage_00
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_00
     terraform init
     terraform plan -out="stage_00.plan"
     terraform apply "stage_00.plan"
     ```
 
-1. Initialize, plan and apply stage 1
+1. Initialize, plan and apply stage 1.
+    > This stage deploys Cert-Manager, Ingress-Nginx, Keycloak and Harbor on the build cluster.
 
     ```
     cd ../stage_01
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_01
     terraform init
     terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
     ```
+    > **_NOTE:_** 
+    > The ```terraform apply``` command can take several minutes to complete.
 
-    > **_NOTE:_** The ```terraform apply``` command can take several minutes to complete
+1. Fetch the loadbalancer IP address using ```terraform output loadbalancer_ip```.
 
-1. Fetch the loadbalancer IP address using ```terraform output loadbalancer_ip```
+1. Update your DNS with the loadbalancer IP address.
 
-1. Update your DNS with the loadbalancer IP address
+1. Fetch the Harbor URL using ```terraform output harbor_url_admin_login```.
+    > At this point, you'll need to login using the database authentication because the OIDC provider authentication configuration is not complete yet.
+    > The database authentication page is accessible when appending `/account/sign-in` to the harbor URL (e.g. https://harbor.build.chorus-tre.ch/account/sign-in).
 
-1. Fetch the Harbor URL using ```terraform output harbor_url_admin_login```
+1. Fetch the Harbor password using ```terraform output harbor_username```.
+   The default Harbor admin username is "admin".
 
-1. Make sure Harbor can be accessed using your browser, then proceed with stage 2
+1. Fetch the Keycloak URL using ```terraform output keycloak_url_login```.
 
-    > **_NOTE:_** It takes some time for the certificates to be signed and trusted, hence TLS server verification is currently disabled for Terraform providers used in stage 2. If you chose to enable the verification, you might hit the following error: ```tls: failed to verify certificate: x509: certificate signed by unknown authority```
+1. Fetch the Keycloak admin password using ```terraform output keycloak_password```.
+   The default Keycloak admin username is "admin".
 
-1. Initialize, plan and apply stage 2
+1. Make sure Harbor and Keycloak can be accessed using your browser, then proceed with stage 2.
+    > **_NOTE:_** 
+    > If you do not wait for certificates to appear as signed and trusted, make sure to disable TLS verification for the Harbor and Keycloak Terraform providers used in stage 2, otherwise you might get the following error ```tls: failed to verify certificate: x509: certificate signed by unknown authority```.
+
+1. Initialize, plan and apply stage 2.
+    > This stage configures Harbor (e.g. create registries, projects, robot accounts, upload Helm charts) and Keycloak (e.g. create realms, clients, groups, oidc identity provider), and deploys Argo Workflows, Argo Events and ArgoCD. It also creates all necessary secrets.
+
     ```
     cd ../stage_02
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_02
     terraform init
     terraform plan -out="stage_02.plan"
     terraform apply "stage_02.plan"
     ```
 
-1. Make sure the ```output.yaml``` file appeared. At this stage, the build cluster is complete. You can proceed with stage 3 to add a remote cluster.
+    > **_NOTE:_** 
+    > The applications' sync status might be in an unkown state for a few minutes because ArgoCD fails to connect to the Harbor Helm registry.
+    > This is caused by the fact that Harbor initially serves an invalid certificate, and it takes some time for the correct certificate to be provisioned. 
+    > Also, you might be hitting Let's Encrypt rate limit if you've reinstalled the services too many times lately.
 
-1. Initialize, plan and apply stage 3 (you might need to re-apply stage 0 if the remote cluster related variables were not set previously)
+    > **_NOTE:_**
+    > As ArgoCD takes over the responsibility for the components that were already deployed (e.g. Keycloak, Harbor), their related services will experience a short unavailability period.
+
+1. Make sure the ```build-cluster-name_output.yaml``` file appeared in your local filesystem. 
+   At this stage, the build cluster installation is complete.
+
+1. Fetch the ArgoCD URL and credentials from the ```build-cluster-name_output.yaml``` file.
+   Make sure the build cluster functions as expected, then proceed to bootstrap a remote cluster.
+
+1. If you did not fill in the remote cluster related variables yet, you need to do so in your `.env` file, source it and re-apply stage 0.
+
+1. Initialize, plan and apply stage 3.
+   > This stage installs Cert-Manager CRDs, creates the necessary secrets for Harbor and Keycloak and configures the connection from the ArgoCD running on the build cluster to the remote cluster.
+
     ```
     cd ../stage_03
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_03
     terraform init
     terraform plan -out="stage_03.plan"
     terraform apply "stage_03.plan"
     ``` 
 
 1. Initialize, plan and apply stage 4
+   > This stage configures Harbor (e.g. create registries, projects, robot accounts, upload Helm charts) and Keycloak (e.g. create realms, clients, groups, oidc identity provider) and creates all necessary secrets.
+
     ```
     cd ../stage_04
     terraform login
     terraform workspace show
+    terraform workspace select workspace_stage_04
     terraform init
     terraform plan -out="stage_04.plan"
     terraform apply "stage_04.plan"
     ```
 
-1. Find all the URLs, usernames and passwords needed in the ```output.yaml``` file
-
-    > **_NOTE:_** The applications' sync status might be in an unkown state for a few minutes because ArgoCD fails to connect to the Harbor Helm registry. This is caused by the fact that Harbor initially serves an invalid certificate, and it takes some time for the correct certificate to be provisioned. Also, you might be hitting Let's Encrypt rate limit if you've reinstalled the services too many times lately.
-
-    > **_NOTE:_** As ArgoCD takes over the responsibility for the components that were already deployed (e.g. Keycloak, Harbor), their related services will experience a short unavailability period.
+1. Find all the URLs, usernames and passwords needed in the ```remote-cluster-name_output.yaml``` file
 
 ## Handle existing resources
 

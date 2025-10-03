@@ -13,6 +13,12 @@ locals {
   keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_url           = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
+  keycloak_db_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml")
+  keycloak_db_values_parsed      = yamldecode(local.keycloak_db_values)
+  keycloak_db_existing_secret    = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  keycloak_db_user_password_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  keycloak_db_admin_password_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
+
   harbor_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml")
   harbor_values_parsed = yamldecode(local.harbor_values)
   harbor_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
@@ -34,6 +40,12 @@ locals {
 
   keycloak_admin_password = data.kubernetes_secret.keycloak_admin_password.data["${local.keycloak_secret_key}"]
   harbor_admin_password   = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_secret_key}"]
+
+  harbor_db_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
+  harbor_db_values_parsed      = yamldecode(local.harbor_db_values)
+  harbor_db_existing_secret    = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  harbor_db_user_password_key  = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  harbor_db_admin_password_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
   kube_prometheus_stack_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
   kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)
@@ -693,4 +705,9 @@ module "juicefs" {
   s3_bucket_name                = var.s3_bucket_name
 
   count = var.s3_secret_key == "" ? 0 : 1
+}
+
+resource "local_file" "stage_02_output" {
+  filename = "../${local.remote_cluster_name}_output.yaml"
+  content  = yamlencode(local.output)
 }
