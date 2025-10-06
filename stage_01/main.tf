@@ -37,22 +37,22 @@ locals {
   keycloak_namespace      = jsondecode(file(local.config_files.keycloak)).namespace
   harbor_namespace        = jsondecode(file(local.config_files.harbor)).namespace
 
-  keycloak_values_parsed = yamldecode(local.values_files.keycloak)
+  keycloak_values_parsed = yamldecode(file(local.values_files.keycloak))
   keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
   keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_url           = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
-  keycloak_db_values_parsed    = yamldecode(local.values_files.keycloak_db)
+  keycloak_db_values_parsed    = yamldecode(file(local.values_files.keycloak_db))
   keycloak_db_secret_name      = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   keycloak_db_admin_secret_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   keycloak_db_user_secret_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
-  harbor_db_values_parsed    = yamldecode(local.values_files.harbor_db)
+  harbor_db_values_parsed    = yamldecode(file(local.values_files.harbor_db))
   harbor_db_secret_name      = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   harbor_db_user_secret_key  = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
   harbor_db_admin_secret_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
-  harbor_values_parsed                    = yamldecode(local.values_files.harbor)
+  harbor_values_parsed                    = yamldecode(file(local.values_files.harbor))
   harbor_core_secret_name                 = local.harbor_values_parsed.harbor.core.existingSecret
   harbor_encryption_key_secret_name       = local.harbor_values_parsed.harbor.existingSecretSecretKey
   harbor_xsrf_secret_name                 = local.harbor_values_parsed.harbor.core.existingXsrfSecret
@@ -184,14 +184,14 @@ module "keycloak" {
 
   keycloak_chart_name    = var.keycloak_chart_name
   keycloak_chart_version = local.keycloak_chart_version
-  keycloak_helm_values   = local.values_files.keycloak
+  keycloak_helm_values   = file(local.values_files.keycloak)
   keycloak_namespace     = local.keycloak_namespace
   keycloak_secret_name   = local.keycloak_secret_name
   keycloak_secret_key    = local.keycloak_secret_key
 
   keycloak_db_chart_name       = var.postgresql_chart_name
   keycloak_db_chart_version    = local.keycloak_db_chart_version
-  keycloak_db_helm_values      = local.values_files.keycloak_db
+  keycloak_db_helm_values      = file(local.values_files.keycloak_db)
   keycloak_db_secret_name      = local.keycloak_db_secret_name
   keycloak_db_admin_secret_key = local.keycloak_db_admin_secret_key
   keycloak_db_user_secret_key  = local.keycloak_db_user_secret_key
@@ -220,17 +220,17 @@ module "harbor" {
 
   harbor_chart_name     = var.harbor_chart_name
   harbor_chart_version  = local.harbor_chart_version
-  harbor_helm_values    = local.values_files.harbor
+  harbor_helm_values    = file(local.values_files.harbor)
   harbor_admin_username = var.harbor_admin_username
   harbor_namespace      = local.harbor_namespace
 
   harbor_cache_chart_name    = var.valkey_chart_name
   harbor_cache_chart_version = local.harbor_cache_chart_version
-  harbor_cache_helm_values   = local.values_files.harbor_cache
+  harbor_cache_helm_values   = file(local.values_files.harbor_cache)
 
   harbor_db_chart_name    = var.postgresql_chart_name
   harbor_db_chart_version = local.harbor_db_chart_version
-  harbor_db_helm_values   = local.values_files.harbor_db
+  harbor_db_helm_values   = file(local.values_files.harbor_db)
 
   harbor_db_secret_name                   = local.harbor_db_secret_name
   harbor_db_user_secret_key               = local.harbor_db_user_secret_key
