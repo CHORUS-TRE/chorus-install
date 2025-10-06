@@ -107,7 +107,7 @@
 1. Fetch the Harbor password using ```terraform output harbor_username```.
    The default Harbor admin username is "admin".
 
-1. Fetch the Keycloak URL using ```terraform output keycloak_url_login```.
+1. Fetch the Keycloak URL using ```terraform output keycloak_url```.
 
 1. Fetch the Keycloak admin password using ```terraform output keycloak_password```.
    The default Keycloak admin username is "admin".
