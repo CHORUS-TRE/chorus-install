@@ -1,15 +1,15 @@
 locals {
-  cluster_name                = coalesce(var.cluster_name, var.kubeconfig_context)
+  cluster_name = coalesce(var.cluster_name, var.kubeconfig_context)
 
   config_files = {
-    ingress_nginx       = "${var.helm_values_path}/${local.cluster_name}/${var.ingress_nginx_chart_name}/config.json"
-    cert_manager        = "${var.helm_values_path}/${local.cluster_name}/${var.cert_manager_chart_name}/config.json"
-    selfsigned          = "${var.helm_values_path}/${local.cluster_name}/${var.selfsigned_chart_name}/config.json"
-    keycloak            = "${var.helm_values_path}/${local.cluster_name}/${var.keycloak_chart_name}/config.json"
-    keycloak_db         = "${var.helm_values_path}/${local.cluster_name}/${var.keycloak_chart_name}-db/config.json"
-    harbor              = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}/config.json"
-    harbor_cache        = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}-cache/config.json"
-    harbor_db           = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}-db/config.json"
+    ingress_nginx = "${var.helm_values_path}/${local.cluster_name}/${var.ingress_nginx_chart_name}/config.json"
+    cert_manager  = "${var.helm_values_path}/${local.cluster_name}/${var.cert_manager_chart_name}/config.json"
+    selfsigned    = "${var.helm_values_path}/${local.cluster_name}/${var.selfsigned_chart_name}/config.json"
+    keycloak      = "${var.helm_values_path}/${local.cluster_name}/${var.keycloak_chart_name}/config.json"
+    keycloak_db   = "${var.helm_values_path}/${local.cluster_name}/${var.keycloak_chart_name}-db/config.json"
+    harbor        = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}/config.json"
+    harbor_cache  = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}-cache/config.json"
+    harbor_db     = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}-db/config.json"
   }
 
   values_files = {
@@ -89,7 +89,7 @@ locals {
 resource "null_resource" "validate_config_files" {
   lifecycle {
     precondition {
-      condition = alltrue([for path in values(local.config_files) : can(file(path))])
+      condition     = alltrue([for path in values(local.config_files) : can(file(path))])
       error_message = <<-EOT
         Missing configuration files!
         
@@ -103,7 +103,7 @@ resource "null_resource" "validate_config_files" {
 resource "null_resource" "validate_values_files" {
   lifecycle {
     precondition {
-      condition = alltrue([for path in values(local.values_files) : can(file(path))])
+      condition     = alltrue([for path in values(local.values_files) : can(file(path))])
       error_message = <<-EOT
         Missing values files!
         
