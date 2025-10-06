@@ -1,7 +1,7 @@
 locals {
   cluster_name        = coalesce(var.cluster_name, var.kubeconfig_context)
   remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context, "no-remote")
-  has_remote_cluster     = local.remote_cluster_name != "no-remote"
+  has_remote_cluster  = local.remote_cluster_name != "no-remote"
 }
 
 module "build_cluster_helm_charts_values" {
