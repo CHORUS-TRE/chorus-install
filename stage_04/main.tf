@@ -2,96 +2,172 @@ locals {
   remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
   build_cluster_name  = coalesce(var.cluster_name, var.kubeconfig_context)
 
-  build_cluster_harbor_values        = file("${var.helm_values_path}/${local.build_cluster_name}/${var.harbor_chart_name}/values.yaml")
-  build_cluster_harbor_values_parsed = yamldecode(local.build_cluster_harbor_values)
-  build_cluster_harbor_url           = local.build_cluster_harbor_values_parsed.harbor.externalURL
+  config_files = {
+    # Build cluster files
+    build_cluster_harbor = "${var.helm_values_path}/${local.build_cluster_name}/${var.harbor_chart_name}/config.json"
+    # Remote cluster files
+    keycloak                  = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/config.json"
+    harbor                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json"
+    kube_prometheus_stack     = "${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json"
+    matomo                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/config.json"
+    matomo_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json"
+    backend                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/config.json"
+    backend_db                = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json"
+    i2b2_wildfly              = "${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json"
+    i2b2_db                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json"
+    didata_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json"
+    juicefs_csi_driver        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/config.json"
+    juicefs_s3_gateway        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-s3-gateway/config.json"
+    juicefs_cache             = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-cache/config.json"
+  }
 
-  keycloak_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml")
-  keycloak_values_parsed = yamldecode(local.keycloak_values)
-  keycloak_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
-  keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
-  keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
-  keycloak_url           = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
+  values_files = {
+    # Build cluster files
+    build_cluster_harbor = "${var.helm_values_path}/${local.build_cluster_name}/${var.harbor_chart_name}/values.yaml"
+    # Remote cluster files
+    keycloak                  = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml"
+    keycloak_db               = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
+    harbor_values             = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml"
+    harbor_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml"
+    kube_prometheus_stack     = "${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
+    matomo                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml"
+    matomo_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml"
+    frontend                  = "${var.helm_values_path}/${local.remote_cluster_name}/${var.frontend_chart_name}/values.yaml"
+    backend                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
+    backend_db                = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml"
+    didata                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}/values.yaml"
+    juicefs_csi_driver        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/values.yaml"
+    juicefs_cache             = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-cache/values.yaml"
+  }
 
-  keycloak_db_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml")
-  keycloak_db_values_parsed      = yamldecode(local.keycloak_db_values)
+  keycloak_namespace                  = jsondecode(file(local.config_files.keycloak)).namespace
+  harbor_namespace                    = jsondecode(file(local.config_files.harbor)).namespace
+  prometheus_namespace                = jsondecode(file(local.config_files.kube_prometheus_stack)).namespace
+  alertmanager_namespace              = local.prometheus_namespace
+  grafana_namespace                   = local.prometheus_namespace
+  prometheus_oauth2_proxy_namespace   = jsondecode(file(local.config_files.prometheus_oauth2_proxy)).namespace
+  alertmanager_oauth2_proxy_namespace = jsondecode(file(local.config_files.alertmanager_oauth2_proxy)).namespace
+  oauth2_proxy_cache_namespace        = jsondecode(file(local.config_files.oauth2_proxy_cache)).namespace
+  matomo_namespace                    = jsondecode(file(local.config_files.matomo)).namespace
+  matomo_db_namespace                 = jsondecode(file(local.config_files.matomo_db)).namespace
+  backend_namespace                   = jsondecode(file(local.config_files.backend)).namespace
+  backend_db_namespace                = jsondecode(file(local.config_files.backend_db)).namespace
+  i2b2_wildfly_namespace              = jsondecode(file(local.config_files.i2b2_wildfly)).namespace
+  i2b2_db_namespace                   = jsondecode(file(local.config_files.i2b2_db)).namespace
+  didata_db_namespace                 = jsondecode(file(local.config_files.didata_db)).namespace
+  juicefs_csi_driver_namespace = (
+    fileexists(local.config_files.juicefs_csi_driver)
+    ? jsondecode(file(local.config_files.juicefs_csi_driver)).namespace : null
+  )
+  juicefs_s3_gateway_namespace = (
+    fileexists(local.config_files.juicefs_s3_gateway)
+    ? jsondecode(file(local.config_files.juicefs_s3_gateway)).namespace : null
+  )
+  juicefs_cache_namespace = (
+    fileexists(local.config_files.juicefs_cache)
+    ? jsondecode(file(local.config_files.juicefs_cache)).namespace : null
+  )
+
+  build_cluster_harbor_values      = file(local.values_files.build_cluster_harbor)
+  keycloak_values                  = file(local.values_files.keycloak)
+  keycloak_db_values               = file(local.values_files.keycloak_db)
+  harbor_values                    = file(local.values_files.harbor_values)
+  harbor_db_values                 = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
+  kube_prometheus_stack_values     = file(local.values_files.kube_prometheus_stack)
+  prometheus_oauth2_proxy_values   = file(local.values_files.prometheus_oauth2_proxy)
+  alertmanager_oauth2_proxy_values = file(local.values_files.alertmanager_oauth2_proxy)
+  oauth2_proxy_cache_values        = file(local.values_files.oauth2_proxy_cache)
+  matomo_values                    = file(local.values_files.matomo)
+  matomo_db_values                 = file(local.values_files.matomo_db)
+  frontend_values                  = file(local.values_files.frontend)
+  backend_values                   = file(local.values_files.backend)
+  backend_db_values                = file(local.values_files.backend_db)
+  didata_db_values                 = file(local.values_files.didata_db)
+  juicefs_csi_driver_values = (
+    fileexists(local.values_files.juicefs_csi_driver)
+    ? file(local.values_files.juicefs_csi_driver) : null
+  )
+  juicefs_cache_values = (
+    fileexists(local.values_files.juicefs_cache)
+    ? file(local.values_files.juicefs_cache) : null
+  )
+
+  build_cluster_harbor_values_parsed      = yamldecode(local.build_cluster_harbor_values)
+  keycloak_values_parsed                  = yamldecode(local.keycloak_values)
+  keycloak_db_values_parsed               = yamldecode(local.keycloak_db_values)
+  harbor_values_parsed                    = yamldecode(local.harbor_values)
+  harbor_db_values_parsed                 = yamldecode(local.harbor_db_values)
+  kube_prometheus_stack_values_parsed     = yamldecode(local.kube_prometheus_stack_values)
+  prometheus_oauth2_proxy_values_parsed   = yamldecode(local.prometheus_oauth2_proxy_values)
+  alertmanager_oauth2_proxy_values_parsed = yamldecode(local.alertmanager_oauth2_proxy_values)
+  matomo_values_parsed                    = yamldecode(local.matomo_values)
+  matomo_db_values_parsed                 = yamldecode(local.matomo_db_values)
+  frontend_values_parsed                  = yamldecode(local.frontend_values)
+  backend_values_parsed                   = yamldecode(local.backend_values)
+  backend_db_values_parsed                = yamldecode(local.backend_db_values)
+  didata_db_values_parsed                 = yamldecode(local.didata_db_values)
+  juicefs_csi_driver_values_parsed = (
+    local.juicefs_csi_driver_values != null
+    ? yamldecode(local.juicefs_csi_driver_values) : null
+  )
+  juicefs_cache_values_parsed = (
+    local.juicefs_cache_values != null
+    ? yamldecode(local.juicefs_cache_values) : null
+  )
+
+  build_cluster_harbor_url = local.build_cluster_harbor_values_parsed.harbor.externalURL
+
+  keycloak_url            = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
+  keycloak_secret_name    = local.keycloak_values_parsed.keycloak.auth.existingSecret
+  keycloak_secret_key     = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
+  keycloak_admin_password = data.kubernetes_secret.keycloak_admin_password.data["${local.keycloak_secret_key}"]
+
   keycloak_db_existing_secret    = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   keycloak_db_user_password_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
   keycloak_db_admin_password_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
-  harbor_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml")
-  harbor_values_parsed = yamldecode(local.harbor_values)
-  harbor_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
-  harbor_secret_name   = local.harbor_values_parsed.harbor.existingSecretAdminPassword
-  harbor_secret_key    = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
-  harbor_url           = local.harbor_values_parsed.harbor.externalURL
-
-  harbor_oidc_secret = local.harbor_values_parsed.harbor.core.extraEnvVars[
-    index(
-      local.harbor_values_parsed.harbor.core.extraEnvVars[*].name,
-      "CONFIG_OVERWRITE_JSON"
-    )
-  ].valueFrom.secretKeyRef
-  harbor_oidc_secret_name = local.harbor_oidc_secret.name
-  harbor_oidc_secret_key  = local.harbor_oidc_secret.key
+  harbor_url                    = local.harbor_values_parsed.harbor.externalURL
+  harbor_secret_name            = local.harbor_values_parsed.harbor.existingSecretAdminPassword
+  harbor_secret_key             = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
+  harbor_keycloak_client_secret = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_oidc_secret_key}"]).oidc_client_secret
+  harbor_admin_password         = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_secret_key}"]
+  harbor_oidc_config_env = [
+    for env in local.harbor_values_parsed.harbor.core.extraEnvVars :
+    env if env.name == "CONFIG_OVERWRITE_JSON"
+  ][0]
+  harbor_oidc_secret_name = local.harbor_oidc_config_env.valueFrom.secretKeyRef.name
+  harbor_oidc_secret_key  = local.harbor_oidc_config_env.valueFrom.secretKeyRef.key
   harbor_oidc_endpoint    = join("/", [local.keycloak_url, "realms", var.keycloak_infra_realm])
 
-  harbor_keycloak_client_secret = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_oidc_secret_key}"]).oidc_client_secret
-
-  keycloak_admin_password = data.kubernetes_secret.keycloak_admin_password.data["${local.keycloak_secret_key}"]
-  harbor_admin_password   = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_secret_key}"]
-
-  harbor_db_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
-  harbor_db_values_parsed      = yamldecode(local.harbor_db_values)
   harbor_db_existing_secret    = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   harbor_db_user_password_key  = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
   harbor_db_admin_password_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
-  kube_prometheus_stack_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
-  kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)
-  grafana_url                         = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
+  prometheus_url   = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
+  alertmanager_url = "https://${local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
+  grafana_url      = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
 
-  alertmanager_namespace         = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
   alertmanager_webex_secret_name = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.name, "")
   alertmanager_webex_secret_key  = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.key, "")
 
-  alertmanager_oauth2_proxy_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json")).namespace
-  alertmanager_oauth2_proxy_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml")
-  alertmanager_oauth2_proxy_values_parsed = yamldecode(local.alertmanager_oauth2_proxy_values)
-  alertmanager_url                        = "https://${local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
-
-  prometheus_oauth2_proxy_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json")).namespace
-  prometheus_oauth2_proxy_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml")
-  prometheus_oauth2_proxy_values_parsed = yamldecode(local.prometheus_oauth2_proxy_values)
-  prometheus_url                        = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
-
-  oauth2_proxy_cache_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json")).namespace
-  oauth2_proxy_cache_values    = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml")
-
-  grafana_namespace                = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
   grafana_oauth_client_secret_name = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
   grafana_oauth_client_secret_key  = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
 
-  matomo_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml")
-  matomo_values_parsed = yamldecode(local.matomo_values)
-  matomo_url           = "https://${local.matomo_values_parsed.matomo.ingress.hostname}"
-  matomo_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/config.json")).namespace
-  matomo_secret_name   = local.matomo_values_parsed.matomo.existingSecret
+  matomo_url         = "https://${local.matomo_values_parsed.matomo.ingress.hostname}"
+  matomo_secret_name = local.matomo_values_parsed.matomo.existingSecret
 
-  matomo_db_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml")
-  matomo_db_values_parsed = yamldecode(local.matomo_db_values)
-  matomo_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
-  matomo_db_secret_name   = local.matomo_db_values_parsed.mariadb.auth.existingSecret
-  matomo_db_host          = local.matomo_values_parsed.matomo.externalDatabase.host
+  matomo_db_secret_name = local.matomo_db_values_parsed.mariadb.auth.existingSecret
+  matomo_db_host        = local.matomo_values_parsed.matomo.externalDatabase.host
 
-  frontend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.frontend_chart_name}/values.yaml")
-  frontend_values_parsed = yamldecode(local.frontend_values)
-  frontend_url           = "https://${local.frontend_values_parsed.ingress.hosts.0.host}"
+  frontend_url = "https://${local.frontend_values_parsed.ingress.hosts.0.host}"
 
-  backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
-  backend_values_parsed = yamldecode(local.backend_values)
-  backend_url           = "https://${local.backend_values_parsed.ingress.host}"
-  backend_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/config.json")).namespace
+  backend_url = "https://${local.backend_values_parsed.ingress.host}"
   backend_secrets_content = templatefile("${var.templates_path}/backend_secrets.tmpl",
     {
       daemon_jwt_secret                      = random_password.jwt_signature.result
@@ -114,23 +190,18 @@ locals {
     }
   ) # TODO: break down backend secret into multiple small secrets
 
-  backend_db_namespace        = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json")).namespace
-  backend_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml")
-  backend_db_values_parsed    = yamldecode(local.backend_db_values)
   backend_db_secret_name      = local.backend_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   backend_db_admin_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   backend_db_user_secret_key  = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
-  i2b2_wildfly_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json")).namespace
-  i2b2_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
-
   didata_registry_password = coalesce(var.didata_registry_password, "do-not-install")
 
+  didata_url = "https://didata.${local.remote_cluster_name}.chorus-tre.ch/"
   didata_secrets_content = templatefile("${var.templates_path}/didata_secrets.tmpl",
     {
       didata_app_name    = "didata_chorus"
       didata_app_key     = var.didata_app_key
-      didata_app_url     = "https://didata.${local.remote_cluster_name}.chorus-tre.ch/"
+      didata_app_url     = local.didata_url
       didata_db_host     = "${local.remote_cluster_name}-didata-db-mariadb"
       didata_db_database = "didata"
       didata_db_username = "didata"
@@ -139,45 +210,35 @@ locals {
     }
   )
 
-  didata_db_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml")
-  didata_db_values_parsed = yamldecode(local.didata_db_values)
-  didata_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json")).namespace
-  didata_db_secret_name   = local.didata_db_values_parsed.mariadb.auth.existingSecret
+  didata_db_secret_name = local.didata_db_values_parsed.mariadb.auth.existingSecret
+}
 
-  juicefs_csi_driver_values_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/values.yaml"
-  juicefs_csi_driver_values = (
-    fileexists(local.juicefs_csi_driver_values_path)
-    ? file(local.juicefs_csi_driver_values_path) : null
-  )
-  juicefs_csi_driver_values_parsed = (
-    fileexists(local.juicefs_csi_driver_values_path)
-    ? yamldecode(local.juicefs_csi_driver_values) : null
-  )
-  juicefs_csi_driver_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/config.json"
-  juicefs_csi_driver_namespace = (
-    fileexists(local.juicefs_csi_driver_config_path)
-    ? jsondecode(local.juicefs_csi_driver_config_path).namespace : null
-  )
-  juicefs_s3_gateway_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json"
-  juicefs_s3_gateway_namespace = (
-    fileexists(local.juicefs_s3_gateway_config_path)
-    ? jsondecode(file(local.juicefs_s3_gateway_config_path)).namespace : null
-  )
-  juicefs_cache_values_folder_name = "juicefs-cache"
-  juicefs_cache_values_path        = "${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/values.yaml"
-  juicefs_cache_values = (
-    fileexists(local.juicefs_cache_values_path)
-    ? file(local.juicefs_cache_values_path) : null
-  )
-  juicefs_cache_values_parsed = (
-    fileexists(local.juicefs_cache_values_path)
-    ? yamldecode(local.juicefs_cache_values) : null
-  )
-  juicefs_cache_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json"
-  juicefs_cache_namespace = (
-    fileexists(local.juicefs_cache_config_path)
-    ? jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json")).namespace : null
-  )
+# Validate all config files exist
+resource "null_resource" "validate_config_files" {
+  lifecycle {
+    precondition {
+      condition     = alltrue([for path in values(local.config_files) : can(file(path))])
+      error_message = <<-EOT
+        Missing configuration files!
+        
+        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v))])}
+      EOT
+    }
+  }
+}
+
+# Validate all values files exist
+resource "null_resource" "validate_values_files" {
+  lifecycle {
+    precondition {
+      condition     = alltrue([for path in values(local.values_files) : can(file(path))])
+      error_message = <<-EOT
+        Missing values files!
+        
+        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v))])}
+      EOT
+    }
+  }
 }
 
 # Providers
@@ -707,7 +768,31 @@ module "juicefs" {
   count = var.s3_secret_key == "" ? 0 : 1
 }
 
-resource "local_file" "stage_02_output" {
+locals {
+  output = {
+    harbor_admin_username = var.harbor_admin_username
+    harbor_admin_password = local.harbor_admin_password
+    harbor_url            = local.harbor_url
+    harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
+
+    keycloak_admin_username = var.keycloak_admin_username
+    keycloak_admin_password = local.keycloak_admin_password
+    keycloak_url            = local.keycloak_url
+
+    prometheus_url         = local.prometheus_url
+    alertmanager_url       = local.alertmanager_url
+    grafana_url            = local.grafana_url
+    grafana_admin_username = var.grafana_admin_username
+    grafana_admin_password = random_password.grafana_admin_password.result
+
+    matomo_url   = local.matomo_url
+    frontend_url = local.frontend_url
+    backend_url  = local.backend_url
+    didata_url   = local.didata_url
+  }
+}
+
+resource "local_file" "stage_04_output" {
   filename = "../${local.remote_cluster_name}_output.yaml"
   content  = yamlencode(local.output)
 }
