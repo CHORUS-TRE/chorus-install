@@ -65,14 +65,12 @@ locals {
   harbor_registry_http_secret_key         = local.harbor_values_parsed.harbor.registry.existingSecretKey
   harbor_registry_credentials_secret_name = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
 
-  harbor_oidc_secret = local.harbor_values_parsed.harbor.core.extraEnvVars[
-    index(
-      local.harbor_values_parsed.harbor.core.extraEnvVars[*].name,
-      "CONFIG_OVERWRITE_JSON"
-    )
-  ].valueFrom.secretKeyRef
-  harbor_oidc_secret_name = local.harbor_oidc_secret.name
-  harbor_oidc_secret_key  = local.harbor_oidc_secret.key
+  harbor_oidc_config_env = [
+    for env in local.harbor_values_parsed.harbor.core.extraEnvVars :
+    env if env.name == "CONFIG_OVERWRITE_JSON"
+  ][0]
+  harbor_oidc_secret_name = local.harbor_oidc_config_env.valueFrom.secretKeyRef.name
+  harbor_oidc_secret_key  = local.harbor_oidc_config_env.valueFrom.secretKeyRef.key
   harbor_oidc_endpoint    = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
 
   harbor_oidc_config = jsondecode(templatefile("${var.templates_path}/harbor_oidc.tmpl",
