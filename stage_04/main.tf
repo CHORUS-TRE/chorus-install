@@ -211,29 +211,35 @@ locals {
   didata_db_secret_name = local.didata_db_values_parsed.mariadb.auth.existingSecret
 }
 
-# Validate all config files exist
+# Validate all config files exist (excluding optional JuiceFS files)
 resource "null_resource" "validate_config_files" {
   lifecycle {
     precondition {
-      condition     = alltrue([for path in values(local.config_files) : can(file(path))])
+      condition = alltrue([
+        for k, path in local.config_files :
+        can(file(path)) if !contains(["juicefs_csi_driver", "juicefs_s3_gateway", "juicefs_cache"], k)
+      ])
       error_message = <<-EOT
         Missing configuration files!
         
-        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v))])}
+        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(["juicefs_csi_driver", "juicefs_s3_gateway", "juicefs_cache"], k)])}
       EOT
     }
   }
 }
 
-# Validate all values files exist
+# Validate all values files exist (excluding optional JuiceFS files)
 resource "null_resource" "validate_values_files" {
   lifecycle {
     precondition {
-      condition     = alltrue([for path in values(local.values_files) : can(file(path))])
+      condition = alltrue([
+        for k, path in local.values_files :
+        can(file(path)) if !contains(["juicefs_csi_driver", "juicefs_cache"], k)
+      ])
       error_message = <<-EOT
         Missing values files!
         
-        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v))])}
+        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(["juicefs_csi_driver", "juicefs_cache"], k)])}
       EOT
     }
   }
