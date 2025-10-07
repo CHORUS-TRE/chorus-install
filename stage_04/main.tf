@@ -18,6 +18,7 @@ locals {
     backend_db                = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json"
     i2b2_wildfly              = "${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json"
     i2b2_db                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json"
+    didata                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}/config.json"
     didata_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json"
     juicefs_csi_driver        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/config.json"
     juicefs_s3_gateway        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-s3-gateway/config.json"
@@ -42,6 +43,7 @@ locals {
     backend                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
     backend_db                = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml"
     didata                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}/values.yaml"
+    didata_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml"
     juicefs_csi_driver        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/values.yaml"
     juicefs_cache             = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-cache/values.yaml"
   }
@@ -60,6 +62,7 @@ locals {
   backend_db_namespace                = jsondecode(file(local.config_files.backend_db)).namespace
   i2b2_wildfly_namespace              = jsondecode(file(local.config_files.i2b2_wildfly)).namespace
   i2b2_db_namespace                   = jsondecode(file(local.config_files.i2b2_db)).namespace
+  didata_namespace                    = jsondecode(file(local.config_files.didata)).namespace
   didata_db_namespace                 = jsondecode(file(local.config_files.didata_db)).namespace
   juicefs_csi_driver_namespace = (
     fileexists(local.config_files.juicefs_csi_driver)
@@ -209,6 +212,9 @@ locals {
   )
 
   didata_db_secret_name = local.didata_db_values_parsed.mariadb.auth.existingSecret
+
+  exclude_config_files_validation = ["didata", "didata_db", "juicefs_csi_driver", "juicefs_s3_gateway", "juicefs_cache"]
+  exclude_values_files_validation = ["didata", "juicefs_csi_driver", "juicefs_cache"]
 }
 
 # Validate all config files exist (excluding optional JuiceFS files)
@@ -217,12 +223,12 @@ resource "null_resource" "validate_config_files" {
     precondition {
       condition = alltrue([
         for k, path in local.config_files :
-        can(file(path)) if !contains(["juicefs_csi_driver", "juicefs_s3_gateway", "juicefs_cache"], k)
+        can(file(path)) if !contains(local.local.exclude_validation, k)
       ])
       error_message = <<-EOT
         Missing configuration files!
         
-        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(["juicefs_csi_driver", "juicefs_s3_gateway", "juicefs_cache"], k)])}
+        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(local.local.exclude_validation, k)])}
       EOT
     }
   }
@@ -662,7 +668,7 @@ resource "random_password" "didata_jwt_secret" {
 resource "kubernetes_secret" "didata_env" {
   metadata {
     name      = "didata-env"
-    namespace = "didata"
+    namespace = local.didata_namespace
   }
 
   data = {
