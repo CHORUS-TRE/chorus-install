@@ -22,9 +22,9 @@ resource "kubernetes_secret" "argocd_secret" {
   }
 
   data = {
-    "${local.keycloak_issuer_key}"  = var.oidc_endpoint
-    "${keycloak_client_id_key}"     = var.oidc_client_id
-    "${keycloak_client_secret_key}" = var.oidc_client_secret
+    "${local.keycloak_issuer_key}"        = var.oidc_endpoint
+    "${local.keycloak_client_id_key}"     = var.oidc_client_id
+    "${local.keycloak_client_secret_key}" = var.oidc_client_secret
   }
 }
 
