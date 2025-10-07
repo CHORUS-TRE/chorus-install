@@ -5,7 +5,7 @@ locals {
   remote_cluster_config = jsonencode({
     bearerToken = var.remote_cluster_bearer_token
     tlsClientConfig = {
-      insecure = tobool(var.remote_cluster_insecure)
+      insecure = var.remote_cluster_insecure
       caData   = var.remote_cluster_ca_data
     }
   })
@@ -78,7 +78,6 @@ locals {
   harbor_registry_http_secret_name        = local.harbor_values_parsed.harbor.registry.existingSecret
   harbor_registry_http_secret_key         = local.harbor_values_parsed.harbor.registry.existingSecretKey
   harbor_registry_credentials_secret_name = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
-  harbor_admin_username                   = "admin"
 
   harbor_oidc_config_env = [
     for env in local.harbor_values_parsed.harbor.core.extraEnvVars :
@@ -101,6 +100,34 @@ locals {
   alertmanager_url = "https://${local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
   grafana_url      = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
   backend_url      = "https://${local.backend_values_parsed.ingress.host}"
+}
+
+# Validate all config files exist
+resource "null_resource" "validate_config_files" {
+  lifecycle {
+    precondition {
+      condition     = alltrue([for path in values(local.config_files) : can(file(path))])
+      error_message = <<-EOT
+        Missing configuration files!
+        
+        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v))])}
+      EOT
+    }
+  }
+}
+
+# Validate all values files exist
+resource "null_resource" "validate_values_files" {
+  lifecycle {
+    precondition {
+      condition     = alltrue([for path in values(local.values_files) : can(file(path))])
+      error_message = <<-EOT
+        Missing values files!
+        
+        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v))])}
+      EOT
+    }
+  }
 }
 
 # Providers
@@ -182,7 +209,7 @@ module "harbor_secret" {
   encryption_key_secret_name       = local.harbor_encryption_key_secret_name
   xsrf_secret_name                 = local.harbor_xsrf_secret_name
   xsrf_secret_key                  = local.harbor_xsrf_secret_key
-  admin_username                   = local.harbor_admin_username
+  admin_username                   = var.harbor_admin_username
   admin_secret_name                = local.harbor_admin_secret_name
   admin_secret_key                 = local.harbor_admin_secret_key
   jobservice_secret_name           = local.harbor_jobservice_secret_name
@@ -217,7 +244,7 @@ resource "kubernetes_secret" "remote_clusters" {
   }
 
   # We wait for the remote cluster configuration
-  # to complete to avoir race condition on
+  # to complete to avoid race condition on
   # namespace creation
   depends_on = [
     module.harbor_db_secret,

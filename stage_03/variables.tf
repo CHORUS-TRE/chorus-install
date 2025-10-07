@@ -38,7 +38,7 @@ variable "remote_cluster_kubeconfig_path" {
 
 variable "remote_cluster_insecure" {
   description = "Allow insecure connection to remote cluster"
-  type        = string
+  type        = bool
   default     = false
 }
 
@@ -103,76 +103,16 @@ variable "harbor_keycloak_oidc_admin_group" {
   default     = "HarborAdmins"
 }
 
-variable "harbor_keycloak_base_url" {
-  description = "Harbor base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/harbor/projects"
-}
-
-variable "grafana_keycloak_client_id" {
-  description = "Keycloak client ID assigned to Grafana"
-  type        = string
-  default     = "grafana"
-}
-
-variable "grafana_keycloak_base_url" {
-  description = "Grafana base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/"
-}
-
-variable "grafana_keycloak_oidc_admin_group" {
-  description = "Keycloak OIDC admin group assigned to Grafana"
-  type        = string
-  default     = "Grafana"
-}
-
-variable "alertmanager_keycloak_client_id" {
-  description = "Keycloak client ID assigned to Alertmanager"
-  type        = string
-  default     = "alertmanager"
-}
-
 variable "alertmanager_oauth2_proxy_chart_name" {
   description = "Alertmanager OAuth2 Proxy Helm chart name"
   type        = string
   default     = "alertmanager-oauth2-proxy"
 }
 
-variable "alertmanager_keycloak_base_url" {
-  description = "Alertmanager base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/"
-}
-
-variable "prometheus_keycloak_client_id" {
-  description = "Keycloak client ID assigned to Prometheus"
-  type        = string
-  default     = "prometheus"
-}
-
 variable "prometheus_oauth2_proxy_chart_name" {
   description = "Prometheus OAuth2 Proxy Helm chart name"
   type        = string
   default     = "prometheus-oauth2-proxy"
-}
-
-variable "prometheus_keycloak_base_url" {
-  description = "Prometheus base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/"
-}
-
-variable "backend_keycloak_client_id" {
-  description = "Keycloak client ID assigned to Prometheus"
-  type        = string
-  default     = "chorus"
-}
-
-variable "backend_keycloak_base_url" {
-  description = "Chorus backend base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/"
 }
 
 variable "backend_chart_name" {
