@@ -42,7 +42,6 @@ locals {
     frontend                  = "${var.helm_values_path}/${local.remote_cluster_name}/${var.frontend_chart_name}/values.yaml"
     backend                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
     backend_db                = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml"
-    didata                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}/values.yaml"
     didata_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml"
     juicefs_csi_driver        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/values.yaml"
     juicefs_cache             = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-cache/values.yaml"
@@ -62,8 +61,14 @@ locals {
   backend_db_namespace                = jsondecode(file(local.config_files.backend_db)).namespace
   i2b2_wildfly_namespace              = jsondecode(file(local.config_files.i2b2_wildfly)).namespace
   i2b2_db_namespace                   = jsondecode(file(local.config_files.i2b2_db)).namespace
-  didata_namespace                    = jsondecode(file(local.config_files.didata)).namespace
-  didata_db_namespace                 = jsondecode(file(local.config_files.didata_db)).namespace
+  didata_namespace = (
+    fileexists(local.config_files.didata)
+    ? jsondecode(file(local.config_files.didata)).namespace : null
+  )
+  didata_db_namespace = (
+    fileexists(local.config_files.didata_db)
+    ? jsondecode(file(local.config_files.didata_db)).namespace : null
+  )
   juicefs_csi_driver_namespace = (
     fileexists(local.config_files.juicefs_csi_driver)
     ? jsondecode(file(local.config_files.juicefs_csi_driver)).namespace : null
@@ -91,7 +96,10 @@ locals {
   frontend_values                  = file(local.values_files.frontend)
   backend_values                   = file(local.values_files.backend)
   backend_db_values                = file(local.values_files.backend_db)
-  didata_db_values                 = file(local.values_files.didata_db)
+  didata_db_values = (
+    fileexists(local.values_files.didata_db)
+    ? file(local.values_files.didata_db) : null
+  )
   juicefs_csi_driver_values = (
     fileexists(local.values_files.juicefs_csi_driver)
     ? file(local.values_files.juicefs_csi_driver) : null
@@ -114,7 +122,10 @@ locals {
   frontend_values_parsed                  = yamldecode(local.frontend_values)
   backend_values_parsed                   = yamldecode(local.backend_values)
   backend_db_values_parsed                = yamldecode(local.backend_db_values)
-  didata_db_values_parsed                 = yamldecode(local.didata_db_values)
+  didata_db_values_parsed = (
+    local.didata_db_values != null
+    ? yamldecode(local.didata_db_values) : null
+  )
   juicefs_csi_driver_values_parsed = (
     local.juicefs_csi_driver_values != null
     ? yamldecode(local.juicefs_csi_driver_values) : null
@@ -211,41 +222,43 @@ locals {
     }
   )
 
-  didata_db_secret_name = local.didata_db_values_parsed.mariadb.auth.existingSecret
+  didata_db_secret_name = (
+    local.didata_db_values_parsed != null
+    ? local.didata_db_values_parsed.mariadb.auth.existingSecret : null
+  )
 
   exclude_config_files_validation = ["didata", "didata_db", "juicefs_csi_driver", "juicefs_s3_gateway", "juicefs_cache"]
-  exclude_values_files_validation = ["didata", "juicefs_csi_driver", "juicefs_cache"]
+  exclude_values_files_validation = ["didata_db", "juicefs_csi_driver", "juicefs_cache"]
 }
 
-# Validate all config files exist (excluding optional JuiceFS files)
+# Validate all config files exist
 resource "null_resource" "validate_config_files" {
   lifecycle {
     precondition {
       condition = alltrue([
         for k, path in local.config_files :
-        can(file(path)) if !contains(local.local.exclude_validation, k)
+        can(file(path)) if !contains(local.exclude_config_files_validation, k)
       ])
       error_message = <<-EOT
         Missing configuration files!
         
-        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(local.local.exclude_validation, k)])}
+        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(local.exclude_config_files_validation, k)])}
       EOT
     }
   }
 }
 
-# Validate all values files exist (excluding optional JuiceFS files)
 resource "null_resource" "validate_values_files" {
   lifecycle {
     precondition {
       condition = alltrue([
         for k, path in local.values_files :
-        can(file(path)) if !contains(["juicefs_csi_driver", "juicefs_cache"], k)
+        can(file(path)) if !contains(local.exclude_values_files_validation, k)
       ])
       error_message = <<-EOT
         Missing values files!
         
-        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(["juicefs_csi_driver", "juicefs_cache"], k)])}
+        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(local.exclude_values_files_validation, k)])}
       EOT
     }
   }
