@@ -36,31 +36,31 @@ locals {
 
   harbor_values                             = file(local.values_files.harbor)
   harbor_values_parsed                      = yamldecode(local.harbor_values)
-  harbor_existing_admin_password_secret     = local.harbor_values_parsed.harbor.existingSecretAdminPassword
-  harbor_existing_admin_password_secret_key = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
-  harbor_admin_password                     = data.kubernetes_secret.harbor_existing_admin_password.data["${local.harbor_existing_admin_password_secret_key}"]
+  harbor_admin_password_secret     = local.harbor_values_parsed.harbor.existingSecretAdminPassword
+  harbor_admin_password_secret_key = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
+  harbor_admin_password                     = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_admin_password_secret_key}"]
   harbor_url                                = local.harbor_values_parsed.harbor.externalURL
-  harbor_existing_oidc_secret               = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.name
-  harbor_existing_oidc_secret_key           = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.key
-  harbor_keycloak_client_secret             = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_existing_oidc_secret_key}"]).oidc_client_secret
+  harbor_oidc_secret               = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.name
+  harbor_oidc_secret_key           = local.harbor_values_parsed.harbor.core.extraEnvVars.0.valueFrom.secretKeyRef.key
+  harbor_keycloak_client_secret             = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_oidc_secret_key}"]).oidc_client_secret
 
   harbor_db_values                          = file(local.values_files.harbor_db)
   harbor_db_values_parsed                   = yamldecode(local.harbor_db_values)
-  harbor_db_existing_secret                 = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  harbor_db_secret                 = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   harbor_db_user_password_key               = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
   harbor_db_admin_password_key              = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
   keycloak_values                             = file(local.values_files.keycloak)
   keycloak_values_parsed                      = yamldecode(local.keycloak_values)
   keycloak_namespace                          = jsondecode(file(local.config_files.keycloak)).namespace
-  keycloak_existing_admin_password_secret     = local.keycloak_values_parsed.keycloak.auth.existingSecret
-  keycloak_existing_admin_password_secret_key = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
-  keycloak_admin_password                     = data.kubernetes_secret.keycloak_existing_admin_password.data["${local.keycloak_existing_admin_password_secret_key}"]
+  keycloak_admin_password_secret     = local.keycloak_values_parsed.keycloak.auth.existingSecret
+  keycloak_admin_password_secret_key = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
+  keycloak_admin_password                     = data.kubernetes_secret.keycloak_admin_password.data["${local.keycloak_admin_password_secret_key}"]
   keycloak_url                                = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
   keycloak_db_values                          = file(local.values_files.keycloak_db)
   keycloak_db_values_parsed                   = yamldecode(local.keycloak_db_values)
-  keycloak_db_existing_secret                 = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  keycloak_db_secret                 = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   keycloak_db_user_password_key               = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
   keycloak_db_admin_password_key              = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
 
@@ -69,8 +69,8 @@ locals {
 
   grafana_namespace                        = jsondecode(file(local.config_files.grafana)).namespace
   grafana_url                              = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
-  grafana_existing_oauth_client_secret     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
-  grafana_existing_oauth_client_secret_key = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
+  grafana_oauth_client_secret     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
+  grafana_oauth_client_secret_key = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
 
   alertmanager_namespace         = jsondecode(file(local.config_files.alertmanager)).namespace
   alertmanager_webex_secret_name = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.name, "")
@@ -94,10 +94,10 @@ locals {
   argo_workflows_url                                    = "https://${local.argo_workflows_values_parsed.argo-workflows.server.ingress.hosts.0}"
   argo_workflows_redirect_uri                           = local.argo_workflows_values_parsed.argo-workflows.server.sso.redirectUrl
   argo_workflows_namespace                              = jsondecode(file(local.config_files.argo_workflows)).namespace
-  argo_workflows_existing_sso_server_client_id_name     = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.name
-  argo_workflows_existing_sso_server_client_id_key      = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.key
-  argo_workflows_existing_sso_server_client_secret_name = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.name
-  argo_workflows_existing_sso_server_client_secret_key  = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.key
+  argo_workflows_sso_server_client_id_name     = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.name
+  argo_workflows_sso_server_client_id_key      = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.key
+  argo_workflows_sso_server_client_secret_name = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.name
+  argo_workflows_sso_server_client_secret_key  = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.key
   argo_workflows_workflow_namespace                     = local.argo_workflows_values_parsed.argo-workflows.controller.workflowNamespaces.0
 }
 
@@ -203,37 +203,37 @@ resource "random_password" "grafana_admin_password" {
   special = false
 }
 
-data "kubernetes_secret" "harbor_existing_admin_password" {
+data "kubernetes_secret" "harbor_admin_password" {
   metadata {
-    name      = local.harbor_existing_admin_password_secret
+    name      = local.harbor_admin_password_secret
     namespace = local.harbor_namespace
   }
 }
 
-data "kubernetes_secret" "keycloak_existing_admin_password" {
+data "kubernetes_secret" "keycloak_admin_password" {
   metadata {
-    name      = local.keycloak_existing_admin_password_secret
+    name      = local.keycloak_admin_password_secret
     namespace = local.keycloak_namespace
   }
 }
 
 data "kubernetes_secret" "harbor_oidc" {
   metadata {
-    name      = local.harbor_existing_oidc_secret
+    name      = local.harbor_oidc_secret
     namespace = local.harbor_namespace
   }
 }
 
-data "kubernetes_secret" "keycloak_db_existing_secret" {
+data "kubernetes_secret" "keycloak_db_secret" {
   metadata {
-    name      = local.keycloak_db_existing_secret
+    name      = local.keycloak_db_secret
     namespace = local.keycloak_namespace
   }
 }
 
-data "kubernetes_secret" "harbor_db_existing_secret" {
+data "kubernetes_secret" "harbor_db_secret" {
   metadata {
-    name      = local.harbor_db_existing_secret
+    name      = local.harbor_db_secret
     namespace = local.harbor_namespace
   }
 }
@@ -248,14 +248,14 @@ resource "kubernetes_namespace" "grafana" {
 
 resource "kubernetes_secret" "grafana_oauth_client_secret" {
   metadata {
-    name      = local.grafana_existing_oauth_client_secret
+    name      = local.grafana_oauth_client_secret
     namespace = local.grafana_namespace
   }
 
   data = {
     "admin-password"                                    = random_password.grafana_admin_password.result
     "admin-user"                                        = var.grafana_admin_username
-    "${local.grafana_existing_oauth_client_secret_key}" = random_password.grafana_keycloak_client_secret.result
+    "${local.grafana_oauth_client_secret_key}" = random_password.grafana_keycloak_client_secret.result
   }
 
   depends_on = [kubernetes_namespace.grafana]
@@ -277,39 +277,39 @@ resource "kubernetes_namespace" "argo" {
 
 resource "kubernetes_secret" "argo_workflows_oidc_client_id_and_secret" {
   metadata {
-    name      = local.argo_workflows_existing_sso_server_client_id_name
+    name      = local.argo_workflows_sso_server_client_id_name
     namespace = local.argo_workflows_namespace
   }
 
   data = {
-    "${local.argo_workflows_existing_sso_server_client_id_key}"     = var.argo_workflows_keycloak_client_id
-    "${local.argo_workflows_existing_sso_server_client_secret_key}" = random_password.argo_workflows_keycloak_client_secret.result
+    "${local.argo_workflows_sso_server_client_id_key}"     = var.argo_workflows_keycloak_client_id
+    "${local.argo_workflows_sso_server_client_secret_key}" = random_password.argo_workflows_keycloak_client_secret.result
   }
-  count = local.argo_workflows_existing_sso_server_client_secret_name == local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
+  count = local.argo_workflows_sso_server_client_secret_name == local.argo_workflows_sso_server_client_id_name ? 1 : 0
 }
 
 resource "kubernetes_secret" "argo_workflows_oidc_client_id" {
   metadata {
-    name      = local.argo_workflows_existing_sso_server_client_id_name
+    name      = local.argo_workflows_sso_server_client_id_name
     namespace = local.argo_workflows_namespace
   }
 
   data = {
-    "${local.argo_workflows_existing_sso_server_client_id_key}" = var.argo_workflows_keycloak_client_id
+    "${local.argo_workflows_sso_server_client_id_key}" = var.argo_workflows_keycloak_client_id
   }
-  count = local.argo_workflows_existing_sso_server_client_secret_name != local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
+  count = local.argo_workflows_sso_server_client_secret_name != local.argo_workflows_sso_server_client_id_name ? 1 : 0
 }
 
 resource "kubernetes_secret" "argo_workflows_oidc_client_secret" {
   metadata {
-    name      = local.argo_workflows_existing_sso_server_client_secret_name
+    name      = local.argo_workflows_sso_server_client_secret_name
     namespace = local.argo_workflows_namespace
   }
 
   data = {
-    "${local.argo_workflows_existing_sso_server_client_secret_key}" = random_password.argo_workflows_keycloak_client_secret.result
+    "${local.argo_workflows_sso_server_client_secret_key}" = random_password.argo_workflows_keycloak_client_secret.result
   }
-  count = local.argo_workflows_existing_sso_server_client_secret_name != local.argo_workflows_existing_sso_server_client_id_name ? 1 : 0
+  count = local.argo_workflows_sso_server_client_secret_name != local.argo_workflows_sso_server_client_id_name ? 1 : 0
 }
 
 module "oauth2_proxy" {
@@ -592,17 +592,17 @@ locals {
     harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
     harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
     harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
-    harbor_db_password             = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_user_password_key}"]
+    harbor_db_password             = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_user_password_key}"]
     harbor_db_admin_username       = "postgres"
-    harbor_db_admin_password       = data.kubernetes_secret.harbor_db_existing_secret.data["${local.harbor_db_admin_password_key}"]
+    harbor_db_admin_password       = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_admin_password_key}"]
 
     keycloak_admin_username    = var.keycloak_admin_username
     keycloak_admin_password    = local.keycloak_admin_password
     keycloak_url               = local.keycloak_url
     keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
-    keycloak_db_password       = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_user_password_key}"]
+    keycloak_db_password       = data.kubernetes_secret.keycloak_db_secret.data["${local.keycloak_db_user_password_key}"]
     keycloak_db_admin_username = "postgres"
-    keycloak_db_admin_password = data.kubernetes_secret.keycloak_db_existing_secret.data["${local.keycloak_db_admin_password_key}"]
+    keycloak_db_admin_password = data.kubernetes_secret.keycloak_db_secret.data["${local.keycloak_db_admin_password_key}"]
 
     argocd_url      = module.argo_cd.argocd_url
     argocd_username = module.argo_cd.argocd_username
