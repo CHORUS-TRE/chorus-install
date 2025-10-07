@@ -78,7 +78,7 @@ locals {
   keycloak_values                  = file(local.values_files.keycloak)
   keycloak_db_values               = file(local.values_files.keycloak_db)
   harbor_values                    = file(local.values_files.harbor_values)
-  harbor_db_values                 = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
+  harbor_db_values                 = file(local.values_files.harbor_db)
   kube_prometheus_stack_values     = file(local.values_files.kube_prometheus_stack)
   prometheus_oauth2_proxy_values   = file(local.values_files.prometheus_oauth2_proxy)
   alertmanager_oauth2_proxy_values = file(local.values_files.alertmanager_oauth2_proxy)
@@ -193,8 +193,6 @@ locals {
   backend_db_secret_name      = local.backend_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   backend_db_admin_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   backend_db_user_secret_key  = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
-
-  didata_registry_password = coalesce(var.didata_registry_password, "do-not-install")
 
   didata_url = "https://didata.${local.remote_cluster_name}.chorus-tre.ch/"
   didata_secrets_content = templatefile("${var.templates_path}/didata_secrets.tmpl",
@@ -665,7 +663,7 @@ resource "kubernetes_secret" "didata_env" {
     "didata.env" = local.didata_secrets_content
   }
 
-  count = local.didata_registry_password == "do-not-install" ? 0 : 1
+  count = var.didata_registry_password != "" ? 1 : 0
 }
 
 resource "kubernetes_secret" "didata_db_secret" {
@@ -682,7 +680,7 @@ resource "kubernetes_secret" "didata_db_secret" {
     mariadb-root-password        = random_password.didata_db_root_password.result
   }
 
-  count = local.didata_registry_password == "do-not-install" ? 0 : 1
+  count = var.didata_registry_password != "" ? 1 : 0
 }
 
 resource "kubernetes_secret" "regcred_didata" {
@@ -700,7 +698,7 @@ resource "kubernetes_secret" "regcred_didata" {
     ".dockerconfigjson" = jsonencode({
       "auths" = {
         "https://index.docker.io/v1/" = {
-          "auth" = base64encode(join(":", [var.didata_registry_username, local.didata_registry_password]))
+          "auth" = base64encode(join(":", [var.didata_registry_username, var.didata_registry_password]))
         }
       }
     })
@@ -708,7 +706,7 @@ resource "kubernetes_secret" "regcred_didata" {
 
   type = "kubernetes.io/dockerconfigjson"
 
-  count = local.didata_registry_password == "do-not-install" ? 0 : 1
+  count = var.didata_registry_password != "" ? 1 : 0
 }
 
 # RegCred
@@ -789,6 +787,9 @@ locals {
     frontend_url = local.frontend_url
     backend_url  = local.backend_url
     didata_url   = local.didata_url
+
+    juicefs_enabled = var.s3_secret_key != "" ? true : false
+    didata_enabled  = var.didata_registry_password != "" ? true : false
   }
 }
 
