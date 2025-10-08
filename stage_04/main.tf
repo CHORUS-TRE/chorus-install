@@ -1,183 +1,34 @@
-locals {
-  remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
-  build_cluster_name  = coalesce(var.cluster_name, var.kubeconfig_context)
-
-  build_cluster_harbor_values        = file("${var.helm_values_path}/${local.build_cluster_name}/${var.harbor_chart_name}/values.yaml")
-  build_cluster_harbor_values_parsed = yamldecode(local.build_cluster_harbor_values)
-  build_cluster_harbor_url           = local.build_cluster_harbor_values_parsed.harbor.externalURL
-
-  keycloak_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml")
-  keycloak_values_parsed = yamldecode(local.keycloak_values)
-  keycloak_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/config.json")).namespace
-  keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
-  keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
-  keycloak_url           = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
-
-  keycloak_db_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml")
-  keycloak_db_values_parsed      = yamldecode(local.keycloak_db_values)
-  keycloak_db_existing_secret    = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
-  keycloak_db_user_password_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
-  keycloak_db_admin_password_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-
-  harbor_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml")
-  harbor_values_parsed = yamldecode(local.harbor_values)
-  harbor_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json")).namespace
-  harbor_secret_name   = local.harbor_values_parsed.harbor.existingSecretAdminPassword
-  harbor_secret_key    = local.harbor_values_parsed.harbor.existingSecretAdminPasswordKey
-  harbor_url           = local.harbor_values_parsed.harbor.externalURL
-
-  harbor_oidc_secret = local.harbor_values_parsed.harbor.core.extraEnvVars[
-    index(
-      local.harbor_values_parsed.harbor.core.extraEnvVars[*].name,
-      "CONFIG_OVERWRITE_JSON"
-    )
-  ].valueFrom.secretKeyRef
-  harbor_oidc_secret_name = local.harbor_oidc_secret.name
-  harbor_oidc_secret_key  = local.harbor_oidc_secret.key
-  harbor_oidc_endpoint    = join("/", [local.keycloak_url, "realms", var.keycloak_infra_realm])
-
-  harbor_keycloak_client_secret = jsondecode(data.kubernetes_secret.harbor_oidc.data["${local.harbor_oidc_secret_key}"]).oidc_client_secret
-
-  keycloak_admin_password = data.kubernetes_secret.keycloak_admin_password.data["${local.keycloak_secret_key}"]
-  harbor_admin_password   = data.kubernetes_secret.harbor_admin_password.data["${local.harbor_secret_key}"]
-
-  harbor_db_values             = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml")
-  harbor_db_values_parsed      = yamldecode(local.harbor_db_values)
-  harbor_db_existing_secret    = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
-  harbor_db_user_password_key  = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
-  harbor_db_admin_password_key = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-
-  kube_prometheus_stack_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml")
-  kube_prometheus_stack_values_parsed = yamldecode(local.kube_prometheus_stack_values)
-  grafana_url                         = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
-
-  alertmanager_namespace         = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
-  alertmanager_webex_secret_name = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.name, "")
-  alertmanager_webex_secret_key  = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.key, "")
-
-  alertmanager_oauth2_proxy_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json")).namespace
-  alertmanager_oauth2_proxy_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml")
-  alertmanager_oauth2_proxy_values_parsed = yamldecode(local.alertmanager_oauth2_proxy_values)
-  alertmanager_url                        = "https://${local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
-
-  prometheus_oauth2_proxy_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json")).namespace
-  prometheus_oauth2_proxy_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml")
-  prometheus_oauth2_proxy_values_parsed = yamldecode(local.prometheus_oauth2_proxy_values)
-  prometheus_url                        = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
-
-  oauth2_proxy_cache_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json")).namespace
-  oauth2_proxy_cache_values    = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml")
-
-  grafana_namespace                = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json")).namespace
-  grafana_oauth_client_secret_name = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
-  grafana_oauth_client_secret_key  = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
-
-  matomo_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml")
-  matomo_values_parsed = yamldecode(local.matomo_values)
-  matomo_url           = "https://${local.matomo_values_parsed.matomo.ingress.hostname}"
-  matomo_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/config.json")).namespace
-  matomo_secret_name   = local.matomo_values_parsed.matomo.existingSecret
-
-  matomo_db_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml")
-  matomo_db_values_parsed = yamldecode(local.matomo_db_values)
-  matomo_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json")).namespace
-  matomo_db_secret_name   = local.matomo_db_values_parsed.mariadb.auth.existingSecret
-  matomo_db_host          = local.matomo_values_parsed.matomo.externalDatabase.host
-
-  frontend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.frontend_chart_name}/values.yaml")
-  frontend_values_parsed = yamldecode(local.frontend_values)
-  frontend_url           = "https://${local.frontend_values_parsed.ingress.hosts.0.host}"
-
-  backend_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml")
-  backend_values_parsed = yamldecode(local.backend_values)
-  backend_url           = "https://${local.backend_values_parsed.ingress.host}"
-  backend_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/config.json")).namespace
-  backend_secrets_content = templatefile("${var.templates_path}/backend_secrets.tmpl",
-    {
-      daemon_jwt_secret                      = random_password.jwt_signature.result
-      daemon_metrics_authentication_enabled  = "true"
-      daemon_metrics_authentication_username = "prometheus"
-      daemon_metrics_authentication_password = random_password.metrics_password.result
-      daemon_private_key                     = indent(2, trimspace(tls_private_key.chorus_backend_daemon.private_key_pem))
-      storage_datastores_chorus_password     = module.backend_db_secret.db_password
-      k8s_client_is_watcher                  = "true"
-      k8s_client_api_server                  = var.remote_cluster_server
-      k8s_client_image_pull_secrets = [
-        {
-          registry = "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}"
-          username = join("", ["robot$", "${local.remote_cluster_name}"])
-          password = module.harbor_config.cluster_robot_password
-        }
-      ]
-      keycloak_openid_client_secret = random_password.backend_keycloak_client_secret.result
-      steward_user_password         = random_password.steward_password.result
+# Validate all config files exist
+resource "null_resource" "validate_config_files" {
+  lifecycle {
+    precondition {
+      condition = alltrue([
+        for k, path in local.config_files :
+        can(file(path)) if !contains(local.exclude_config_files_validation, k)
+      ])
+      error_message = <<-EOT
+        Missing configuration files!
+        
+        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(local.exclude_config_files_validation, k)])}
+      EOT
     }
-  ) # TODO: break down backend secret into multiple small secrets
+  }
+}
 
-  backend_db_namespace        = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json")).namespace
-  backend_db_values           = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml")
-  backend_db_values_parsed    = yamldecode(local.backend_db_values)
-  backend_db_secret_name      = local.backend_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
-  backend_db_admin_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
-  backend_db_user_secret_key  = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
-
-  i2b2_wildfly_namespace = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json")).namespace
-  i2b2_db_namespace      = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json")).namespace
-
-  didata_registry_password = coalesce(var.didata_registry_password, "do-not-install")
-
-  didata_secrets_content = templatefile("${var.templates_path}/didata_secrets.tmpl",
-    {
-      didata_app_name    = "didata_chorus"
-      didata_app_key     = var.didata_app_key
-      didata_app_url     = "https://didata.${local.remote_cluster_name}.chorus-tre.ch/"
-      didata_db_host     = "${local.remote_cluster_name}-didata-db-mariadb"
-      didata_db_database = "didata"
-      didata_db_username = "didata"
-      didata_db_password = random_password.didata_db_password.result
-      didata_jwt_secret  = random_password.didata_jwt_secret.result
+resource "null_resource" "validate_values_files" {
+  lifecycle {
+    precondition {
+      condition = alltrue([
+        for k, path in local.values_files :
+        can(file(path)) if !contains(local.exclude_values_files_validation, k)
+      ])
+      error_message = <<-EOT
+        Missing values files!
+        
+        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(local.exclude_values_files_validation, k)])}
+      EOT
     }
-  )
-
-  didata_db_values        = file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml")
-  didata_db_values_parsed = yamldecode(local.didata_db_values)
-  didata_db_namespace     = jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json")).namespace
-  didata_db_secret_name   = local.didata_db_values_parsed.mariadb.auth.existingSecret
-
-  juicefs_csi_driver_values_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/values.yaml"
-  juicefs_csi_driver_values = (
-    fileexists(local.juicefs_csi_driver_values_path)
-    ? file(local.juicefs_csi_driver_values_path) : null
-  )
-  juicefs_csi_driver_values_parsed = (
-    fileexists(local.juicefs_csi_driver_values_path)
-    ? yamldecode(local.juicefs_csi_driver_values) : null
-  )
-  juicefs_csi_driver_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_csi_driver_chart_name}/config.json"
-  juicefs_csi_driver_namespace = (
-    fileexists(local.juicefs_csi_driver_config_path)
-    ? jsondecode(local.juicefs_csi_driver_config_path).namespace : null
-  )
-  juicefs_s3_gateway_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_s3_gateway_chart_name}/config.json"
-  juicefs_s3_gateway_namespace = (
-    fileexists(local.juicefs_s3_gateway_config_path)
-    ? jsondecode(file(local.juicefs_s3_gateway_config_path)).namespace : null
-  )
-  juicefs_cache_values_folder_name = "juicefs-cache"
-  juicefs_cache_values_path        = "${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/values.yaml"
-  juicefs_cache_values = (
-    fileexists(local.juicefs_cache_values_path)
-    ? file(local.juicefs_cache_values_path) : null
-  )
-  juicefs_cache_values_parsed = (
-    fileexists(local.juicefs_cache_values_path)
-    ? yamldecode(local.juicefs_cache_values) : null
-  )
-  juicefs_cache_config_path = "${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json"
-  juicefs_cache_namespace = (
-    fileexists(local.juicefs_cache_config_path)
-    ? jsondecode(file("${var.helm_values_path}/${local.remote_cluster_name}/${local.juicefs_cache_values_folder_name}/config.json")).namespace : null
-  )
+  }
 }
 
 # Providers
@@ -597,14 +448,14 @@ resource "random_password" "didata_jwt_secret" {
 resource "kubernetes_secret" "didata_env" {
   metadata {
     name      = "didata-env"
-    namespace = "didata"
+    namespace = local.didata_namespace
   }
 
   data = {
     "didata.env" = local.didata_secrets_content
   }
 
-  count = local.didata_registry_password == "do-not-install" ? 0 : 1
+  count = var.didata_registry_password != "" ? 1 : 0
 }
 
 resource "kubernetes_secret" "didata_db_secret" {
@@ -621,7 +472,7 @@ resource "kubernetes_secret" "didata_db_secret" {
     mariadb-root-password        = random_password.didata_db_root_password.result
   }
 
-  count = local.didata_registry_password == "do-not-install" ? 0 : 1
+  count = var.didata_registry_password != "" ? 1 : 0
 }
 
 resource "kubernetes_secret" "regcred_didata" {
@@ -639,7 +490,7 @@ resource "kubernetes_secret" "regcred_didata" {
     ".dockerconfigjson" = jsonencode({
       "auths" = {
         "https://index.docker.io/v1/" = {
-          "auth" = base64encode(join(":", [var.didata_registry_username, local.didata_registry_password]))
+          "auth" = base64encode(join(":", [var.didata_registry_username, var.didata_registry_password]))
         }
       }
     })
@@ -647,7 +498,7 @@ resource "kubernetes_secret" "regcred_didata" {
 
   type = "kubernetes.io/dockerconfigjson"
 
-  count = local.didata_registry_password == "do-not-install" ? 0 : 1
+  count = var.didata_registry_password != "" ? 1 : 0
 }
 
 # RegCred
@@ -658,7 +509,7 @@ resource "kubernetes_secret" "regcred" {
     namespace = "reflector"
     annotations = {
       "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "workbench-operator-system,backend,frontend,workspace[0-9]+"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "kube-system,workbench-operator-system,backend,frontend,workspace[0-9]+"
       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
     }
   }
@@ -709,7 +560,34 @@ module "juicefs" {
   count = var.s3_secret_key == "" ? 0 : 1
 }
 
-resource "local_file" "stage_02_output" {
+locals {
+  output = {
+    harbor_admin_username = var.harbor_admin_username
+    harbor_admin_password = local.harbor_admin_password
+    harbor_url            = local.harbor_url
+    harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
+
+    keycloak_admin_username = var.keycloak_admin_username
+    keycloak_admin_password = local.keycloak_admin_password
+    keycloak_url            = local.keycloak_url
+
+    prometheus_url         = local.prometheus_url
+    alertmanager_url       = local.alertmanager_url
+    grafana_url            = local.grafana_url
+    grafana_admin_username = var.grafana_admin_username
+    grafana_admin_password = random_password.grafana_admin_password.result
+
+    matomo_url   = local.matomo_url
+    frontend_url = local.frontend_url
+    backend_url  = local.backend_url
+    didata_url   = local.didata_url
+
+    juicefs_enabled = var.s3_secret_key != "" ? true : false
+    didata_enabled  = var.didata_registry_password != "" ? true : false
+  }
+}
+
+resource "local_file" "stage_04_output" {
   filename = "../${local.remote_cluster_name}_output.yaml"
   content  = yamlencode(local.output)
 }
