@@ -43,11 +43,6 @@ variable "helm_values" {
   type        = string
 
   validation {
-    condition     = length(var.helm_values) > 0
-    error_message = "helm_values cannot be empty."
-  }
-
-  validation {
     condition     = can(yamldecode(var.helm_values))
     error_message = "helm_values must be valid YAML."
   }
