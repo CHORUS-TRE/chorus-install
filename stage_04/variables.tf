@@ -288,16 +288,10 @@ variable "remote_cluster_webex_access_token" {
   default     = ""
 }
 
-variable "juicefs_csi_driver_chart_name" {
-  description = "JuiceFS CSI driver Helm chart name"
+variable "juicefs_chart_name" {
+  description = "JuiceFS Helm chart name used as prefix for CSI driver, S3 gateway and cache"
   type        = string
-  default     = "juicefs-csi-driver"
-}
-
-variable "juicefs_s3_gateway_chart_name" {
-  description = "JuiceFS S3 gateway Helm chart name"
-  type        = string
-  default     = "juicefs-s3-gateway"
+  default     = "juicefs"
 }
 
 variable "juicefs_dashboard_username" {
