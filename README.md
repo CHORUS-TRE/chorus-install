@@ -42,6 +42,7 @@
 
 | Repository                                                         | Description                                          |
 | ------------------------------------------------------------------ | ---------------------------------------------------- |
+| [chorus-tre](https://github.com/CHORUS-TRE/chorus-tre) | Repository gathering all the CHORUS Helm charts |
 | [environment-template](https://github.com/CHORUS-TRE/environment-template) | Repository gathering all the Helm charts values files |
 
 ## Install
@@ -66,12 +67,17 @@
     Make sure to add the necessary tag to your workspace (e.g. `stage_00` for the workspace used for stage_00).
     > If you don't have access to Terraform Cloud, you can delete all the `backend.tf` files, hence using the default local backend. The local backend type stores state as a local file on disk.
 
+1. Log in to Terraform Cloud
+
+    ```
+    terraform login
+    ```
+
 1. Initialize, plan and apply stage 0.
    > This stage downloads the necessary overriding Helm values from the https://github.com/$TF_VAR_github_orga/$TF_VAR_helm_values_repo repository (e.g. https://github.com/CHORUS-TRE/environment-template).
 
     ```
     cd stage_00
-    terraform login
     terraform workspace show
     terraform workspace select workspace_stage_00
     terraform init
@@ -84,7 +90,6 @@
 
     ```
     cd ../stage_01
-    terraform login
     terraform workspace show
     terraform workspace select workspace_stage_01
     terraform init
@@ -119,7 +124,6 @@
 
     ```
     cd ../stage_02
-    terraform login
     terraform workspace show
     terraform workspace select workspace_stage_02
     terraform init
@@ -148,7 +152,6 @@
 
     ```
     cd ../stage_03
-    terraform login
     terraform workspace show
     terraform workspace select workspace_stage_03
     terraform init
@@ -161,7 +164,6 @@
 
     ```
     cd ../stage_04
-    terraform login
     terraform workspace show
     terraform workspace select workspace_stage_04
     terraform init
