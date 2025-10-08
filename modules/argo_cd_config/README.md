@@ -21,5 +21,4 @@ _This module does not define explicit Terraform outputs. All resources are manag
 ## References
 
 - [ArgoCD Documentation](https://argo-cd.readthedocs.io/en/stable/)
-- [Terraform ArgoCD Provider](https://registry.terraform.io/providers/argoproj-labs/argocd/latest/docs)
-- [Terraform Kubernetes Provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) 
+- [Terraform Kubernetes Provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)

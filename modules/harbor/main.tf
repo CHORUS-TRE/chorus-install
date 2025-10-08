@@ -92,6 +92,8 @@ resource "helm_release" "harbor_db" {
     name  = "postgresql.metrics.serviceMonitor.enabled"
     value = "false"
   }
+
+  depends_on = [module.db_secret]
 }
 
 # Harbor
@@ -115,4 +117,9 @@ resource "helm_release" "harbor" {
     name  = "harbor.metrics.serviceMonitor.enabled"
     value = "false"
   }
+
+  depends_on = [
+    helm_release.harbor_cache,
+    helm_release.harbor_db
+  ]
 }
