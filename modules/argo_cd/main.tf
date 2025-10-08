@@ -126,7 +126,7 @@ resource "helm_release" "argocd_cache" {
       name  = "valkey.metrics.podMonitor.enabled"
       value = "false"
     }
-  ] 
+  ]
 
   depends_on = [
     kubernetes_namespace.argocd,
