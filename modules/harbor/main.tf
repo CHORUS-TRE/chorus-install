@@ -55,18 +55,20 @@ resource "helm_release" "harbor_cache" {
 
   values = [var.harbor_cache_helm_values]
 
-  set {
-    name  = "valkey.metrics.enabled"
-    value = "false"
-  }
-  set {
-    name  = "valkey.metrics.serviceMonitor.enabled"
-    value = "false"
-  }
-  set {
-    name  = "valkey.metrics.podMonitor.enabled"
-    value = "false"
-  }
+  set = [
+    {
+      name  = "valkey.metrics.enabled"
+      value = "false"
+    },
+    {
+      name  = "valkey.metrics.serviceMonitor.enabled"
+      value = "false"
+    },
+    {
+      name  = "valkey.metrics.podMonitor.enabled"
+      value = "false"
+    }
+  ]
 
   depends_on = [kubernetes_namespace.harbor]
 }
@@ -84,14 +86,16 @@ resource "helm_release" "harbor_db" {
 
   values = [var.harbor_db_helm_values]
 
-  set {
-    name  = "postgresql.metrics.enabled"
-    value = "false"
-  }
-  set {
-    name  = "postgresql.metrics.serviceMonitor.enabled"
-    value = "false"
-  }
+  set = [
+    {
+      name  = "postgresql.metrics.enabled"
+      value = "false"
+    },
+    {
+      name  = "postgresql.metrics.serviceMonitor.enabled"
+      value = "false"
+    }
+  ]
 
   depends_on = [module.db_secret]
 }
@@ -109,14 +113,16 @@ resource "helm_release" "harbor" {
 
   values = [var.harbor_helm_values]
 
-  set {
-    name  = "harbor.metrics.enabled"
-    value = "false"
-  }
-  set {
-    name  = "harbor.metrics.serviceMonitor.enabled"
-    value = "false"
-  }
+  set = [
+    {
+      name  = "harbor.metrics.enabled"
+      value = "false"
+    },
+    {
+      name  = "harbor.metrics.serviceMonitor.enabled"
+      value = "false"
+    }
+  ]
 
   depends_on = [
     helm_release.harbor_cache,

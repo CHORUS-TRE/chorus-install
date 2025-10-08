@@ -42,14 +42,16 @@ resource "helm_release" "keycloak_db" {
 
   values = [var.keycloak_db_helm_values]
 
-  set {
-    name  = "postgresql.metrics.enabled"
-    value = "false"
-  }
-  set {
-    name  = "postgresql.metrics.serviceMonitor.enabled"
-    value = "false"
-  }
+  set = [
+    {
+      name  = "postgresql.metrics.enabled"
+      value = "false"
+    },
+    {
+      name  = "postgresql.metrics.serviceMonitor.enabled"
+      value = "false"
+    }
+  ]
 
   depends_on = [kubernetes_namespace.keycloak, module.db_secret]
 }
@@ -67,14 +69,16 @@ resource "helm_release" "keycloak" {
 
   values = [var.keycloak_helm_values]
 
-  set {
-    name  = "keycloak.metrics.enabled"
-    value = "false"
-  }
-  set {
-    name  = "keycloak.metrics.serviceMonitor.enabled"
-    value = "false"
-  }
+  set = [
+    {
+      name  = "keycloak.metrics.enabled"
+      value = "false"
+    },
+    {
+      name  = "keycloak.metrics.serviceMonitor.enabled"
+      value = "false"
+    }
+  ]
 
   depends_on = [kubernetes_namespace.keycloak, helm_release.keycloak_db, module.keycloak_secret]
 }
