@@ -1,6 +1,8 @@
 locals {
   cluster_name = coalesce(var.cluster_name, var.kubeconfig_context)
 
+  cert_manager_crds_path = join("/", [var.cert_manager_crds_folder_name, local.cluster_name, var.cert_manager_crds_file_name])
+
   config_files = {
     ingress_nginx = "${var.helm_values_path}/${local.cluster_name}/${var.ingress_nginx_chart_name}/config.json"
     cert_manager  = "${var.helm_values_path}/${local.cluster_name}/${var.cert_manager_chart_name}/config.json"
