@@ -1,8 +1,8 @@
 locals {
-  argocd_values_parsed             = yamldecode(var.argocd_helm_values)
-  argocd_cache_values_parsed       = yamldecode(var.argocd_cache_helm_values)
-  argocd_cache_existing_secret     = local.argocd_cache_values_parsed.valkey.auth.existingSecret
-  argocd_cache_existing_secret_key = local.argocd_cache_values_parsed.valkey.auth.existingSecretPasswordKey
+  argocd_values_parsed       = yamldecode(var.argocd_helm_values)
+  argocd_cache_values_parsed = yamldecode(var.argocd_cache_helm_values)
+  argocd_cache_secret        = local.argocd_cache_values_parsed.valkey.auth.existingSecret
+  argocd_cache_secret_key    = local.argocd_cache_values_parsed.valkey.auth.existingSecretPasswordKey
 }
 
 # Namespace
@@ -22,14 +22,14 @@ resource "random_password" "redis_password" {
 
 resource "kubernetes_secret" "argocd_cache" {
   metadata {
-    name      = local.argocd_cache_existing_secret
+    name      = local.argocd_cache_secret
     namespace = var.argocd_namespace
   }
 
   data = {
-    # TODO: double check why user is empty string (copied from chorus-build)
-    "redis-username"                            = ""
-    "${local.argocd_cache_existing_secret_key}" = random_password.redis_password.result
+    # Empty username for Valkey default authentication
+    "redis-username"                   = ""
+    "${local.argocd_cache_secret_key}" = random_password.redis_password.result
   }
 
   depends_on = [kubernetes_namespace.argocd]
@@ -51,7 +51,8 @@ resource "kubernetes_secret" "public_environments_repository_credentials" {
 
   depends_on = [kubernetes_namespace.argocd]
 
-  count = coalesce(var.helm_values_pat, "public") == "public" ? 1 : 0
+  # Public repository: no password needed
+  count = var.helm_values_pat != "" ? 0 : 1
 }
 
 resource "kubernetes_secret" "private_environments_repository_credentials" {
@@ -71,11 +72,13 @@ resource "kubernetes_secret" "private_environments_repository_credentials" {
 
   depends_on = [kubernetes_namespace.argocd]
 
-  count = coalesce(var.helm_values_pat, "public") == "public" ? 0 : 1
+  # Private repository: password needed
+  count = var.helm_values_pat != "" ? 1 : 0
 }
 
-# The following secret name is hardcoded 
-# because ArgoCD relies only on the labels
+# Note: ArgoCD discovers OCI repositories by labels, not by name.
+# The name can be anything,
+# which is why we hardcoded it for simplicity.
 
 resource "kubernetes_secret" "oci-build" {
   metadata {
