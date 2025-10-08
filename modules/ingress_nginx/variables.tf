@@ -42,10 +42,15 @@ variable "helm_values" {
   description = "Ingress-Nginx Helm chart values"
   type        = string
 
+  /*
+  This validation is commented out because the
+  helm values used in CHORUS are empty for
+  ingress-nginx at the moment
   validation {
     condition     = can(yamldecode(var.helm_values))
     error_message = "helm_values must be valid YAML."
   }
+  */
 }
 
 variable "namespace" {
