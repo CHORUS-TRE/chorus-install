@@ -64,7 +64,8 @@ resource "null_resource" "wait_for_cert_manager_webhook" {
   }
 
   triggers = {
-    always_run = timestamp()
+    cert_manager_version = var.cert_manager_chart_version
+    cert_manager_values  = md5(var.cert_manager_helm_values)
   }
 
   depends_on = [helm_release.cert_manager]
