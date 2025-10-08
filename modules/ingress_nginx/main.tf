@@ -50,7 +50,9 @@ resource "null_resource" "wait_for_lb_ip" {
   }
 
   triggers = {
-    always_run = timestamp()
+    ingress_version = var.chart_version
+    ingress_values  = md5(var.helm_values)
+    service_name    = "${var.cluster_name}-${var.chart_name}-controller"
   }
 
   depends_on = [helm_release.ingress_nginx]
