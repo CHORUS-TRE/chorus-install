@@ -51,7 +51,7 @@ resource "helm_release" "keycloak_db" {
     value = "false"
   }
 
-  depends_on = [kubernetes_namespace.keycloak]
+  depends_on = [kubernetes_namespace.keycloak, module.db_secret]
 }
 
 # Keycloak Deployment
@@ -76,7 +76,7 @@ resource "helm_release" "keycloak" {
     value = "false"
   }
 
-  depends_on = [kubernetes_namespace.keycloak]
+  depends_on = [kubernetes_namespace.keycloak, helm_release.keycloak_db, module.keycloak_secret]
 }
 
 # Retrieve data for outputs
