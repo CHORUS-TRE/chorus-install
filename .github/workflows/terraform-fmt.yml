@@ -63,3 +63,27 @@ jobs:
           cd modules/${{ matrix.module }}
           terraform init -backend=false
           terraform validate
+
+  terraform-validate-stages:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stage:
+          - stage_00
+          - stage_01
+          - stage_02
+          - stage_03
+          - stage_04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Validate stage - ${{ matrix.stage }}
+        run: |
+          cd ${{ matrix.stage }}
+          terraform init -backend=false
+          terraform validate
