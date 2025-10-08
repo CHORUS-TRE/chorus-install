@@ -12,6 +12,6 @@ output "harbor_db_password" {
 
 output "harbor_db_admin_password" {
   value       = try(module.db_secret.db_admin_password, null)
-  description = "Habor DB password for Postgres user"
+  description = "Harbor DB password for Postgres user"
   sensitive   = true
 }
