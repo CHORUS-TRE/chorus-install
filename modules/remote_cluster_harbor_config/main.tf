@@ -119,7 +119,7 @@ resource "harbor_robot_account" "build" {
   name        = var.build_robot_username
   description = "Replication from Harbor build"
   level       = "system"
-  secret      = random_password.cluster_robot_password.result
+  secret      = random_password.build_robot_password[0].result
   permissions {
     # Audit Log
     access {
