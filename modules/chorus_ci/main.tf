@@ -1,6 +1,6 @@
 locals {
   chorusci_values_parsed         = yamldecode(var.chorusci_helm_values)
-  chorusci_sensor_regcred_secret = yamldecode(local.chorusci_values_parsed.sensor.dockerConfig.secretName)
+  chorusci_sensor_regcred_secret = local.chorusci_values_parsed.sensor.dockerConfig.secretName
   webhook_events                 = { for event in local.chorusci_values_parsed.webhookEvents : event.name => event.secretName }
 }
 

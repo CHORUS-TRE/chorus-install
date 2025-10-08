@@ -37,6 +37,9 @@ resource "null_resource" "fetch_helm_charts_values" {
     interpreter = ["/bin/sh", "-c"]
   }
 
+  # We want to refetch the Helm values
+  # on every run because they might have changed
+  # in the Git repository
   triggers = {
     always_run  = timestamp()
     target_path = "${path.module}/${var.helm_values_path}/${var.cluster_name}"
@@ -52,6 +55,8 @@ data "external" "cert_manager_config" {
 # the cert-manager release tag corresponds
 # to the app version
 data "external" "cert_manager_app_version" {
+  depends_on = [null_resource.fetch_helm_charts_values]
+
   program = [
     "/bin/sh", "-c",
     <<EOT
