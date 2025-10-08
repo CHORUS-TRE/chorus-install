@@ -8,6 +8,7 @@ and reference it using the "helm_values_path" variable below
 variable "cluster_name" {
   description = "The cluster name to be used as a prefix to release names"
   type        = string
+  default     = ""
 }
 
 variable "kubeconfig_path" {
