@@ -9,7 +9,7 @@ output "harbor_url_admin_login" {
 }
 
 output "harbor_username" {
-  value = try(local.harbor_admin_username,
+  value = try(var.harbor_admin_username,
   "Failed to retrieve Harbor username")
 }
 
