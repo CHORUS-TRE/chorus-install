@@ -51,7 +51,7 @@ resource "kubernetes_secret" "harbor_core_secret" {
   }
 
   # Harbor Helm chart does not allow to change the secret key
-  # which is why "secret" is hardoced here
+  # which is why "secret" is hardcoded here
   data = {
     "secret" = random_password.harbor_secret.result
   }
@@ -64,7 +64,7 @@ resource "kubernetes_secret" "harbor_encryption_secret" {
   }
 
   # Harbor Helm chart does not allow to change the secret key
-  # which is why "secretKey" is hardoced here
+  # which is why "secretKey" is hardcoded here
   data = {
     "secretKey" = random_password.harbor_secret_secret_key.result
   }
@@ -127,7 +127,7 @@ resource "kubernetes_secret" "harbor_registry_credentials_secret" {
 
   # Harbor Helm chart does not allow to change the secret key
   # which is why "REGISTRY_PASSWD" and
-  # "REGISTRY_HTPASSWD" are hardoced here
+  # "REGISTRY_HTPASSWD" are hardcoded here
   data = {
     "REGISTRY_PASSWD"   = random_password.harbor_registry_passwd.result
     "REGISTRY_HTPASSWD" = "${var.admin_username}:${htpasswd_password.harbor_registry.bcrypt}"
