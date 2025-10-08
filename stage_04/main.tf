@@ -120,7 +120,6 @@ module "remote_cluster_keycloak_config" {
     keycloak = keycloak.kcadmin-provider
   }
 
-  admin_id           = var.keycloak_admin_username
   infra_realm_name   = var.keycloak_infra_realm
   backend_realm_name = var.keycloak_backend_realm
 

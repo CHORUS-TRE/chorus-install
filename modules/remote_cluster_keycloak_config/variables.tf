@@ -1,13 +1,3 @@
-variable "admin_id" {
-  description = "Keycloak admin ID"
-  type        = string
-
-  validation {
-    condition     = length(var.admin_id) > 0
-    error_message = "admin_id cannot be empty."
-  }
-}
-
 variable "infra_realm_name" {
   description = "Keycloak infrastructure realm name"
   type        = string
