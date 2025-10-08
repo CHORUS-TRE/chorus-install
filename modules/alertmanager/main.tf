@@ -8,6 +8,4 @@ resource "kubernetes_secret" "webex" {
   data = {
     "${var.webex_secret_key}" = var.webex_access_token
   }
-
-  count = var.webex_access_token == "" ? 0 : 1
 }

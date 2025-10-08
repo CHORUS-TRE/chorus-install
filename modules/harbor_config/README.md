@@ -4,17 +4,24 @@ This module configures [Harbor](https://goharbor.io/) projects, robot accounts, 
 
 ## Features
 
-- Creates and manages Harbor projects for different workloads
-- Provisions robot account for ArgoCD with appropriate permissions
-- Adds external registries (e.g., Docker Hub) to Harbor
+- Creates and manages Harbor projects for different workloads (apps, cache, charts, chorus, services)
+- Sets up Docker Hub as a proxy cache registry
+- Provisions robot accounts with appropriate permissions:
+  - **GitHub Actions** - for publishing Helm charts
+  - **ArgoCD** - for pulling charts and images
+  - **ChorusCI** - for CI/CD operations
+  - **Renovate** - for dependency updates
 - Automates the initial population of the Harbor registry with Helm charts
 - Exposes robot account passwords as Terraform outputs
 
 ## Outputs
 
-| Name                     | Description                                      |
-|--------------------------|--------------------------------------------------|
-| `argocd_robot_password`  | Password of the robot user used by ArgoCD        |
+| Name                             | Description                                      |
+|----------------------------------|--------------------------------------------------|
+| `github_actions_robot_password`  | Password of the robot user used by GitHub Actions |
+| `argocd_robot_password`          | Password of the robot user used by ArgoCD        |
+| `chorusci_robot_password`        | Password of the robot user used by ChorusCI      |
+| `renovate_robot_password`        | Password of the robot user used by Renovate      |
 
 ## Prerequisites
 
