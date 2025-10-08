@@ -15,7 +15,7 @@ module "keycloak_generic_client_config" {
   valid_redirect_uris = var.valid_redirect_uris
 }
 
-data "keycloak_openid_client" "openid_cliend" {
+data "keycloak_openid_client" "openid_client" {
   realm_id   = var.realm_id
   client_id  = var.client_id
   depends_on = [module.keycloak_generic_client_config]
@@ -23,7 +23,7 @@ data "keycloak_openid_client" "openid_cliend" {
 
 resource "keycloak_openid_audience_protocol_mapper" "audience_mapper" {
   realm_id  = var.realm_id
-  client_id = data.keycloak_openid_client.openid_cliend.id
+  client_id = data.keycloak_openid_client.openid_client.id
   name      = "aud-mapper-${var.client_id}"
 
   included_client_audience = var.client_id
