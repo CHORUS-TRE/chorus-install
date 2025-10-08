@@ -111,6 +111,11 @@ locals {
       ]
       keycloak_openid_client_secret = random_password.backend_keycloak_client_secret.result
       steward_user_password         = random_password.steward_password.result
+      backend_s3_enabled            = try(local.backend_values_parsed.main.clients.minio_client.enabled, "false")
+      juicefs_endpoint              = "${var.juicefs_s3_gateway_chart_name}.${local.juicefs_s3_gateway_namespace}.svc.cluster.local:9000"
+      s3_access_key                 = var.s3_access_key
+      s3_secret_key                 = var.s3_secret_key
+      s3_bucket_name                = var.s3_bucket_name
     }
   ) # TODO: break down backend secret into multiple small secrets
 
