@@ -20,37 +20,35 @@ jobs:
 
       - name: Run terraform fmt
         run: terraform fmt -check -diff -recursive
+
+  discover-terraform-dirs:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.set-modules.outputs.modules }}
+      stages: ${{ steps.set-stages.outputs.stages }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Discover modules
+        id: set-modules
+        run: |
+          modules=$(find modules -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | jq -R -s -c 'split("\n")[:-1]')
+          echo "modules=$modules" >> $GITHUB_OUTPUT
+
+      - name: Discover stages
+        id: set-stages
+        run: |
+          stages=$(find . -mindepth 1 -maxdepth 1 -type d -name 'stage_*' -exec basename {} \; | sort | jq -R -s -c 'split("\n")[:-1]')
+          echo "stages=$stages" >> $GITHUB_OUTPUT
       
   terraform-validate-modules:
+    needs: discover-terraform-dirs
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        module:
-          - alertmanager
-          - argo_cd
-          - argo_cd_config
-          - cert_manager_crds
-          - certificate_authorities
-          - chorus_ci
-          - db_secret
-          - harbor
-          - harbor_config
-          - harbor_secret
-          - helm_charts_values
-          - ingress_nginx
-          - juicefs
-          - keycloak
-          - keycloak_backend_client_config
-          - keycloak_config
-          - keycloak_generic_client_config
-          - keycloak_grafana_client_config
-          - keycloak_oauth2_proxy_client_config
-          - keycloak_realm
-          - keycloak_secret
-          - oauth2_proxy
-          - remote_cluster_harbor_config
-          - remote_cluster_keycloak_config
+        module: ${{ fromJson(needs.discover-terraform-dirs.outputs.modules) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -65,16 +63,12 @@ jobs:
           terraform validate
 
   terraform-validate-stages:
+    needs: discover-terraform-dirs
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        stage:
-          - stage_00
-          - stage_01
-          - stage_02
-          - stage_03
-          - stage_04
+        stage: ${{ fromJson(needs.discover-terraform-dirs.outputs.stages) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
