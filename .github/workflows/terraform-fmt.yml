@@ -19,4 +19,65 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Run terraform fmt
-        run: terraform fmt -check -diff -recursive 
+        run: terraform fmt -check -diff -recursive
+
+  discover-terraform-dirs:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.set-modules.outputs.modules }}
+      stages: ${{ steps.set-stages.outputs.stages }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Discover modules
+        id: set-modules
+        run: |
+          modules=$(find modules -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | jq -R -s -c 'split("\n")[:-1]')
+          echo "modules=$modules" >> $GITHUB_OUTPUT
+
+      - name: Discover stages
+        id: set-stages
+        run: |
+          stages=$(find . -mindepth 1 -maxdepth 1 -type d -name 'stage_*' -exec basename {} \; | sort | jq -R -s -c 'split("\n")[:-1]')
+          echo "stages=$stages" >> $GITHUB_OUTPUT
+      
+  terraform-validate-modules:
+    needs: discover-terraform-dirs
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.discover-terraform-dirs.outputs.modules) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Validate module - ${{ matrix.module }}
+        run: |
+          cd modules/${{ matrix.module }}
+          terraform init -backend=false
+          terraform validate
+
+  terraform-validate-stages:
+    needs: discover-terraform-dirs
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: ${{ fromJson(needs.discover-terraform-dirs.outputs.stages) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Validate stage - ${{ matrix.stage }}
+        run: |
+          cd ${{ matrix.stage }}
+          terraform init -backend=false
+          terraform validate
