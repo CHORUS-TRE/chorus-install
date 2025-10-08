@@ -804,7 +804,8 @@ resource "null_resource" "pull_charts" {
   for_each = var.charts_versions
 
   triggers = {
-    always_run = timestamp()
+    chart_versions = jsonencode(each.value)
+    registry       = var.source_helm_registry
   }
 
   depends_on = [harbor_project.projects]
@@ -830,7 +831,8 @@ resource "null_resource" "push_charts" {
   for_each = var.charts_versions
 
   triggers = {
-    always_run = timestamp()
+    chart_versions = jsonencode(each.value)
+    harbor_url     = local.harbor_url
   }
 
   depends_on = [
