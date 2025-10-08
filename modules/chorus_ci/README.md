@@ -1,6 +1,6 @@
-# argo_ci_config Terraform Module
+# chorus_ci Terraform Module
 
-This module provisions Kubernetes secrets used by Argo CI. These secrets are designed to securely store credentials for various GitHub repositories that Argo CI interacts with, such as for Workbench Operator, Chorus Web UI, Images, and Chorus Backend.
+This module provisions Kubernetes secrets used by Chorus CI. These secrets are designed to securely store credentials for various GitHub repositories that Chorus CI interacts with, such as for Workbench Operator, Chorus Web UI, Images, and Chorus Backend.
 
 ## Features
 

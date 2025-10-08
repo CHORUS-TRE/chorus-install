@@ -18,7 +18,7 @@ resource "keycloak_openid_client" "openid_client" {
   frontchannel_logout_enabled  = true
 
   oauth2_device_authorization_grant_enabled = true
-  # TODO: add oidc_ciba_grant_enablesd = true
+  # TODO: add oidc_ciba_grant_enabled = true
   # option does not seem to be available yet
 }
 
@@ -37,33 +37,3 @@ resource "keycloak_openid_client_optional_scopes" "client_optional_scopes" {
     "groups"
   ]
 }
-
-/*
-# TODO: check if the following roles are needed
-# or not during next install and remove if obsolete
-resource "keycloak_role" "client_role" {
-  realm_id    = var.realm_id
-  client_id = keycloak_openid_client.openid_client.id
-  name        = "uma_protection"
-}
-
-resource "keycloak_role" "realm_role" {
-  realm_id    = var.realm_id
-  name        = "uma_authorization"
-}
-
-resource "keycloak_user" "user" {
-    realm_id = var.realm_id
-    username = "service-account-chorus"
-    enabled  = false
-}
-
-resource "keycloak_user_roles" "user_roles" {
-  realm_id = var.realm_id
-  user_id  = keycloak_user.user.id
-
-  role_ids = [
-    keycloak_role.client_role.id
-  ]
-}
-*/

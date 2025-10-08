@@ -35,14 +35,15 @@ For example:
 
 | Name                         | Description                                                     | Type   |
 |------------------------------|-----------------------------------------------------------------|--------|
+| `cluster_name`               | Name of the Kubernetes cluster where JuiceFS is deployed        | string |
 | `juicefs_cache_secret_name`  | Name of the Kubernetes Secret used for JuiceFS cache credentials | string |
+| `juicefs_cache_secret_key`   | Key of the Kubernetes Secret used for JuiceFS cache credentials | string |
 | `juicefs_cache_namespace`    | Namespace where the JuiceFS cache Secret is located             | string |
 | `juicefs_dashboard_secret_name` | Name of the Kubernetes Secret containing JuiceFS dashboard credentials | string |
 | `juicefs_csi_driver_namespace` | Namespace where the JuiceFS CSI driver is deployed            | string |
 | `juicefs_dashboard_username` | Username used to authenticate to the JuiceFS dashboard          | string |
 | `s3_access_key`              | Access key for the S3-compatible object storage                 | string |
 | `s3_secret_key`              | Secret key for the S3-compatible object storage                 | string |
-| `cluster_name`               | Name of the Kubernetes cluster where JuiceFS is deployed        | string |
 | `s3_endpoint`                | Endpoint URL of the S3-compatible object storage                | string |
 | `s3_bucket_name`             | Name of the S3 bucket to use for JuiceFS storage                | string |
 

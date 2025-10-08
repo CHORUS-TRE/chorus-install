@@ -1,5 +1,5 @@
 output "keycloak_password" {
-  value       = try(random_password.keycloak_password.result, null)
-  description = "Keycloak password"
+  description = "The generated Keycloak admin password"
+  value       = random_password.keycloak_password.result
   sensitive   = true
 }
