@@ -29,14 +29,10 @@ variable "helm_values_path" {
 }
 
 variable "helm_values_pat" {
-  description = "The Personal Access Token (PAT) used to authenticate with the Helm values Git repository"
+  description = "The Personal Access Token (PAT) used to authenticate with the Helm values Git repository (empty for public repos)"
   type        = string
   sensitive   = true
-
-  validation {
-    condition     = length(var.helm_values_pat) > 0
-    error_message = "helm_values_pat cannot be empty."
-  }
+  default     = ""
 }
 
 variable "chorus_release" {
@@ -80,24 +76,17 @@ variable "helm_registry" {
 }
 
 variable "helm_registry_username" {
-  description = "The username for authenticating with the Helm chart registry"
+  description = "The username for authenticating with the Helm chart registry (empty for public registries)"
   type        = string
+  default     = ""
 
-  validation {
-    condition     = length(var.helm_registry_username) > 0
-    error_message = "helm_registry_username cannot be empty."
-  }
 }
 
 variable "helm_registry_password" {
-  description = "The password for authenticating with the Helm chart registry"
+  description = "The password for authenticating with the Helm chart registry (empty for public registries)"
   type        = string
   sensitive   = true
-
-  validation {
-    condition     = length(var.helm_registry_password) > 0
-    error_message = "helm_registry_password cannot be empty."
-  }
+  default     = ""
 }
 
 variable "cert_manager_crds_path" {
