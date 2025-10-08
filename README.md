@@ -1,8 +1,6 @@
 # CHORUS-TRE Installation
 
 ## Table of contents
-<!-- Generated with VIM plugin https://github.com/mzlogin/vim-markdown-toc -->
-
 <!-- vim-markdown-toc GFM -->
 
 * [Prerequisites](#prerequisites)
@@ -48,14 +46,14 @@
 
 ## Install
 
-![chorus-install diagram](chorus-install-excalidraw.png)
+![CHORUS-TRE installation architecture diagram showing the multi-stage deployment process across build and remote Kubernetes clusters, including components like ArgoCD, Harbor, Keycloak, and their interconnections](chorus-install-excalidraw.png)
 
-1. Copy over the environment variables example file and set all the necessary variables for your usecase.
+1. Copy over the environment variables example file and set all the necessary variables for your use case.
 
     ```
     cp .env.example .env
     ```
-    > You can find more information about each variable in the `VARIABLE.md` file.
+    > You can find more information about each variable in the `VARIABLES.md` file.
     > Remote cluster related variables are only used in stages 3 and 4.
     > If you only intend to install the build cluster for now, you can leave the remote cluster related variables unset.
 
@@ -64,7 +62,7 @@
     source .env
     ```
 
-1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspace) for each stage (e.g. workspace_stage_00, workspace_stage_01, ...). 
+1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps) for each stage (e.g. workspace_stage_00, workspace_stage_01, ...).
     Make sure to add the necessary tag to your workspace (e.g. `stage_00` for the workspace used for stage_00).
     > If you don't have access to Terraform Cloud, you can delete all the `backend.tf` files, hence using the default local backend. The local backend type stores state as a local file on disk.
 
@@ -107,7 +105,7 @@
 1. Fetch the Harbor password using ```terraform output harbor_username```.
    The default Harbor admin username is "admin".
 
-1. Fetch the Keycloak URL using ```terraform output keycloak_url_login```.
+1. Fetch the Keycloak URL using ```terraform output keycloak_url```.
 
 1. Fetch the Keycloak admin password using ```terraform output keycloak_password```.
    The default Keycloak admin username is "admin".
