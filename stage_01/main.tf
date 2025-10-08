@@ -75,7 +75,7 @@ module "certificate_authorities" {
   cert_manager_chart_version = local.cert_manager_chart_version
   cert_manager_helm_values   = file(local.values_files.cert_manager)
   cert_manager_namespace     = local.cert_manager_namespace
-  cert_manager_crds_path     = var.cert_manager_crds_path
+  cert_manager_crds_content  = file(var.cert_manager_crds_path)
 
   selfsigned_chart_name    = var.selfsigned_chart_name
   selfsigned_chart_version = local.selfsigned_chart_version
