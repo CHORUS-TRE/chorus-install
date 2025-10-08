@@ -20,7 +20,6 @@ This module configures [Keycloak](https://www.keycloak.org/) realms, groups, ide
 
 | Name                                       | Description                                          | Type   | Required | Default |
 |--------------------------------------------|------------------------------------------------------|--------|----------|---------|
-| `admin_id`                                 | Keycloak admin ID                                    | string | Yes      | -       |
 | `infra_realm_name`                         | Keycloak infrastructure realm name                   | string | Yes      | -       |
 | `google_identity_provider_client_id`       | The Google client identifier                         | string | No       | ""      |
 | `google_identity_provider_client_secret`   | The Google client secret used for authentication     | string | No       | ""      |
