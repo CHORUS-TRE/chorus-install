@@ -19,4 +19,47 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Run terraform fmt
-        run: terraform fmt -check -diff -recursive 
+        run: terraform fmt -check -diff -recursive
+      
+  terraform-validate-modules:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - alertmanager
+          - argo_cd
+          - argo_cd_config
+          - cert_manager_crds
+          - certificate_authorities
+          - chorus_ci
+          - db_secret
+          - harbor
+          - harbor_config
+          - harbor_secret
+          - helm_charts_values
+          - ingress_nginx
+          - juicefs
+          - keycloak
+          - keycloak_backend_client_config
+          - keycloak_config
+          - keycloak_generic_client_config
+          - keycloak_grafana_client_config
+          - keycloak_oauth2_proxy_client_config
+          - keycloak_realm
+          - keycloak_secret
+          - oauth2_proxy
+          - remote_cluster_harbor_config
+          - remote_cluster_keycloak_config
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Validate module - ${{ matrix.module }}
+        run: |
+          cd modules/${{ matrix.module }}
+          terraform init -backend=false
+          terraform validate
