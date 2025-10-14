@@ -34,24 +34,14 @@ variable "source_helm_registry" {
 }
 
 variable "source_helm_registry_username" {
-  description = "Username to connect to the source Helm chart registry"
+  description = "Username to connect to the source Helm chart registry (empty for public registries)"
   type        = string
-
-  validation {
-    condition     = length(var.source_helm_registry_username) > 0
-    error_message = "source_helm_registry_username cannot be empty."
-  }
 }
 
 variable "source_helm_registry_password" {
-  description = "Password to connect to the source Helm chart registry"
+  description = "Password to connect to the source Helm chart registry (empty for public registries)"
   type        = string
   sensitive   = true
-
-  validation {
-    condition     = length(var.source_helm_registry_password) > 0
-    error_message = "source_helm_registry_password cannot be empty."
-  }
 }
 
 variable "github_actions_robot_username" {
