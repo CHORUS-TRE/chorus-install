@@ -68,9 +68,11 @@ cat << EOF
 ########################################################################
 EOF
 
-echo -e "\nYou are about to destroy the $(tput bold) $current_context $(tput sgr0) cluster\n"
-read -p "Please type the cluster name to confirm: " user_input_context
+echo -e "\nYou are about to destroy the resources found in the $(tput bold) $current_context $(tput sgr0) context\n"
+read -p "Please type the context name to confirm: " user_input_context
 if [[ "$user_input_context" == "$current_context" ]]; then
+    cluster_name=$current_context
+    read -p "Please type the cluster name used for the installation (default: $current_context): " cluster_name
     nuke
 else
     echo "Canceling"
