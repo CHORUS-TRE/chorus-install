@@ -38,6 +38,24 @@
 | Domain name        | CHORUS-TRE is only accessible via HTTPS and it's essential to register a domain name via registrars like Cloudflare, Route53, etc. | Required |  
 | DNS Server         | CHORUS-TRE is only accessible via HTTPS and it's essential to have a DNS server via providers like Cloudflare, Route53, etc. | Required |
 
+### Hardware requirements
+
+The following requirements serve as a lower bound estimate, you might want to increase the size or the number of your nodes depending on your expected workloads.
+
+#### Build
+
+| Role               | CPU | Memory (GB)  | Amount |
+|--------------------|-----|--------------|--------|
+| control-plane,etcd | 8   | 16           | 3      |
+| worker             | 16  | 32           | 3      |
+
+#### Chorus
+
+| Role               | CPU | Memory (GB) | Amount |
+|--------------------|-----|-------------|--------|
+| control-plane,etcd | 16  | 32          | 3      |
+| worker             | 16  | 32          | 3      |
+
 ### Repositories
 
 | Repository                                                         | Description                                          |
