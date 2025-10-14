@@ -85,6 +85,8 @@
     terraform apply "stage_00.plan"
     ```
 
+1. Make sure one of your [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/#default-storageclass) is set as default.
+
 1. Initialize, plan and apply stage 1.
     > This stage deploys Cert-Manager, Ingress-Nginx, Keycloak and Harbor on the build cluster.
 
