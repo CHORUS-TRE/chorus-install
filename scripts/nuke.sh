@@ -3,8 +3,8 @@
 nuke() {
     # ARGOCD
     helm uninstall $cluster_name-argo-cd $cluster_name-argo-cd-cache -n argocd
-    kubectl patch appprojects.argoproj.io $cluster_name --type=merge -p '{"metadata":{"finalizers":null}}'
-    kubectl delete appprojects.argoproj.io $cluster_name
+    kubectl patch appprojects.argoproj.io $cluster_name --type=merge -p '{"metadata":{"finalizers":null}}' -n argocd
+    kubectl delete appprojects.argoproj.io $cluster_name -n argocd
     kubectl delete ns argocd
     kubectl delete $(kubectl get crds -oname | grep argoproj.io)
 
