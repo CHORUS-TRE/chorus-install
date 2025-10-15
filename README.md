@@ -241,6 +241,7 @@ Where
     kubectl delete $(kubectl get appproject -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
 
     cd stage_02
+    terraform refresh
     terraform destroy
     cd ../stage_01
     terraform destroy
