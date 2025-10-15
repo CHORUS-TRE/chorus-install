@@ -122,6 +122,7 @@ The following requirements serve as a lower bound estimate, you might want to in
 1. Fetch the loadbalancer IP address using ```terraform output loadbalancer_ip```.
 
 1. Update your DNS with the loadbalancer IP address.
+    > ACME challenges will fail as long as our hosts do not resolve properly
 
 1. Fetch the Harbor URL using ```terraform output harbor_url_admin_login```.
     > At this point, you'll need to login using the database authentication because the OIDC provider authentication configuration is not complete yet.
