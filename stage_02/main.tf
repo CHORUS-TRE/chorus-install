@@ -477,10 +477,10 @@ resource "null_resource" "destroy_argocd_applicationset_and_appproject" {
     quiet       = true
     command     = <<EOT
       set -e
-      export KUBECONFIG="${self.kubeconfig_path}"
-      kubectl config use-context "${self.kubeconfig_context}"
-      kubectl delete $(kubectl get applicationset -oname -n "${self.argocd_namespace}") -n "${self.argocd_namespace}"
-      kubectl delete $(kubectl get appproject -oname -n "${self.argocd_namespace}") -n "${self.argocd_namespace}"
+      export KUBECONFIG="${self.triggers.kubeconfig_path}"
+      kubectl config use-context "${self.triggers.kubeconfig_context}"
+      kubectl delete $(kubectl get applicationset -oname -n "${self.triggers.argocd_namespace}") -n "${self.triggers.argocd_namespace}"
+      kubectl delete $(kubectl get appproject -oname -n "${self.triggers.argocd_namespace}") -n "${self.triggers.argocd_namespace}"
     EOT
     interpreter = ["/bin/sh", "-c"]
   }
