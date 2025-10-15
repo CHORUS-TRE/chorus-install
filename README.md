@@ -44,17 +44,17 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 #### Build
 
-| Role               | CPU | Memory (GB)  | Amount |
-|--------------------|-----|--------------|--------|
-| control-plane,etcd | 8   | 16           | 3      |
-| worker             | 16  | 32           | 3      |
+| Role               | CPU | Memory (GB)  | Storage (GB) | Amount |
+|--------------------|-----|--------------|--------------|--------|
+| control-plane,etcd | 8   | 16           | 200          | 3      |
+| worker             | 16  | 32           | 200          | 3      |
 
 #### Chorus
 
-| Role               | CPU | Memory (GB) | Amount |
-|--------------------|-----|-------------|--------|
-| control-plane,etcd | 16  | 32          | 3      |
-| worker             | 16  | 32          | 3      |
+| Role               | CPU | Memory (GB) | Storage (GB) | Amount |
+|--------------------|-----|-------------|--------------|--------|
+| control-plane,etcd | 16  | 32          | 200          | 3      |
+| worker             | 16  | 32          | 1000         | 3      |
 
 ### Repositories
 
