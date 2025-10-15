@@ -186,6 +186,13 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 1. Make sure the remote cluster has connection status is "Successful" in ArgoCD.
 
+1. Fetch the loadbalancer IP address using the kubectl command below
+   ```
+   kubectl get svc -n ingress-nginx --field-selector spec.type=LoadBalancer -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}'
+   ```
+
+1. Update your DNS with the loadbalancer IP address.
+
 1. Initialize, plan and apply stage 4
    > This stage configures Harbor (e.g. create registries, projects, robot accounts, upload Helm charts) and Keycloak (e.g. create realms, clients, groups, oidc identity provider) and creates all necessary secrets.
 
