@@ -246,6 +246,24 @@ Where
     cd ../stage_01
     terraform destroy
     cd ..
+
+    # Delete hanging Ingresses
+    kubectl delete $(kubectl get ingress -n kube-system -oname | grep argo-workflows-server) -n kube-system
+
+    # Delete hanging Services
+    kubectl delete $(kubectl get service -n kube-system -oname | grep argo-workflows-server) -n kube-system
+    kubectl delete $(kubectl get service -n kube-system -oname | grep kube-prometheus) -n kube-system
+
+    # Delete hanging Namespaces
+    kubectl delete namespace argo-events
+    kubectl delete namespace trivy-system
+
+    # Delete CRDs
+    kubectl delete $(kubectl get crds -oname | grep argoproj.io)
+    kubectl delete $(kubectl get crds -oname | grep monitoring.coreos.com)
+
+    # Optional: clean up all the PersistentVolumes
+    kubectl delete $(kubectl get persistentvolume -oname)
     ```
 
 1. Make sure the uninstallation was successful
