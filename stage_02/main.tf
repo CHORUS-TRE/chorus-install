@@ -28,21 +28,6 @@ resource "null_resource" "validate_values_files" {
 
 # Providers
 
-provider "helm" {
-  alias = "chorus_helm"
-
-  kubernetes {
-    config_path    = var.kubeconfig_path
-    config_context = var.kubeconfig_context
-  }
-
-  registry {
-    url      = "oci://${var.helm_registry}"
-    username = var.helm_registry_username
-    password = var.helm_registry_password
-  }
-}
-
 provider "keycloak" {
   alias     = "kcadmin-provider"
   client_id = "admin-cli"
@@ -387,10 +372,6 @@ module "chorus_ci" {
 
 module "argo_cd" {
   source = "../modules/argo_cd"
-
-  providers = {
-    helm = helm.chorus_helm
-  }
 
   cluster_name  = local.cluster_name
   helm_registry = var.helm_registry

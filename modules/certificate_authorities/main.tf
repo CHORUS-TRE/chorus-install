@@ -1,6 +1,3 @@
-locals {
-  cert_manager_crds_content = file(var.cert_manager_crds_path)
-}
 # Namespace
 
 resource "kubernetes_namespace" "cert_manager" {
@@ -14,7 +11,7 @@ resource "kubernetes_namespace" "cert_manager" {
 module "cert_manager_crds" {
   source = "../cert_manager_crds"
 
-  cert_manager_crds_content = local.cert_manager_crds_content
+  cert_manager_crds_content = var.cert_manager_crds_content
 }
 
 # Cert-Manager
@@ -30,10 +27,12 @@ resource "helm_release" "cert_manager" {
 
   values = [var.cert_manager_helm_values]
 
-  set {
-    name  = "cert-manager.crds.enabled"
-    value = "false"
-  }
+  set = [
+    {
+      name  = "cert-manager.crds.enabled"
+      value = "false"
+    }
+  ]
 
   depends_on = [
     kubernetes_namespace.cert_manager,

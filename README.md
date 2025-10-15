@@ -38,6 +38,24 @@
 | Domain name        | CHORUS-TRE is only accessible via HTTPS and it's essential to register a domain name via registrars like Cloudflare, Route53, etc. | Required |  
 | DNS Server         | CHORUS-TRE is only accessible via HTTPS and it's essential to have a DNS server via providers like Cloudflare, Route53, etc. | Required |
 
+### Hardware requirements
+
+The following requirements serve as a lower bound estimate, you might want to increase the size or the number of your nodes depending on your expected workloads.
+
+#### Build
+
+| Role               | CPU | Memory (GB)  | Storage (GB) | Amount |
+|--------------------|-----|--------------|--------------|--------|
+| control-plane,etcd | 8   | 16           | 52           | 3      |
+| worker             | 16  | 32           | 208          | 3      |
+
+#### Chorus
+
+| Role               | CPU | Memory (GB) | Storage (GB) | Amount |
+|--------------------|-----|-------------|--------------|--------|
+| control-plane,etcd | 16  | 32          | 52           | 3      |
+| worker             | 16  | 32          | 1000         | 3      |
+
 ### Repositories
 
 | Repository                                                         | Description                                          |
@@ -85,6 +103,8 @@
     terraform apply "stage_00.plan"
     ```
 
+1. Make sure one of your [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/#default-storageclass) is set as default.
+
 1. Initialize, plan and apply stage 1.
     > This stage deploys Cert-Manager, Ingress-Nginx, Keycloak and Harbor on the build cluster.
 
@@ -102,6 +122,7 @@
 1. Fetch the loadbalancer IP address using ```terraform output loadbalancer_ip```.
 
 1. Update your DNS with the loadbalancer IP address.
+    > ACME challenges will fail as long as our hosts do not resolve properly
 
 1. Fetch the Harbor URL using ```terraform output harbor_url_admin_login```.
     > At this point, you'll need to login using the database authentication because the OIDC provider authentication configuration is not complete yet.
@@ -201,18 +222,48 @@ Where
 
 ## Uninstall
 
-1. Destroy the infrastructure
+1. Destroy the remote cluster
 
     ```
     cd stage_04
     terraform destroy
     cd ../stage_03
     terraform destroy
-    cd ../stage_02
+    cd ..
+    ```
+
+1. Destroy the build cluster
+    > ArgoCD conflicts with Terraform, so we first need to delete the ApplicationSet and the AppProject resources
+
+    ```
+    ARGOCD_NAMESPACE="argocd"
+    kubectl delete $(kubectl get applicationset -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
+    kubectl delete $(kubectl get appproject -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
+
+    cd stage_02
+    terraform refresh
     terraform destroy
     cd ../stage_01
     terraform destroy
     cd ..
+
+    # Delete hanging Ingresses
+    kubectl delete $(kubectl get ingress -n kube-system -oname | grep argo-workflows-server) -n kube-system
+
+    # Delete hanging Services
+    kubectl delete $(kubectl get service -n kube-system -oname | grep argo-workflows-server) -n kube-system
+    kubectl delete $(kubectl get service -n kube-system -oname | grep kube-prometheus) -n kube-system
+
+    # Delete hanging Namespaces
+    kubectl delete namespace argo-events
+    kubectl delete namespace trivy-system
+
+    # Delete CRDs
+    kubectl delete $(kubectl get crds -oname | grep argoproj.io)
+    kubectl delete $(kubectl get crds -oname | grep monitoring.coreos.com)
+
+    # Optional: clean up all the PersistentVolumes
+    kubectl delete $(kubectl get persistentvolume -oname)
     ```
 
 1. Make sure the uninstallation was successful

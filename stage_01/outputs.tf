@@ -13,11 +13,6 @@ output "harbor_url_admin_login" {
   "Failed to retrieve Harbor URL to login with local DB admin user")
 }
 
-output "harbor_username" {
-  value = try(module.harbor.harbor_username,
-  "Failed to retrieve Harbor URL")
-}
-
 output "harbor_password" {
   value     = module.harbor.harbor_password
   sensitive = true

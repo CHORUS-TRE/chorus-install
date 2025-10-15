@@ -30,7 +30,7 @@ resource "keycloak_oidc_google_identity_provider" "master" {
   disable_user_info     = true
   sync_mode             = "LEGACY"
 
-  count = coalesce(var.google_identity_provider_client_id, "no_google_identity_provider") == "no_google_identity_provider" ? 0 : 1
+  count = var.google_identity_provider_client_id == "" ? 0 : 1
 }
 
 # Infra realm
@@ -50,7 +50,7 @@ resource "keycloak_oidc_google_identity_provider" "infra" {
   trust_email           = true
   sync_mode             = "LEGACY"
 
-  count = coalesce(var.google_identity_provider_client_id, "no_google_identity_provider") == "no_google_identity_provider" ? 0 : 1
+  count = var.google_identity_provider_client_id == "" ? 0 : 1
 }
 
 # Client scope
