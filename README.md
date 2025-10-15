@@ -238,7 +238,7 @@ Where
     ```
     ARGOCD_NAMESPACE="argocd"
     kubectl delete $(kubectl get applicationset -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
-    kubectl delete $(kubectl get appproject -oname -n $ARGOCD_NAMESPACE$) -n $ARGOCD_NAMESPACE
+    kubectl delete $(kubectl get appproject -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
 
     cd stage_02
     terraform destroy
