@@ -466,9 +466,9 @@ module "alertmanager" {
 
 resource "null_resource" "project_mgmt" {
   provisioner "local-exec" {
-    when    = destroy
-    quiet   = true
-    command = <<EOT
+    when        = destroy
+    quiet       = true
+    command     = <<EOT
       set -e
       export KUBECONFIG
       kubectl config use-context ${var.kubeconfig_context}
