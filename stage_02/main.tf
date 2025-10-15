@@ -468,6 +468,7 @@ resource "null_resource" "destroy_argocd_applicationset_and_appproject" {
   triggers = {
     kubeconfig_context = var.kubeconfig_context
     argocd_namespace   = local.argocd_namespace
+    kubeconfig_path    = var.kubeconfig_path
     always_run         = timestamp()
   }
 
@@ -476,15 +477,12 @@ resource "null_resource" "destroy_argocd_applicationset_and_appproject" {
     quiet       = true
     command     = <<EOT
       set -e
-      export KUBECONFIG
+      export KUBECONFIG="${self.kubeconfig_path}"
       kubectl config use-context "${self.kubeconfig_context}"
       kubectl delete $(kubectl get applicationset -oname -n "${self.argocd_namespace}") -n "${self.argocd_namespace}"
       kubectl delete $(kubectl get appproject -oname -n "${self.argocd_namespace}") -n "${self.argocd_namespace}"
     EOT
     interpreter = ["/bin/sh", "-c"]
-    environment = {
-      KUBECONFIG = pathexpand(var.kubeconfig_path)
-    }
   }
 }
 
