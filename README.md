@@ -222,14 +222,25 @@ Where
 
 ## Uninstall
 
-1. Destroy the infrastructure
+1. Destroy the remote cluster
 
     ```
     cd stage_04
     terraform destroy
     cd ../stage_03
     terraform destroy
-    cd ../stage_02
+    cd ..
+    ```
+
+1. Destroy the build cluster
+    > ArgoCD conflicts with Terraform, so we first need to delete the ApplicationSet and the AppProject resources
+
+    ```
+    ARGOCD_NAMESPACE="argocd"
+    kubectl delete $(kubectl get applicationset -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
+    kubectl delete $(kubectl get appproject -oname -n $ARGOCD_NAMESPACE$) -n $ARGOCD_NAMESPACE
+
+    cd stage_02
     terraform destroy
     cd ../stage_01
     terraform destroy
