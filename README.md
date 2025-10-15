@@ -180,6 +180,12 @@ The following requirements serve as a lower bound estimate, you might want to in
     terraform apply "stage_03.plan"
     ``` 
 
+1. Make sure to add the remote cluster to the list of environments in the overriding values of the argo-deploy Helm chart deployed on the build cluster.
+
+1. Make sure a project named after the remote cluster name was created in ArgoCD.
+
+1. Make sure the remote cluster has connection status is "Successful" in ArgoCD.
+
 1. Initialize, plan and apply stage 4
    > This stage configures Harbor (e.g. create registries, projects, robot accounts, upload Helm charts) and Keycloak (e.g. create realms, clients, groups, oidc identity provider) and creates all necessary secrets.
 
