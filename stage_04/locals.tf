@@ -203,7 +203,7 @@ locals {
       steward_user_password         = random_password.steward_password.result
       backend_s3_enabled            = try(local.backend_values_parsed.main.clients.minio_client.enabled, false)
       juicefs_endpoint              = try(local.backend_values_parsed.main.clients.minio_client.endpoint, "")
-      s3_access_key_id              = var.s3_access_key
+      s3_access_key                 = var.s3_access_key
       s3_secret_key                 = var.s3_secret_key
       s3_bucket_name                = var.s3_bucket_name
     }
