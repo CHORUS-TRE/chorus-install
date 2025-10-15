@@ -460,6 +460,28 @@ module "alertmanager" {
   count = var.webex_access_token != "" ? 1 : 0
 }
 
+# Destroy
+# ArgoCD conflicts with Terraform destroy
+# so we first need to delete the ArgoCD ApplicationSet and AppProject
+
+resource "null_resource" "project_mgmt" {
+  provisioner "local-exec" {
+    when    = destroy
+    quiet   = true
+    command = <<EOT
+      set -e
+      export KUBECONFIG
+      kubectl config use-context ${var.kubeconfig_context}
+      kubectl delete $(kubectl get applicationset -oname -n "${local.argocd_namespace}") -n "${local.argocd_namespace}"
+      kubectl delete $(kubectl get appproject -oname -n "${local.argocd_namespace}") -n "${local.argocd_namespace}"
+    EOT
+    interpreter = ["/bin/sh", "-c"]
+    environment = {
+      KUBECONFIG = pathexpand(var.kubeconfig_path)
+    }
+  }
+}
+
 locals {
   output = {
     harbor_admin_username = var.harbor_admin_username
