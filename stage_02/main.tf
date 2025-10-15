@@ -464,7 +464,7 @@ module "alertmanager" {
 # ArgoCD conflicts with Terraform destroy
 # so we first need to delete the ArgoCD ApplicationSet and AppProject
 
-resource "null_resource" "project_mgmt" {
+resource "null_resource" "destroy_argocd_applicationset_and_appproject" {
   provisioner "local-exec" {
     when        = destroy
     quiet       = true
@@ -472,8 +472,8 @@ resource "null_resource" "project_mgmt" {
       set -e
       export KUBECONFIG
       kubectl config use-context ${var.kubeconfig_context}
-      kubectl delete $(kubectl get applicationset -oname -n "${local.argocd_namespace}") -n "${local.argocd_namespace}"
-      kubectl delete $(kubectl get appproject -oname -n "${local.argocd_namespace}") -n "${local.argocd_namespace}"
+      kubectl delete $(kubectl get applicationset -oname -n ${local.argocd_namespace}) -n ${local.argocd_namespace}
+      kubectl delete $(kubectl get appproject -oname -n ${local.argocd_namespace}) -n ${local.argocd_namespace}
     EOT
     interpreter = ["/bin/sh", "-c"]
     environment = {
