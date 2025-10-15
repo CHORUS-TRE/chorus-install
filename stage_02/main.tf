@@ -465,15 +465,21 @@ module "alertmanager" {
 # so we first need to delete the ArgoCD ApplicationSet and AppProject
 
 resource "null_resource" "destroy_argocd_applicationset_and_appproject" {
+  triggers = {
+    kubeconfig_context = var.kubeconfig_context
+    argocd_namespace   = local.argocd_namespace
+    always_run         = timestamp()
+  }
+
   provisioner "local-exec" {
     when        = destroy
     quiet       = true
     command     = <<EOT
       set -e
       export KUBECONFIG
-      kubectl config use-context ${var.kubeconfig_context}
-      kubectl delete $(kubectl get applicationset -oname -n ${local.argocd_namespace}) -n ${local.argocd_namespace}
-      kubectl delete $(kubectl get appproject -oname -n ${local.argocd_namespace}) -n ${local.argocd_namespace}
+      kubectl config use-context "${self.kubeconfig_context}"
+      kubectl delete $(kubectl get applicationset -oname -n "${self.argocd_namespace}") -n "${self.argocd_namespace}"
+      kubectl delete $(kubectl get appproject -oname -n "${self.argocd_namespace}") -n "${self.argocd_namespace}"
     EOT
     interpreter = ["/bin/sh", "-c"]
     environment = {
