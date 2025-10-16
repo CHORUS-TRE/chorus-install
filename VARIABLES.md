@@ -12,8 +12,6 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | `remote_cluster_kubeconfig_path`    | Absolute path to the kubeconfig file for the remote cluster.                |
 | `remote_cluster_kubeconfig_context` | Context name in the kubeconfig file for the remote cluster.                 |
 | `remote_cluster_server`             | K8s API server URL of the remote cluster.                                   |
-| `remote_cluster_bearer_token`       | Bearer token (JWT) used to authenticate to the remote cluster.              |
-| `remote_cluster_ca_data`            | Base64-encoded CA certificate data for the remote cluster.                  |
 | `helm_registry`                     | OCI registry where CHORUS Helm charts are hosted. If the registry is not public, you need to set the `helm_registry_username` and `helm_registry_password` described in the optional variables.|
 | `github_username`                   | GitHub username used for repository authentication. This is used to get the CHORUS wrapper Helm charts as well as their overriding Helm values.|
 | `github_workbench_operator_token`   | GitHub PAT for the Workbench Operator repository. Requires read/write access. This is needed to enable the continuous integration. |
