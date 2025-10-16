@@ -6,10 +6,18 @@
 * [Prerequisites](#prerequisites)
     * [Local machine tools](#local-machine-tools)
     * [Infrastructure](#infrastructure)
+    * [Hardware requirements](#hardware-requirements)
+        * [Build cluster (ArgoCD)](#build-cluster-argocd)
+        * [Remote cluster (Chorus)](#remote-cluster-chorus)
     * [Repositories](#repositories)
-* [Install](#install)
-* [Uninstall](#uninstall)
+* [Install the build cluster](#install-the-build-cluster)
+* [Install the remote cluster](#install-the-remote-cluster)
+* [Handle existing resources](#handle-existing-resources)
+* [Uninstall the remote cluster](#uninstall-the-remote-cluster)
+* [Uninstall the build cluster](#uninstall-the-build-cluster)
+* [Force uninstall the build cluster](#force-uninstall-the-build-cluster)
 * [License and Usage Restrictions](#license-and-usage-restrictions)
+* [Acknowledgments](#acknowledgments)
 
 <!-- vim-markdown-toc -->
 
@@ -42,14 +50,14 @@
 
 The following requirements serve as a lower bound estimate, you might want to increase the size or the number of your nodes depending on your expected workloads.
 
-#### Build
+#### Build cluster (ArgoCD)
 
 | Role               | CPU | Memory (GB)  | Storage (GB) | Amount |
 |--------------------|-----|--------------|--------------|--------|
 | control-plane,etcd | 8   | 16           | 52           | 3      |
 | worker             | 16  | 32           | 208          | 3      |
 
-#### Chorus
+#### Remote cluster (Chorus)
 
 | Role               | CPU | Memory (GB) | Storage (GB) | Amount |
 |--------------------|-----|-------------|--------------|--------|
@@ -63,7 +71,7 @@ The following requirements serve as a lower bound estimate, you might want to in
 | [chorus-tre](https://github.com/CHORUS-TRE/chorus-tre) | Repository gathering all the CHORUS Helm charts |
 | [environment-template](https://github.com/CHORUS-TRE/environment-template) | Repository gathering all the Helm charts values files |
 
-## Install
+## Install the build cluster
 
 ![CHORUS-TRE installation architecture diagram showing the multi-stage deployment process across build and remote Kubernetes clusters, including components like ArgoCD, Harbor, Keycloak, and their interconnections](chorus-install-excalidraw.png)
 
@@ -128,7 +136,7 @@ The following requirements serve as a lower bound estimate, you might want to in
     > At this point, you'll need to login using the database authentication because the OIDC provider authentication configuration is not complete yet.
     > The database authentication page is accessible when appending `/account/sign-in` to the harbor URL (e.g. https://harbor.build.chorus-tre.ch/account/sign-in).
 
-1. Fetch the Harbor password using ```terraform output harbor_username```.
+1. Fetch the Harbor password using ```terraform output harbor_password```.
    The default Harbor admin username is "admin".
 
 1. Fetch the Keycloak URL using ```terraform output keycloak_url```.
@@ -153,7 +161,7 @@ The following requirements serve as a lower bound estimate, you might want to in
     ```
 
     > **_NOTE:_** 
-    > The applications' sync status might be in an unkown state for a few minutes because ArgoCD fails to connect to the Harbor Helm registry.
+    > The applications' sync status might be in an unknown state for a few minutes because ArgoCD fails to connect to the Harbor Helm registry.
     > This is caused by the fact that Harbor initially serves an invalid certificate, and it takes some time for the correct certificate to be provisioned. 
     > Also, you might be hitting Let's Encrypt rate limit if you've reinstalled the services too many times lately.
 
@@ -164,9 +172,12 @@ The following requirements serve as a lower bound estimate, you might want to in
    At this stage, the build cluster installation is complete.
 
 1. Fetch the ArgoCD URL and credentials from the ```build-cluster-name_output.yaml``` file.
-   Make sure the build cluster functions as expected, then proceed to bootstrap a remote cluster.
 
-1. If you did not fill in the remote cluster related variables yet, you need to do so in your `.env` file, source it and re-apply stage 0.
+1. Make sure the build cluster runs as expected. Check the applications status in ArgoCD. Check the alerts in Prometheus. Check the events in the different namespaces.
+
+## Install the remote cluster
+
+1. Go through steps 1 to 5 of the build cluster installation, making sure environment variables related to the remote cluster were filled in your env file.
 
 1. Initialize, plan and apply stage 3.
    > This stage installs Cert-Manager CRDs, creates the necessary secrets for Harbor and Keycloak and configures the connection from the ArgoCD running on the build cluster to the remote cluster.
@@ -207,6 +218,10 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 1. Find all the URLs, usernames and passwords needed in the ```remote-cluster-name_output.yaml``` file
 
+1. Make sure the remote cluster runs as expected. Check the applications status in ArgoCD. Check the alerts in Prometheus. Check the events in the different namespaces.
+
+1. To add another remote cluster, go through the previous steps once again. Make sure to update the env file accordingly. Make sure to use dedicated Terraform workspaces to save that new remote cluster state.
+
 ## Handle existing resources
 
 In the case where Terraform fails due to existing resources not managed by Terraform,
@@ -233,46 +248,73 @@ Where
 - ```ingress-nginx``` is the resource ID
 
 
-## Uninstall
+## Uninstall the remote cluster
 
-1. Destroy the remote cluster
+1. Delete all the artifacts in all the projects in Harbor
+
+1. Run Terraform destroy command on stage 4
 
     ```
     cd stage_04
     terraform destroy
-    cd ../stage_03
+    cd ..
+    ```
+
+1. Run Terraform destroy command on stage 3
+
+    ```
+    cd stage_03
     terraform destroy
     cd ..
     ```
 
-1. Destroy the build cluster
-    > ArgoCD conflicts with Terraform, so we first need to delete the ApplicationSet and the AppProject resources
+## Uninstall the build cluster
+
+1. Delete the ApplicationSet and AppProject resources
 
     ```
     ARGOCD_NAMESPACE="argocd"
     kubectl delete $(kubectl get applicationset -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
     kubectl delete $(kubectl get appproject -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
+    ```
 
+1. Run the Terraform destroy command on stage 2
+
+    ```
     cd stage_02
-    terraform refresh
-    terraform destroy
-    cd ../stage_01
     terraform destroy
     cd ..
+    ```
 
-    # Delete hanging Ingresses
+1. Run the Terraform destroy command on stage 1
+
+    ```
+    cd stage_01
+    terraform destroy
+    cd ..
+    ```
+
+1. Delete hanging resources
+    ```
+    # argo-workflows-server ingress
     kubectl delete $(kubectl get ingress -n kube-system -oname | grep argo-workflows-server) -n kube-system
 
-    # Delete hanging Services
+    # argo-workflows-server service
     kubectl delete $(kubectl get service -n kube-system -oname | grep argo-workflows-server) -n kube-system
+
+    # kube-prometheus service
     kubectl delete $(kubectl get service -n kube-system -oname | grep kube-prometheus) -n kube-system
 
-    # Delete hanging Namespaces
+    # argo-events namespace
     kubectl delete namespace argo-events
+
+    # trivy-system namespace
     kubectl delete namespace trivy-system
 
-    # Delete CRDs
+    # argocd crds
     kubectl delete $(kubectl get crds -oname | grep argoproj.io)
+
+    # kube-prometheus crds
     kubectl delete $(kubectl get crds -oname | grep monitoring.coreos.com)
 
     # Optional: clean up all the PersistentVolumes
@@ -290,10 +332,9 @@ Where
     # Expected output: system-level charts only (e.g. kube-***)
     ```
 
-1. Double check the PVCs and PVs, you might want to clear up those too
+## Force uninstall the build cluster
 
-> **_NOTE:_** If something goes wrong during the uninstallation, you can run
-```./scripts/nuke.sh``` to destroy everything without relying on Terraform
+Run ```chmod +x ./scripts/nuke.sh && ./scripts/nuke.sh``` to destroy everything on the build cluster without relying on Terraform.
 
 ## License and Usage Restrictions
 
