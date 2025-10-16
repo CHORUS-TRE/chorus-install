@@ -54,16 +54,6 @@ variable "remote_cluster_name" {
   default     = ""
 }
 
-variable "remote_cluster_bearer_token" {
-  description = "Bearer token for authenticating with the remote Kubernetes cluster"
-  type        = string
-}
-
-variable "remote_cluster_ca_data" {
-  description = "Base64-encoded certificate authority data for the remote Kubernetes cluster"
-  type        = string
-}
-
 variable "remote_cluster_server" {
   description = "API server endpoint URL of the remote Kubernetes cluster"
   type        = string

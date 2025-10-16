@@ -3,10 +3,10 @@ locals {
   remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
 
   remote_cluster_config = jsonencode({
-    bearerToken = var.remote_cluster_bearer_token
+    bearerToken = data.kubernetes_secret.argocd_manager_token.data.token
     tlsClientConfig = {
       insecure = var.remote_cluster_insecure
-      caData   = var.remote_cluster_ca_data
+      caData   = base64encode(data.kubernetes_config_map.ca_data.data["ca.crt"])
     }
   })
 

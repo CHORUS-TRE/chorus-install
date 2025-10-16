@@ -122,6 +122,61 @@ module "harbor_secret" {
 
 # Remote Cluster Connection for ArgoCD running on chorus-build
 
+resource "kubernetes_service_account" "argocd_manager" {
+
+  metadata {
+    name      = "argocd-manager"
+    namespace = "kube-system"
+  }
+}
+
+resource "kubernetes_secret" "argocd_manager_token" {
+  metadata {
+    name      = "argocd-manager-token"
+    namespace = kubernetes_service_account.argocd_manager.metadata[0].namespace
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.argocd_manager.metadata.0.name
+    }
+  }
+
+  type                           = "kubernetes.io/service-account-token"
+  wait_for_service_account_token = true
+}
+
+resource "kubernetes_cluster_role_binding" "argocd_manager_role_binding" {
+  metadata {
+    name = "argocd-manager-role-binding"
+  }
+
+  role_ref {
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+    api_group = "rbac.authorization.k8s.io"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.argocd_manager.metadata[0].name
+    namespace = kubernetes_service_account.argocd_manager.metadata[0].namespace
+  }
+}
+
+data "kubernetes_secret" "argocd_manager_token" {
+  metadata {
+    name      = kubernetes_secret.argocd_manager_token.metadata[0].name
+    namespace = kubernetes_secret.argocd_manager_token.metadata[0].namespace
+  }
+
+  depends_on = [kubernetes_secret.argocd_manager_token]
+}
+
+data "kubernetes_config_map" "ca_data" {
+  metadata {
+    name      = "kube-root-ca.crt"
+    namespace = kubernetes_secret.argocd_manager_token.metadata[0].namespace
+  }
+}
+
 resource "kubernetes_secret" "remote_clusters" {
   provider = kubernetes.build_cluster
 
