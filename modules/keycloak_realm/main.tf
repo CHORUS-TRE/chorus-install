@@ -4,7 +4,7 @@ resource "keycloak_realm" "new_realm" {
   revoke_refresh_token        = true
   refresh_token_max_reuse     = 0
 
-  registration_allowed     = true
+  registration_allowed     = false
   login_with_email_allowed = true
   password_policy          = "length(8) and specialChars(1) and upperCase(1) and lowerCase(1) and digits(1) and notUsername and notEmail and notContainsUsername"
 }
