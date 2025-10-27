@@ -1,9 +1,26 @@
+# Registries
+
+resource "harbor_registry" "docker_hub" {
+  provider_name = "docker-hub"
+  name          = "Docker Hub"
+  endpoint_url  = "https://hub.docker.com"
+}
+
 # Projects
 
 resource "harbor_project" "projects" {
   for_each = toset(["apps", "chorus", "services"])
 
   name                   = each.key
+  vulnerability_scanning = "false"
+  force_destroy          = true
+}
+
+# Proxy cache projects
+
+resource "harbor_project" "proxy_cache" {
+  name                   = "docker_proxy"
+  registry_id            = harbor_registry.docker_hub.registry_id
   vulnerability_scanning = "false"
   force_destroy          = true
 }
@@ -99,7 +116,66 @@ resource "harbor_robot_account" "cluster" {
     kind      = "project"
     namespace = "services"
   }
-  depends_on = [harbor_project.projects]
+  permissions {
+    access {
+      action   = "create"
+      resource = "artifact"
+    }
+    access {
+      action   = "delete"
+      resource = "artifact"
+    }
+    access {
+      action   = "list"
+      resource = "artifact"
+    }
+    access {
+      action   = "read"
+      resource = "artifact"
+    }
+    access {
+      action   = "delete"
+      resource = "repository"
+    }
+    access {
+      action   = "list"
+      resource = "repository"
+    }
+    access {
+      action   = "pull"
+      resource = "repository"
+    }
+    access {
+      action   = "push"
+      resource = "repository"
+    }
+    access {
+      action   = "read"
+      resource = "repository"
+    }
+    access {
+      action   = "update"
+      resource = "repository"
+    }
+    access {
+      action   = "create"
+      resource = "tag"
+    }
+    access {
+      action   = "delete"
+      resource = "tag"
+    }
+    access {
+      action   = "list"
+      resource = "tag"
+    }
+    kind      = "project"
+    namespace = "docker_proxy"
+  }
+  depends_on = [
+    harbor_project.projects,
+    harbor_project.proxy_cache
+  ]
 }
 
 
