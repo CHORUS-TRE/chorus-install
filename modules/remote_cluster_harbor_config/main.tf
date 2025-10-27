@@ -118,24 +118,12 @@ resource "harbor_robot_account" "cluster" {
   }
   permissions {
     access {
-      action   = "create"
-      resource = "artifact"
-    }
-    access {
-      action   = "delete"
-      resource = "artifact"
-    }
-    access {
       action   = "list"
       resource = "artifact"
     }
     access {
       action   = "read"
       resource = "artifact"
-    }
-    access {
-      action   = "delete"
-      resource = "repository"
     }
     access {
       action   = "list"
@@ -146,24 +134,8 @@ resource "harbor_robot_account" "cluster" {
       resource = "repository"
     }
     access {
-      action   = "push"
-      resource = "repository"
-    }
-    access {
       action   = "read"
       resource = "repository"
-    }
-    access {
-      action   = "update"
-      resource = "repository"
-    }
-    access {
-      action   = "create"
-      resource = "tag"
-    }
-    access {
-      action   = "delete"
-      resource = "tag"
     }
     access {
       action   = "list"
