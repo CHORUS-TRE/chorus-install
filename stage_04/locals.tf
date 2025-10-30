@@ -1,50 +1,47 @@
 locals {
-  remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
-  build_cluster_name  = coalesce(var.cluster_name, var.kubeconfig_context)
-
   config_files = {
     # Build cluster files
-    build_cluster_harbor = "${var.helm_values_path}/${local.build_cluster_name}/${var.harbor_chart_name}/config.json"
+    build_cluster_harbor = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json"
     # Remote cluster files
-    keycloak                  = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/config.json"
-    harbor                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json"
-    kube_prometheus_stack     = "${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
-    prometheus_oauth2_proxy   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
-    alertmanager_oauth2_proxy = "${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json"
-    oauth2_proxy_cache        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json"
-    matomo                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/config.json"
-    matomo_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/config.json"
-    backend                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/config.json"
-    backend_db                = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/config.json"
-    i2b2_wildfly              = "${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json"
-    i2b2_db                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json"
-    didata                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}/config.json"
-    didata_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/config.json"
-    juicefs_csi_driver        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/config.json"
-    juicefs_s3_gateway        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-s3-gateway/config.json"
-    juicefs_cache             = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-cache/config.json"
+    keycloak                  = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/config.json"
+    harbor                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/config.json"
+    kube_prometheus_stack     = "${var.helm_values_path}/${var.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json"
+    matomo                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}/config.json"
+    matomo_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}-db/config.json"
+    backend                   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}/config.json"
+    backend_db                = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}-db/config.json"
+    i2b2_wildfly              = "${var.helm_values_path}/${var.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json"
+    i2b2_db                   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json"
+    didata                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.didata_chart_name}/config.json"
+    didata_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.didata_chart_name}-db/config.json"
+    juicefs_csi_driver        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/config.json"
+    juicefs_s3_gateway        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-s3-gateway/config.json"
+    juicefs_cache             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-cache/config.json"
   }
 
   values_files = {
     # Build cluster files
-    build_cluster_harbor = "${var.helm_values_path}/${local.build_cluster_name}/${var.harbor_chart_name}/values.yaml"
+    build_cluster_harbor = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml"
     # Remote cluster files
-    keycloak                  = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml"
-    keycloak_db               = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
-    harbor_values             = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml"
-    harbor_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml"
-    kube_prometheus_stack     = "${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
-    prometheus_oauth2_proxy   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
-    alertmanager_oauth2_proxy = "${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
-    oauth2_proxy_cache        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
-    matomo                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}/values.yaml"
-    matomo_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml"
-    frontend                  = "${var.helm_values_path}/${local.remote_cluster_name}/${var.frontend_chart_name}/values.yaml"
-    backend                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
-    backend_db                = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml"
-    didata_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml"
-    juicefs_csi_driver        = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/values.yaml"
-    juicefs_cache             = "${var.helm_values_path}/${local.remote_cluster_name}/${var.juicefs_chart_name}-cache/values.yaml"
+    keycloak                  = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml"
+    keycloak_db               = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
+    harbor_values             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/values.yaml"
+    harbor_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml"
+    kube_prometheus_stack     = "${var.helm_values_path}/${var.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
+    matomo                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}/values.yaml"
+    matomo_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml"
+    frontend                  = "${var.helm_values_path}/${var.remote_cluster_name}/${var.frontend_chart_name}/values.yaml"
+    backend                   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
+    backend_db                = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml"
+    didata_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml"
+    juicefs_csi_driver        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/values.yaml"
+    juicefs_cache             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-cache/values.yaml"
   }
 
   keycloak_namespace                  = jsondecode(file(local.config_files.keycloak)).namespace
@@ -195,7 +192,7 @@ locals {
       k8s_client_image_pull_secrets = [
         {
           registry = "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}"
-          username = join("", ["robot$", "${local.remote_cluster_name}"])
+          username = join("", ["robot$", "${var.remote_cluster_name}"])
           password = module.harbor_config.cluster_robot_password
         }
       ]
@@ -213,13 +210,13 @@ locals {
   backend_db_admin_secret_key = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   backend_db_user_secret_key  = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
 
-  didata_url = "https://didata.${local.remote_cluster_name}.chorus-tre.ch/"
+  didata_url = "https://didata.${var.remote_cluster_name}.chorus-tre.ch/"
   didata_secrets_content = templatefile("${var.templates_path}/didata_secrets.tmpl",
     {
       didata_app_name    = "didata_chorus"
       didata_app_key     = var.didata_app_key
       didata_app_url     = local.didata_url
-      didata_db_host     = "${local.remote_cluster_name}-didata-db-mariadb"
+      didata_db_host     = "${var.remote_cluster_name}-didata-db-mariadb"
       didata_db_database = "didata"
       didata_db_username = "didata"
       didata_db_password = random_password.didata_db_password.result

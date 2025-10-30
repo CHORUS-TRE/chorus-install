@@ -1,13 +1,7 @@
-locals {
-  cluster_name        = coalesce(var.cluster_name, var.kubeconfig_context)
-  remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context, "no-remote")
-  has_remote_cluster  = local.remote_cluster_name != "no-remote"
-}
-
 module "build_cluster_helm_charts_values" {
   source = "../modules/helm_charts_values"
 
-  cluster_name = local.cluster_name
+  cluster_name = var.cluster_name
 
   helm_registry           = var.helm_registry
   chorus_release          = var.chorus_release
@@ -24,7 +18,7 @@ module "build_cluster_helm_charts_values" {
 module "remote_cluster_helm_charts_values" {
   source = "../modules/helm_charts_values"
 
-  cluster_name = local.remote_cluster_name
+  cluster_name = var.remote_cluster_name
 
   helm_registry           = var.helm_registry
   chorus_release          = var.chorus_release
@@ -40,5 +34,5 @@ module "remote_cluster_helm_charts_values" {
   # Wait to avoid potential git conflicts
   depends_on = [module.build_cluster_helm_charts_values]
 
-  count = local.has_remote_cluster ? 1 : 0
+  count = var.remote_cluster_name != "" ? 1 : 0
 }

@@ -9,8 +9,10 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 |-------------------------------------|-----------------------------------------------------------------------------|
 | `kubeconfig_path`                   | Absolute path to the kubeconfig file used to connect to the build cluster.  |
 | `kubeconfig_context`                | Context name in the kubeconfig file for the build cluster.                  |
+| `cluster_name`                      | Cluster name used as a prefix for releases.                                 |
 | `remote_cluster_kubeconfig_path`    | Absolute path to the kubeconfig file for the remote cluster.                |
 | `remote_cluster_kubeconfig_context` | Context name in the kubeconfig file for the remote cluster.                 |
+| `remote_cluster_name`               | Remote cluster name used as a prefix for releases.                          |
 | `remote_cluster_server`             | K8s API server URL of the remote cluster.                                   |
 | `helm_registry`                     | OCI registry where CHORUS Helm charts are hosted. If the registry is not public, you need to set the `helm_registry_username` and `helm_registry_password` described in the optional variables.|
 | `github_username`                   | GitHub username used for repository authentication. This is used to get the CHORUS wrapper Helm charts as well as their overriding Helm values.|
@@ -24,8 +26,6 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 
 | Variable                                 | Description                                                                 | Default                |
 |------------------------------------------|-----------------------------------------------------------------------------|------------------------|
-| `cluster_name`                           | Cluster name used as a prefix for releases. Falls back to `kubeconfig_context` if unset. | `""` |
-| `remote_cluster_name`                    | Remote cluster name used as a prefix for releases. Falls back to `remote_cluster_kubeconfig_context`. | `""` |
 | `remote_cluster_insecure`                | Disable TLS verification for the remote cluster. Used when configuring ArgoCD's remote cluster connection | `"false"`              |
 | `github_orga`                            | GitHub organization where CHORUS repos reside.                              | `"CHORUS-TRE"`         |
 | `helm_registry_username`                 | Username for authenticating to a private Helm registry.                     | `""` |
