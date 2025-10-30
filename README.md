@@ -77,32 +77,36 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 1. Copy over the environment variables example file and set all the necessary variables for your use case.
 
-    ```
+    ```sh
     cp .env.example .env
     ```
+
     > You can find more information about each variable in the `VARIABLES.md` file.
     > Remote cluster related variables are only used in stages 3 and 4.
     > If you only intend to install the build cluster for now, you can leave the remote cluster related variables unset.
 
 1. Source your env file.
-    ```
+
+    ```sh
     source .env
     ```
 
 1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps) for each stage (e.g. workspace_stage_00, workspace_stage_01, ...).
     Make sure to add the necessary tag to your workspace (e.g. `stage_00` for the workspace used for stage_00).
+
     > If you don't have access to Terraform Cloud, you can delete all the `backend.tf` files, hence using the default local backend. The local backend type stores state as a local file on disk.
 
 1. Log in to Terraform Cloud
 
-    ```
+    ```sh
     terraform login
     ```
 
 1. Initialize, plan and apply stage 0.
+
    > This stage downloads the necessary overriding Helm values from the https://github.com/$TF_VAR_github_orga/$TF_VAR_helm_values_repo repository (e.g. https://github.com/CHORUS-TRE/environment-template).
 
-    ```
+    ```sh
     cd stage_00
     terraform workspace show
     terraform workspace select workspace_stage_00
@@ -113,10 +117,15 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 1. Make sure one of your [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/#default-storageclass) is set as default.
 
+   ```sh
+   kubectl patch storageclass your-default-storage-class-name -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+   ```
+
 1. Initialize, plan and apply stage 1.
+
     > This stage deploys Cert-Manager, Ingress-Nginx, Keycloak and Harbor on the build cluster.
 
-    ```
+    ```sh
     cd ../stage_01
     terraform workspace show
     terraform workspace select workspace_stage_01
@@ -124,15 +133,17 @@ The following requirements serve as a lower bound estimate, you might want to in
     terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
     ```
-    > **_NOTE:_** 
+
     > The ```terraform apply``` command can take several minutes to complete.
 
 1. Fetch the loadbalancer IP address using ```terraform output loadbalancer_ip```.
 
 1. Update your DNS with the loadbalancer IP address.
+
     > ACME challenges will fail as long as our hosts do not resolve properly
 
 1. Fetch the Harbor URL using ```terraform output harbor_url_admin_login```.
+
     > At this point, you'll need to login using the database authentication because the OIDC provider authentication configuration is not complete yet.
     > The database authentication page is accessible when appending `/account/sign-in` to the harbor URL (e.g. https://harbor.build.chorus-tre.ch/account/sign-in).
 
@@ -145,13 +156,14 @@ The following requirements serve as a lower bound estimate, you might want to in
    The default Keycloak admin username is "admin".
 
 1. Make sure Harbor and Keycloak can be accessed using your browser, then proceed with stage 2.
-    > **_NOTE:_** 
+
     > If you do not wait for certificates to appear as signed and trusted, make sure to disable TLS verification for the Harbor and Keycloak Terraform providers used in stage 2, otherwise you might get the following error ```tls: failed to verify certificate: x509: certificate signed by unknown authority```.
 
 1. Initialize, plan and apply stage 2.
+
     > This stage configures Harbor (e.g. create registries, projects, robot accounts, upload Helm charts) and Keycloak (e.g. create realms, clients, groups, oidc identity provider), and deploys Argo Workflows, Argo Events and ArgoCD. It also creates all necessary secrets.
 
-    ```
+    ```sh
     cd ../stage_02
     terraform workspace show
     terraform workspace select workspace_stage_02
@@ -160,12 +172,10 @@ The following requirements serve as a lower bound estimate, you might want to in
     terraform apply "stage_02.plan"
     ```
 
-    > **_NOTE:_** 
     > The applications' sync status might be in an unknown state for a few minutes because ArgoCD fails to connect to the Harbor Helm registry.
     > This is caused by the fact that Harbor initially serves an invalid certificate, and it takes some time for the correct certificate to be provisioned. 
     > Also, you might be hitting Let's Encrypt rate limit if you've reinstalled the services too many times lately.
 
-    > **_NOTE:_**
     > As ArgoCD takes over the responsibility for the components that were already deployed (e.g. Keycloak, Harbor), their related services will experience a short unavailability period.
 
 1. Make sure the ```build-cluster-name_output.yaml``` file appeared in your local filesystem. 
@@ -180,9 +190,10 @@ The following requirements serve as a lower bound estimate, you might want to in
 1. Go through steps 1 to 5 of the build cluster installation, making sure environment variables related to the remote cluster were filled in your env file.
 
 1. Initialize, plan and apply stage 3.
+
    > This stage installs Cert-Manager CRDs, creates the necessary secrets for Harbor and Keycloak and configures the connection from the ArgoCD running on the build cluster to the remote cluster.
 
-    ```
+    ```sh
     cd ../stage_03
     terraform workspace show
     terraform workspace select workspace_stage_03
@@ -193,21 +204,32 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 1. Make sure to add the remote cluster to the list of environments in the overriding values of the argo-deploy Helm chart deployed on the build cluster.
 
+   ```yaml
+   environments:
+     - name: your-cluster-name
+       description: your-cluster-description
+       envRepoURL: https://github.com/your-organization/environments.git
+       registryURL: harbor.build.your-organization.ch
+       cluster: your-cluster-name
+   ```
+
 1. Make sure a project named after the remote cluster name was created in ArgoCD.
 
 1. Make sure the remote cluster has connection status is "Successful" in ArgoCD.
 
 1. Fetch the loadbalancer IP address using the kubectl command below
-   ```
+
+   ```sh
    kubectl get svc -n ingress-nginx --field-selector spec.type=LoadBalancer -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}'
    ```
 
 1. Update your DNS with the loadbalancer IP address.
 
 1. Initialize, plan and apply stage 4
+
    > This stage configures Harbor (e.g. create registries, projects, robot accounts, upload Helm charts) and Keycloak (e.g. create realms, clients, groups, oidc identity provider) and creates all necessary secrets.
 
-    ```
+    ```sh
     cd ../stage_04
     terraform workspace show
     terraform workspace select workspace_stage_04
@@ -229,7 +251,7 @@ you can [import](https://developer.hashicorp.com/terraform/cli/import) them.
 
 Error example
 
-```
+```sh
 │ Error: namespaces "ingress-nginx" already exists
 │
 │   with module.ingress_nginx.kubernetes_namespace.ingress_nginx,
@@ -239,7 +261,7 @@ Error example
 
 Import command
 
-```
+```sh
 terraform import module.ingress_nginx.kubernetes_namespace.ingress_nginx ingress-nginx 
 ```
 
@@ -254,7 +276,7 @@ Where
 
 1. Run Terraform destroy command on stage 4
 
-    ```
+    ```sh
     cd stage_04
     terraform destroy
     cd ..
@@ -262,7 +284,7 @@ Where
 
 1. Run Terraform destroy command on stage 3
 
-    ```
+    ```sh
     cd stage_03
     terraform destroy
     cd ..
@@ -272,7 +294,7 @@ Where
 
 1. Delete the ApplicationSet and AppProject resources
 
-    ```
+    ```sh
     ARGOCD_NAMESPACE="argocd"
     kubectl delete $(kubectl get applicationset -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
     kubectl delete $(kubectl get appproject -oname -n $ARGOCD_NAMESPACE) -n $ARGOCD_NAMESPACE
@@ -280,7 +302,7 @@ Where
 
 1. Run the Terraform destroy command on stage 2
 
-    ```
+    ```sh
     cd stage_02
     terraform destroy
     cd ..
@@ -288,14 +310,14 @@ Where
 
 1. Run the Terraform destroy command on stage 1
 
-    ```
+    ```sh
     cd stage_01
     terraform destroy
     cd ..
     ```
 
 1. Delete hanging resources
-    ```
+    ```sh
     # argo-workflows-server ingress
     kubectl delete $(kubectl get ingress -n kube-system -oname | grep argo-workflows-server) -n kube-system
 
@@ -322,12 +344,12 @@ Where
     ```
 
 1. Make sure the uninstallation was successful
-    ```
+    ```sh
     kubectl get ns
     # Expected output: system-level namespace only (e.g. kube-***)
     ```
 
-    ```
+    ```sh
     helm list -A
     # Expected output: system-level charts only (e.g. kube-***)
     ```
