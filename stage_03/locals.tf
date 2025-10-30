@@ -1,7 +1,4 @@
 locals {
-  cluster_name        = coalesce(var.cluster_name, var.kubeconfig_context)
-  remote_cluster_name = coalesce(var.remote_cluster_name, var.remote_cluster_kubeconfig_context)
-
   remote_cluster_config = jsonencode({
     bearerToken = data.kubernetes_secret.argocd_manager_token.data.token
     tlsClientConfig = {
@@ -10,25 +7,25 @@ locals {
     }
   })
 
-  cert_manager_crds_content = file("${var.cert_manager_crds_path}/${local.remote_cluster_name}/cert-manager.crds.yaml")
+  cert_manager_crds_content = file("${var.cert_manager_crds_path}/${var.remote_cluster_name}/cert-manager.crds.yaml")
 
   config_files = {
     # ArgoCD runs on build cluster
-    argocd = "${var.helm_values_path}/${local.cluster_name}/${var.argocd_chart_name}/config.json"
+    argocd = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json"
     # Remote cluster resources
-    keycloak = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/config.json"
-    harbor   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/config.json"
+    keycloak = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/config.json"
+    harbor   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/config.json"
   }
 
   values_files = {
-    keycloak                  = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml"
-    keycloak_db               = "${var.helm_values_path}/${local.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
-    harbor                    = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}/values.yaml"
-    harbor_db                 = "${var.helm_values_path}/${local.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml"
-    kube_prometheus_stack     = "${var.helm_values_path}/${local.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
-    prometheus_oauth2_proxy   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
-    alertmanager_oauth2_proxy = "${var.helm_values_path}/${local.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
-    backend                   = "${var.helm_values_path}/${local.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
+    keycloak                  = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml"
+    keycloak_db               = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
+    harbor                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/values.yaml"
+    harbor_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml"
+    kube_prometheus_stack     = "${var.helm_values_path}/${var.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
+    backend                   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
   }
 
   keycloak_namespace = jsondecode(file(local.config_files.keycloak)).namespace

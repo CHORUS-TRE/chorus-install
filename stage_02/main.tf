@@ -373,7 +373,7 @@ module "chorus_ci" {
 module "argo_cd" {
   source = "../modules/argo_cd"
 
-  cluster_name  = local.cluster_name
+  cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
   argocd_chart_name    = var.argocd_chart_name
@@ -424,7 +424,7 @@ resource "null_resource" "wait_for_argocd" {
 module "argocd_config" {
   source = "../modules/argo_cd_config"
 
-  cluster_name = local.cluster_name
+  cluster_name = var.cluster_name
 
   argocd_helm_values = file(local.values_files.argocd)
   argocd_namespace   = local.argocd_namespace
@@ -490,6 +490,6 @@ locals {
 }
 
 resource "local_file" "stage_02_output" {
-  filename = "../${local.cluster_name}_output.yaml"
+  filename = "../${var.cluster_name}_output.yaml"
   content  = yamlencode(local.output)
 }

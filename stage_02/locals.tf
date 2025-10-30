@@ -1,36 +1,35 @@
 locals {
-  cluster_name        = coalesce(var.cluster_name, var.kubeconfig_context)
-  helm_values_folders = toset([for x in fileset("${path.module}/${var.helm_values_path}/${local.cluster_name}", "**") : dirname(x)])
-  charts_versions     = { for x in local.helm_values_folders : jsondecode(file("${var.helm_values_path}/${local.cluster_name}/${x}/config.json")).chart => jsondecode(file("${var.helm_values_path}/${local.cluster_name}/${x}/config.json")).version... }
+  helm_values_folders = toset([for x in fileset("${path.module}/${var.helm_values_path}/${var.cluster_name}", "**") : dirname(x)])
+  charts_versions     = { for x in local.helm_values_folders : jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).chart => jsondecode(file("${var.helm_values_path}/${var.cluster_name}/${x}/config.json")).version... }
 
   config_files = {
-    argo_deploy               = "${var.helm_values_path}/${local.cluster_name}/${var.argo_deploy_chart_name}/config.json"
-    argocd                    = "${var.helm_values_path}/${local.cluster_name}/${var.argocd_chart_name}/config.json"
-    argocd_cache              = "${var.helm_values_path}/${local.cluster_name}/${var.argocd_chart_name}-cache/config.json"
-    chorusci                  = "${var.helm_values_path}/${local.cluster_name}/${var.chorusci_chart_name}/config.json"
-    harbor                    = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}/config.json"
-    keycloak                  = "${var.helm_values_path}/${local.cluster_name}/${var.keycloak_chart_name}/config.json"
-    kube_prometheus_stack     = "${var.helm_values_path}/${local.cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
-    prometheus_oauth2_proxy   = "${var.helm_values_path}/${local.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
-    alertmanager_oauth2_proxy = "${var.helm_values_path}/${local.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json"
-    oauth2_proxy_cache        = "${var.helm_values_path}/${local.cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json"
-    argo_workflows            = "${var.helm_values_path}/${local.cluster_name}/${var.argo_workflows_chart_name}/config.json"
+    argo_deploy               = "${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/config.json"
+    argocd                    = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json"
+    argocd_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json"
+    chorusci                  = "${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/config.json"
+    harbor                    = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json"
+    keycloak                  = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json"
+    kube_prometheus_stack     = "${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json"
+    argo_workflows            = "${var.helm_values_path}/${var.cluster_name}/${var.argo_workflows_chart_name}/config.json"
   }
 
   values_files = {
-    argo_deploy               = "${var.helm_values_path}/${local.cluster_name}/${var.argo_deploy_chart_name}/values.yaml"
-    argocd                    = "${var.helm_values_path}/${local.cluster_name}/${var.argocd_chart_name}/values.yaml"
-    argocd_cache              = "${var.helm_values_path}/${local.cluster_name}/${var.argocd_chart_name}-cache/values.yaml"
-    chorusci                  = "${var.helm_values_path}/${local.cluster_name}/${var.chorusci_chart_name}/values.yaml"
-    harbor                    = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}/values.yaml"
-    harbor_db                 = "${var.helm_values_path}/${local.cluster_name}/${var.harbor_chart_name}-db/values.yaml"
-    keycloak                  = "${var.helm_values_path}/${local.cluster_name}/${var.keycloak_chart_name}/values.yaml"
-    keycloak_db               = "${var.helm_values_path}/${local.cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
-    kube_prometheus_stack     = "${var.helm_values_path}/${local.cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
-    argo_workflows            = "${var.helm_values_path}/${local.cluster_name}/${var.argo_workflows_chart_name}/values.yaml"
-    alertmanager_oauth2_proxy = "${var.helm_values_path}/${local.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
-    prometheus_oauth2_proxy   = "${var.helm_values_path}/${local.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
-    oauth2_proxy_cache        = "${var.helm_values_path}/${local.cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
+    argo_deploy               = "${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/values.yaml"
+    argocd                    = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml"
+    argocd_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/values.yaml"
+    chorusci                  = "${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/values.yaml"
+    harbor                    = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml"
+    harbor_db                 = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/values.yaml"
+    keycloak                  = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml"
+    keycloak_db               = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
+    kube_prometheus_stack     = "${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
+    argo_workflows            = "${var.helm_values_path}/${var.cluster_name}/${var.argo_workflows_chart_name}/values.yaml"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
   }
 
   argo_deploy_chart_version  = jsondecode(file(local.config_files.argo_deploy)).version

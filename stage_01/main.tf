@@ -31,7 +31,7 @@ resource "null_resource" "validate_values_files" {
 module "ingress_nginx" {
   source = "../modules/ingress_nginx"
 
-  cluster_name  = local.cluster_name
+  cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
   chart_name         = var.ingress_nginx_chart_name
@@ -45,7 +45,7 @@ module "ingress_nginx" {
 module "certificate_authorities" {
   source = "../modules/certificate_authorities"
 
-  cluster_name  = local.cluster_name
+  cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
   cert_manager_chart_name    = var.cert_manager_chart_name
@@ -65,7 +65,7 @@ module "certificate_authorities" {
 module "keycloak" {
   source = "../modules/keycloak"
 
-  cluster_name  = local.cluster_name
+  cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
   keycloak_chart_name    = var.keycloak_chart_name
@@ -101,7 +101,7 @@ resource "random_password" "argocd_keycloak_client_secret" {
 module "harbor" {
   source = "../modules/harbor"
 
-  cluster_name  = local.cluster_name
+  cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
   harbor_chart_name     = var.harbor_chart_name

@@ -37,7 +37,6 @@ variable "kubeconfig_context" {
 variable "cluster_name" {
   description = "The cluster name to be used as a prefix to release names"
   type        = string
-  default     = ""
 }
 
 variable "cert_manager_chart_name" {

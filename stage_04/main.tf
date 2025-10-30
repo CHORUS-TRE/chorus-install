@@ -241,7 +241,7 @@ module "harbor_config" {
   }
 
   cluster_robot_username         = var.remote_cluster_name
-  pull_replication_registry_name = local.build_cluster_name
+  pull_replication_registry_name = var.cluster_name
   pull_replication_registry_url  = local.build_cluster_harbor_url
 }
 
@@ -517,7 +517,7 @@ resource "kubernetes_secret" "regcred" {
     ".dockerconfigjson" = jsonencode({
       "auths" = {
         "${local.harbor_url}" = {
-          "auth" = base64encode(join("", ["robot$", "${local.remote_cluster_name}", ":${module.harbor_config.cluster_robot_password}"]))
+          "auth" = base64encode(join("", ["robot$", "${var.remote_cluster_name}", ":${module.harbor_config.cluster_robot_password}"]))
         }
       }
     })
@@ -544,7 +544,7 @@ module "alertmanager" {
 module "juicefs" {
   source = "../modules/juicefs"
 
-  cluster_name                  = local.remote_cluster_name
+  cluster_name                  = var.remote_cluster_name
   juicefs_cache_secret_name     = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
   juicefs_cache_secret_key      = local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey
   juicefs_cache_namespace       = local.juicefs_cache_namespace
@@ -587,6 +587,6 @@ locals {
 }
 
 resource "local_file" "stage_04_output" {
-  filename = "../${local.remote_cluster_name}_output.yaml"
+  filename = "../${var.remote_cluster_name}_output.yaml"
   content  = yamlencode(local.output)
 }

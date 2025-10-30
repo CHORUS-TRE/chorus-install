@@ -181,7 +181,7 @@ resource "kubernetes_secret" "remote_clusters" {
   provider = kubernetes.build_cluster
 
   metadata {
-    name      = "${local.remote_cluster_name}-cluster"
+    name      = "${var.remote_cluster_name}-cluster"
     namespace = local.argocd_namespace
     labels = {
       "argocd.argoproj.io/secret-type" = "cluster"
@@ -189,7 +189,7 @@ resource "kubernetes_secret" "remote_clusters" {
   }
 
   data = {
-    name   = local.remote_cluster_name
+    name   = var.remote_cluster_name
     server = var.remote_cluster_server
     config = local.remote_cluster_config
   }

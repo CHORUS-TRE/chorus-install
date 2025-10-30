@@ -23,7 +23,6 @@ variable "cert_manager_crds_path" {
 variable "cluster_name" {
   description = "The build cluster name"
   type        = string
-  default     = ""
 }
 
 variable "argocd_chart_name" {
@@ -51,7 +50,6 @@ variable "remote_cluster_kubeconfig_context" {
 variable "remote_cluster_name" {
   description = "The name of the remote cluster"
   type        = string
-  default     = ""
 }
 
 variable "remote_cluster_server" {
