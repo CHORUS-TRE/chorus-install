@@ -63,6 +63,15 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | `remote_cluster_webex_access_token` | Webex bot access token for sending alerts from the remote cluster. See [this section](#webex_alerts) | `""` |
 | `webex_access_token` | Webex bot access token for sending alerts. See [this section](#webex_alerts) | `""` |
 
+### Remote Storage Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `s3_access_key` | S3 access key for JuiceFS storage backend | `""` |
+| `s3_bucket_name` | S3 bucket name for JuiceFS storage backend | `""` |
+| `s3_endpoint` | S3 endpoint URL for JuiceFS storage backend | `""` |
+| `s3_secret_key` | S3 secret key for JuiceFS storage backend | `""` |
+
 ### Applications Configuration
 
 | Variable | Description | Default |
