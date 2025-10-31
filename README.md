@@ -64,6 +64,15 @@ The following requirements serve as a lower bound estimate, you might want to in
 | control-plane,etcd | 16  | 32          | 52           | 3      |
 | worker             | 16  | 32          | 1000         | 3      |
 
+### Networks requirements
+
+| Source        | Destination | Port | Description                                                    |
+|---------------|-------------|------|----------------------------------------------------------------|
+| Build         | Remote      | 6443 | Needed for ArgoCD to connect to the remote cluster             |
+| Remote        | Build       | 443  | Needed for the Remote Harbor to pull images from Harbor Build  |
+| External User | Build       | 443  | Access to build cluster services via LoadBalancer              |
+| External User | Remote      | 443  | Access to remote cluster services via LoadBalancer             |
+
 ### Repositories
 
 | Repository                                                         | Description                                          |
@@ -108,8 +117,9 @@ The following requirements serve as a lower bound estimate, you might want to in
 
     ```sh
     cd stage_00
-    terraform workspace show
+    terraform workspace list
     terraform workspace select workspace_stage_00
+    terraform workspace show
     terraform init
     terraform plan -out="stage_00.plan"
     terraform apply "stage_00.plan"
@@ -127,8 +137,9 @@ The following requirements serve as a lower bound estimate, you might want to in
 
     ```sh
     cd ../stage_01
-    terraform workspace show
+    terraform workspace list
     terraform workspace select workspace_stage_01
+    terraform workspace show
     terraform init
     terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
@@ -165,8 +176,9 @@ The following requirements serve as a lower bound estimate, you might want to in
 
     ```sh
     cd ../stage_02
-    terraform workspace show
+    terraform workspace list
     terraform workspace select workspace_stage_02
+    terraform workspace show
     terraform init
     terraform plan -out="stage_02.plan"
     terraform apply "stage_02.plan"
@@ -195,8 +207,9 @@ The following requirements serve as a lower bound estimate, you might want to in
 
     ```sh
     cd ../stage_03
-    terraform workspace show
+    terraform workspace list
     terraform workspace select workspace_stage_03
+    terraform workspace show
     terraform init
     terraform plan -out="stage_03.plan"
     terraform apply "stage_03.plan"
@@ -231,8 +244,9 @@ The following requirements serve as a lower bound estimate, you might want to in
 
     ```sh
     cd ../stage_04
-    terraform workspace show
+    terraform workspace list
     terraform workspace select workspace_stage_04
+    terraform workspace show
     terraform init
     terraform plan -out="stage_04.plan"
     terraform apply "stage_04.plan"
