@@ -197,7 +197,7 @@ locals {
         }
       ]
       keycloak_openid_client_secret = random_password.backend_keycloak_client_secret.result
-      steward_user_password         = random_password.steward_password.result
+      steward_password              = random_password.steward_password.result
       backend_s3_enabled            = try(local.backend_values_parsed.main.clients.minio_client.enabled, false)
       juicefs_endpoint              = try(local.backend_values_parsed.main.clients.minio_client.endpoint, "")
       s3_access_key                 = var.s3_access_key
