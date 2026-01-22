@@ -43,7 +43,7 @@
 | ------------------ | ------------------------------------------------------------------------------------------------------------------ | -------- |
 | Kubernetes cluster | An infrastructure with a working Kubernetes cluster to run ArgoCD (named _build_ cluster in the following) | Required |
 | Kubernetes cluster | An infrastructure with a working Kubernetes cluster to run CHORUS and its workspaces (named _remote_ cluster in the following) | Required |
-| Domain name        | CHORUS-TRE is only accessible via HTTPS and it's essential to register a domain name via registrars like Cloudflare, Route53, etc. | Required |  
+| Domain name        | CHORUS-TRE is only accessible via HTTPS and it's essential to register a domain name via registrars like Cloudflare, Route53, etc. | Required |
 | DNS Server         | CHORUS-TRE is only accessible via HTTPS and it's essential to have a DNS server via providers like Cloudflare, Route53, etc. | Required |
 
 ### Hardware requirements
@@ -117,10 +117,11 @@ The following requirements serve as a lower bound estimate, you might want to in
 
     ```sh
     cd stage_00
-    terraform workspace list
-    terraform workspace select workspace_stage_00
-    terraform workspace show
     terraform init
+    ```
+    You'll be prompted to select a workspace.
+    Once you selected a workspace, run ```terraform workspace show``` to make sure your selection was correct.
+    ```sh
     terraform plan -out="stage_00.plan"
     terraform apply "stage_00.plan"
     ```
@@ -137,10 +138,11 @@ The following requirements serve as a lower bound estimate, you might want to in
 
     ```sh
     cd ../stage_01
-    terraform workspace list
-    terraform workspace select workspace_stage_01
-    terraform workspace show
     terraform init
+    ```
+    You'll be prompted to select a workspace.
+    Once you selected a workspace, run ```terraform workspace show``` to make sure your selection was correct.
+    ```sh
     terraform plan -out="stage_01.plan"
     terraform apply "stage_01.plan"
     ```
