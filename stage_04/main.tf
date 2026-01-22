@@ -8,7 +8,7 @@ resource "null_resource" "validate_config_files" {
       ])
       error_message = <<-EOT
         Missing configuration files!
-        
+
         ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(local.exclude_config_files_validation, k)])}
       EOT
     }
@@ -24,7 +24,7 @@ resource "null_resource" "validate_values_files" {
       ])
       error_message = <<-EOT
         Missing values files!
-        
+
         ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v)) && !contains(local.exclude_values_files_validation, k)])}
       EOT
     }

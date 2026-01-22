@@ -5,7 +5,7 @@ resource "null_resource" "validate_config_files" {
       condition     = alltrue([for path in values(local.config_files) : can(file(path))])
       error_message = <<-EOT
         Missing configuration files!
-        
+
         ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v))])}
       EOT
     }
@@ -19,7 +19,7 @@ resource "null_resource" "validate_values_files" {
       condition     = alltrue([for path in values(local.values_files) : can(file(path))])
       error_message = <<-EOT
         Missing values files!
-        
+
         ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v))])}
       EOT
     }
