@@ -91,6 +91,21 @@ resource "random_password" "keycloak_remotestate_encryption_key" {
   upper   = false
 }
 
+resource "random_password" "harbor_robot_argo_cd_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "harbor_robot_chorus_ci_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "harbor_robot_renovate_secret" {
+  length  = 32
+  special = false
+}
+
 data "kubernetes_secret" "harbor_admin_password" {
   metadata {
     name      = local.harbor_admin_password_secret
@@ -363,27 +378,60 @@ resource "kubernetes_secret" "keycloak_remotestate_encryption_key" {
 #  valid_redirect_uris = [join("/", [local.prometheus_url, "*"]), join("/", [local.alertmanager_url, "*"])]
 #}
 
-module "harbor_config" {
-  source = "../modules/harbor_config"
-
-  providers = {
-    harbor = harbor.harboradmin-provider
+resource "kubernetes_secret" "harbor_robot_argo_cd_secret" {
+  metadata {
+    name      = "harbor-robot-argo-cd"
+    namespace = local.harbor_namespace
   }
 
-  charts_versions               = local.charts_versions
-  source_helm_registry          = var.helm_registry
-  source_helm_registry_username = var.helm_registry_username
-  source_helm_registry_password = var.helm_registry_password
-
-  harbor_admin_username = var.harbor_admin_username
-  harbor_admin_password = local.harbor_admin_password
-  harbor_helm_values    = file(local.values_files.harbor)
-
-  github_actions_robot_username = var.github_actions_harbor_robot_username
-  argocd_robot_username         = var.argocd_harbor_robot_username
-  chorusci_robot_username       = var.chorusci_harbor_robot_username
-  renovate_robot_username       = var.renovate_harbor_robot_username
+  data = {
+    encryptionKey = random_password.harbor_robot_argo_cd_secret.result
+  }
 }
+
+resource "kubernetes_secret" "harbor_robot_chorus_ci_secret" {
+  metadata {
+    name      = "harbor-robot-chorus-ci"
+    namespace = local.harbor_namespace
+  }
+
+  data = {
+    encryptionKey = random_password.harbor_robot_chorus_ci_secret.result
+  }
+}
+
+resource "kubernetes_secret" "harbor_robot_renovate_secret" {
+  metadata {
+    name      = "harbor-robot-renovate"
+    namespace = local.harbor_namespace
+  }
+
+  data = {
+    encryptionKey = random_password.harbor_robot_renovate_secret.result
+  }
+}
+
+#module "harbor_config" {
+#  source = "../modules/harbor_config"
+#
+#  providers = {
+#    harbor = harbor.harboradmin-provider
+#  }
+#
+#  charts_versions               = local.charts_versions
+#  source_helm_registry          = var.helm_registry
+#  source_helm_registry_username = var.helm_registry_username
+#  source_helm_registry_password = var.helm_registry_password
+#
+#  harbor_admin_username = var.harbor_admin_username
+#  harbor_admin_password = local.harbor_admin_password
+#  harbor_helm_values    = file(local.values_files.harbor)
+#
+#  github_actions_robot_username = var.github_actions_harbor_robot_username
+#  argocd_robot_username         = var.argocd_harbor_robot_username
+#  chorusci_robot_username       = var.chorusci_harbor_robot_username
+#  renovate_robot_username       = var.renovate_harbor_robot_username
+#}
 
 module "chorus_ci" {
   source = "../modules/chorus_ci"
@@ -400,7 +448,7 @@ module "chorus_ci" {
 
   registry_server   = local.harbor_url
   registry_username = var.chorusci_harbor_robot_username
-  registry_password = module.harbor_config.chorusci_robot_password
+  registry_password = random_password.harbor_robot_chorus_ci_secret.result
 
   depends_on = [kubernetes_namespace.argo]
 }
@@ -425,7 +473,7 @@ module "argo_cd" {
   helm_values_pat                       = var.helm_values_pat
   harbor_domain                         = replace(local.harbor_url, "https://", "")
   harbor_robot_username                 = var.argocd_harbor_robot_username
-  harbor_robot_password                 = module.harbor_config.argocd_robot_password
+  harbor_robot_password                 = random_password.harbor_robot_argo_cd_secret.result
 }
 
 resource "null_resource" "wait_for_argocd" {
@@ -502,9 +550,10 @@ locals {
     harbor_url            = local.harbor_url
     harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
 
-    harbor_chorusci_robot_password = module.harbor_config.chorusci_robot_password
-    harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
-    harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
+    harbor_chorusci_robot_password = random_password.harbor_robot_chorus_ci_secret.result
+    harbor_argocd_robot_password   = random_password.harbor_robot_argo_cd_secret.result
+    harbor_renovate_robot_password = random_password.harbor_robot_renovate_secret.result
+
     harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
     harbor_db_password             = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_user_password_key}"]
     harbor_db_admin_username       = "postgres"
