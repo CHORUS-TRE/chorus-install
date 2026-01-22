@@ -266,14 +266,14 @@ variable "i2b2_db_password" {
   type        = string
 }
 
-variable "google_identity_provider_client_id" {
-  description = "The Google client identifier"
+variable "remote_cluster_google_identity_provider_client_id" {
+  description = "The Google client identifier for the remote cluster"
   type        = string
   default     = ""
 }
 
-variable "google_identity_provider_client_secret" {
-  description = "The Google client secret used for authentication"
+variable "remote_cluster_google_identity_provider_client_secret" {
+  description = "The Google client secret used for authentication for the remote cluster"
   type        = string
   sensitive   = true
   default     = ""

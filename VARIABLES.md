@@ -55,6 +55,8 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 |----------|-------------|---------|
 | `google_identity_provider_client_id` | Google Identity Provider Client ID (for OIDC federation). See [this section](#google_idp) | `""` |
 | `google_identity_provider_client_secret` | Google Identity Provider Client Secret. See [this section](#google_idp) | `""` |
+| `remote_cluster_google_identity_provider_client_id` | Remote cluster's Google Identity Provider Client ID (for OIDC federation). See [this section](#google_idp) | `""` |
+| `remote_cluster_google_identity_provider_client_secret` | Remote cluster's Google Identity Provider Client Secret. See [this section](#google_idp) | `""` |
 
 ### Alerting Configuration
 
