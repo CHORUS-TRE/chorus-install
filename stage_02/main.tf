@@ -5,7 +5,7 @@ resource "null_resource" "validate_config_files" {
       condition     = alltrue([for path in values(local.config_files) : can(file(path))])
       error_message = <<-EOT
         Missing configuration files!
-        
+
         ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v))])}
       EOT
     }
@@ -19,7 +19,7 @@ resource "null_resource" "validate_values_files" {
       condition     = alltrue([for path in values(local.values_files) : can(file(path))])
       error_message = <<-EOT
         Missing values files!
-        
+
         ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v))])}
       EOT
     }
@@ -83,6 +83,12 @@ resource "random_password" "prometheus_keycloak_client_secret" {
 resource "random_password" "grafana_admin_password" {
   length  = 32
   special = false
+}
+
+resource "random_password" "keycloak_remotestate_encryption_key" {
+  length  = 32
+  special = false
+  upper   = false
 }
 
 data "kubernetes_secret" "harbor_admin_password" {
@@ -209,124 +215,153 @@ module "oauth2_proxy" {
   alertmanager_keycloak_client_secret = random_password.alertmanager_keycloak_client_secret.result
 }
 
-module "keycloak_config" {
-  source = "../modules/keycloak_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
+resource "kubernetes_secret" "keycloak_client_credentials" {
+  metadata {
+    name      = "keycloak-client-secret"
+    namespace = local.keycloak_namespace
   }
 
-  infra_realm_name = var.keycloak_realm
-
-  google_identity_provider_client_id     = var.google_identity_provider_client_id
-  google_identity_provider_client_secret = var.google_identity_provider_client_secret
+  data = {
+    # master and infra realm
+    GOOGLE_CLIENT_ID     = var.google_identity_provider_client_id
+    GOOGLE_CLIENT_SECRET = var.google_identity_provider_client_secret
+    # infra realm only
+    ALERTMANAGER_CLIENT_SECRET = random_password.alertmanager_keycloak_client_secret.result
+    GRAFANA_CLIENT_SECRET      = random_password.grafana_keycloak_client_secret.result
+    HARBOR_CLIENT_SECRET       = local.harbor_keycloak_client_secret
+    PROMETHEUS_CLIENT_SECRET   = random_password.prometheus_keycloak_client_secret.result
+  }
 }
 
-module "keycloak_harbor_client_config" {
-  source = "../modules/keycloak_generic_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
+resource "kubernetes_secret" "keycloak_remotestate_encryption_key" {
+  metadata {
+    name      = "keycloak-remotestate-encryption-key"
+    namespace = local.keycloak_namespace
   }
 
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.harbor_keycloak_client_id
-  client_secret       = local.harbor_keycloak_client_secret
-  root_url            = local.harbor_url
-  base_url            = var.harbor_keycloak_base_url
-  admin_url           = local.harbor_url
-  web_origins         = [local.harbor_url]
-  valid_redirect_uris = [join("/", [local.harbor_url, "c/oidc/callback"])]
-  client_group        = var.harbor_keycloak_oidc_admin_group
-}
-
-module "keycloak_argocd_client_config" {
-  source = "../modules/keycloak_generic_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
+  data = {
+    encryptionKey = random_password.keycloak_remotestate_encryption_key.result
   }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.argocd_keycloak_client_id
-  client_secret       = random_password.argocd_keycloak_client_secret.result
-  root_url            = module.argo_cd.argocd_url
-  base_url            = var.argocd_keycloak_base_url
-  admin_url           = module.argo_cd.argocd_url
-  web_origins         = [module.argo_cd.argocd_url]
-  valid_redirect_uris = [join("/", [module.argo_cd.argocd_url, "auth/callback"])]
-  client_group        = var.argocd_keycloak_oidc_admin_group
 }
 
-module "keycloak_argo_workflows_client_config" {
-  source = "../modules/keycloak_generic_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.argo_workflows_keycloak_client_id
-  client_secret       = random_password.argo_workflows_keycloak_client_secret.result
-  root_url            = local.argo_workflows_url
-  base_url            = var.argo_workflows_keycloak_base_url
-  admin_url           = local.argo_workflows_url
-  web_origins         = [local.argo_workflows_url]
-  valid_redirect_uris = [local.argo_workflows_redirect_uri]
-  client_group        = var.argo_workflows_keycloak_oidc_admin_group
-}
-
-module "keycloak_grafana_client_config" {
-  source = "../modules/keycloak_grafana_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.grafana_keycloak_client_id
-  client_secret       = random_password.grafana_keycloak_client_secret.result
-  root_url            = local.grafana_url
-  base_url            = var.grafana_keycloak_base_url
-  admin_url           = local.grafana_url
-  web_origins         = [local.grafana_url]
-  valid_redirect_uris = [join("/", [local.grafana_url, "login/generic_oauth"])]
-  client_group        = var.grafana_keycloak_oidc_admin_group
-}
-
-module "keycloak_alertmanager_client_config" {
-  source = "../modules/keycloak_oauth2_proxy_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.alertmanager_keycloak_client_id
-  client_secret       = random_password.alertmanager_keycloak_client_secret.result
-  root_url            = local.alertmanager_url
-  base_url            = var.alertmanager_keycloak_base_url
-  admin_url           = local.alertmanager_url
-  web_origins         = [local.alertmanager_url]
-  valid_redirect_uris = [join("/", [local.alertmanager_url, "*"])]
-}
-
-module "keycloak_prometheus_client_config" {
-  source = "../modules/keycloak_oauth2_proxy_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.prometheus_keycloak_client_id
-  client_secret       = random_password.prometheus_keycloak_client_secret.result
-  root_url            = local.prometheus_url
-  base_url            = var.prometheus_keycloak_base_url
-  admin_url           = local.prometheus_url
-  web_origins         = [local.prometheus_url]
-  valid_redirect_uris = [join("/", [local.prometheus_url, "*"]), join("/", [local.alertmanager_url, "*"])]
-}
+#module "keycloak_config" {
+#  source = "../modules/keycloak_config"
+#
+#  providers = {
+#    keycloak = keycloak.kcadmin-provider
+#  }
+#
+#  infra_realm_name = var.keycloak_realm
+#
+#  google_identity_provider_client_id     = var.google_identity_provider_client_id
+#  google_identity_provider_client_secret = var.google_identity_provider_client_secret
+#}
+#
+#module "keycloak_harbor_client_config" {
+#  source = "../modules/keycloak_generic_client_config"
+#
+#  providers = {
+#    keycloak = keycloak.kcadmin-provider
+#  }
+#
+#  realm_id            = module.keycloak_config.infra_realm_id
+#  client_id           = var.harbor_keycloak_client_id
+#  client_secret       = local.harbor_keycloak_client_secret
+#  root_url            = local.harbor_url
+#  base_url            = var.harbor_keycloak_base_url
+#  admin_url           = local.harbor_url
+#  web_origins         = [local.harbor_url]
+#  valid_redirect_uris = [join("/", [local.harbor_url, "c/oidc/callback"])]
+#  client_group        = var.harbor_keycloak_oidc_admin_group
+#}
+#
+#module "keycloak_argocd_client_config" {
+#  source = "../modules/keycloak_generic_client_config"
+#
+#  providers = {
+#    keycloak = keycloak.kcadmin-provider
+#  }
+#
+#  realm_id            = module.keycloak_config.infra_realm_id
+#  client_id           = var.argocd_keycloak_client_id
+#  client_secret       = random_password.argocd_keycloak_client_secret.result
+#  root_url            = module.argo_cd.argocd_url
+#  base_url            = var.argocd_keycloak_base_url
+#  admin_url           = module.argo_cd.argocd_url
+#  web_origins         = [module.argo_cd.argocd_url]
+#  valid_redirect_uris = [join("/", [module.argo_cd.argocd_url, "auth/callback"])]
+#  client_group        = var.argocd_keycloak_oidc_admin_group
+#}
+#
+#module "keycloak_argo_workflows_client_config" {
+#  source = "../modules/keycloak_generic_client_config"
+#
+#  providers = {
+#    keycloak = keycloak.kcadmin-provider
+#  }
+#
+#  realm_id            = module.keycloak_config.infra_realm_id
+#  client_id           = var.argo_workflows_keycloak_client_id
+#  client_secret       = random_password.argo_workflows_keycloak_client_secret.result
+#  root_url            = local.argo_workflows_url
+#  base_url            = var.argo_workflows_keycloak_base_url
+#  admin_url           = local.argo_workflows_url
+#  web_origins         = [local.argo_workflows_url]
+#  valid_redirect_uris = [local.argo_workflows_redirect_uri]
+#  client_group        = var.argo_workflows_keycloak_oidc_admin_group
+#}
+#
+#module "keycloak_grafana_client_config" {
+#  source = "../modules/keycloak_grafana_client_config"
+#
+#  providers = {
+#    keycloak = keycloak.kcadmin-provider
+#  }
+#
+#  realm_id            = module.keycloak_config.infra_realm_id
+#  client_id           = var.grafana_keycloak_client_id
+#  client_secret       = random_password.grafana_keycloak_client_secret.result
+#  root_url            = local.grafana_url
+#  base_url            = var.grafana_keycloak_base_url
+#  admin_url           = local.grafana_url
+#  web_origins         = [local.grafana_url]
+#  valid_redirect_uris = [join("/", [local.grafana_url, "login/generic_oauth"])]
+#  client_group        = var.grafana_keycloak_oidc_admin_group
+#}
+#
+#module "keycloak_alertmanager_client_config" {
+#  source = "../modules/keycloak_oauth2_proxy_client_config"
+#
+#  providers = {
+#    keycloak = keycloak.kcadmin-provider
+#  }
+#
+#  realm_id            = module.keycloak_config.infra_realm_id
+#  client_id           = var.alertmanager_keycloak_client_id
+#  client_secret       = random_password.alertmanager_keycloak_client_secret.result
+#  root_url            = local.alertmanager_url
+#  base_url            = var.alertmanager_keycloak_base_url
+#  admin_url           = local.alertmanager_url
+#  web_origins         = [local.alertmanager_url]
+#  valid_redirect_uris = [join("/", [local.alertmanager_url, "*"])]
+#}
+#
+#module "keycloak_prometheus_client_config" {
+#  source = "../modules/keycloak_oauth2_proxy_client_config"
+#
+#  providers = {
+#    keycloak = keycloak.kcadmin-provider
+#  }
+#
+#  realm_id            = module.keycloak_config.infra_realm_id
+#  client_id           = var.prometheus_keycloak_client_id
+#  client_secret       = random_password.prometheus_keycloak_client_secret.result
+#  root_url            = local.prometheus_url
+#  base_url            = var.prometheus_keycloak_base_url
+#  admin_url           = local.prometheus_url
+#  web_origins         = [local.prometheus_url]
+#  valid_redirect_uris = [join("/", [local.prometheus_url, "*"]), join("/", [local.alertmanager_url, "*"])]
+#}
 
 module "harbor_config" {
   source = "../modules/harbor_config"
