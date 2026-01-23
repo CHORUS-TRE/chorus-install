@@ -9,6 +9,4 @@ resource "helm_release" "chorus_priority_class" {
   create_namespace = false
   wait             = true
   # using default values for priority class
-
-  depends_on = [kubernetes_namespace.chorus_priority_class]
 }
