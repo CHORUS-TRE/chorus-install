@@ -554,10 +554,10 @@ locals {
     harbor_argocd_robot_password   = random_password.harbor_robot_argo_cd_secret.result
     harbor_renovate_robot_password = random_password.harbor_robot_renovate_secret.result
 
-    harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
-    harbor_db_password             = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_user_password_key}"]
-    harbor_db_admin_username       = "postgres"
-    harbor_db_admin_password       = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_admin_password_key}"]
+    harbor_db_username       = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
+    harbor_db_password       = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_user_password_key}"]
+    harbor_db_admin_username = "postgres"
+    harbor_db_admin_password = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_admin_password_key}"]
 
     keycloak_admin_username    = var.keycloak_admin_username
     keycloak_admin_password    = local.keycloak_admin_password
