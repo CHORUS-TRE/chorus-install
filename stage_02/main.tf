@@ -26,32 +26,32 @@ resource "null_resource" "validate_values_files" {
   }
 }
 
-# Providers
+# Providers (should not be needed anymore thanks to moving the config to the helm charts)
 
-provider "keycloak" {
-  alias     = "kcadmin-provider"
-  client_id = "admin-cli"
-  username  = var.keycloak_admin_username
-  password  = local.keycloak_admin_password
-  url       = local.keycloak_url
-  # Ignoring certificate errors
-  # because it might take some times
-  # for certificates to be signed
-  # by a trusted authority
-  tls_insecure_skip_verify = true
-}
-
-provider "harbor" {
-  alias    = "harboradmin-provider"
-  url      = local.harbor_url
-  username = var.harbor_admin_username
-  password = local.harbor_admin_password
-  # Ignoring certificate errors
-  # because it might take some times
-  # for certificates to be signed
-  # by a trusted authority
-  insecure = true
-}
+#provider "keycloak" {
+#  alias     = "kcadmin-provider"
+#  client_id = "admin-cli"
+#  username  = var.keycloak_admin_username
+#  password  = local.keycloak_admin_password
+#  url       = local.keycloak_url
+#  # Ignoring certificate errors
+#  # because it might take some times
+#  # for certificates to be signed
+#  # by a trusted authority
+#  tls_insecure_skip_verify = true
+#}
+#
+#provider "harbor" {
+#  alias    = "harboradmin-provider"
+#  url      = local.harbor_url
+#  username = var.harbor_admin_username
+#  password = local.harbor_admin_password
+#  # Ignoring certificate errors
+#  # because it might take some times
+#  # for certificates to be signed
+#  # by a trusted authority
+#  insecure = true
+#}
 
 # Random passwords
 
