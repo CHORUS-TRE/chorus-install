@@ -2,14 +2,15 @@ locals {
   cert_manager_crds_path = join("/", [var.cert_manager_crds_folder_name, var.cluster_name, var.cert_manager_crds_file_name])
 
   config_files = {
-    ingress_nginx = "${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json"
-    cert_manager  = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"
-    selfsigned    = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/config.json"
-    keycloak      = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json"
-    keycloak_db   = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/config.json"
-    harbor        = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json"
-    harbor_cache  = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/config.json"
-    harbor_db     = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/config.json"
+    ingress_nginx         = "${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json"
+    cert_manager          = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"
+    selfsigned            = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/config.json"
+    keycloak              = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json"
+    keycloak_db           = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/config.json"
+    harbor                = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json"
+    harbor_cache          = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/config.json"
+    harbor_db             = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/config.json"
+    chorus_priority_class = "${var.helm_values_path}/${var.cluster_name}/${var.chorus_priority_class_chart_name}/config.json"
   }
 
   values_files = {
@@ -23,14 +24,15 @@ locals {
     harbor_db     = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/values.yaml"
   }
 
-  ingress_nginx_chart_version = jsondecode(file(local.config_files.ingress_nginx)).version
-  cert_manager_chart_version  = jsondecode(file(local.config_files.cert_manager)).version
-  selfsigned_chart_version    = jsondecode(file(local.config_files.selfsigned)).version
-  keycloak_chart_version      = jsondecode(file(local.config_files.keycloak)).version
-  keycloak_db_chart_version   = jsondecode(file(local.config_files.keycloak_db)).version
-  harbor_chart_version        = jsondecode(file(local.config_files.harbor)).version
-  harbor_cache_chart_version  = jsondecode(file(local.config_files.harbor_cache)).version
-  harbor_db_chart_version     = jsondecode(file(local.config_files.harbor_db)).version
+  ingress_nginx_chart_version         = jsondecode(file(local.config_files.ingress_nginx)).version
+  cert_manager_chart_version          = jsondecode(file(local.config_files.cert_manager)).version
+  selfsigned_chart_version            = jsondecode(file(local.config_files.selfsigned)).version
+  keycloak_chart_version              = jsondecode(file(local.config_files.keycloak)).version
+  keycloak_db_chart_version           = jsondecode(file(local.config_files.keycloak_db)).version
+  harbor_chart_version                = jsondecode(file(local.config_files.harbor)).version
+  harbor_cache_chart_version          = jsondecode(file(local.config_files.harbor_cache)).version
+  harbor_db_chart_version             = jsondecode(file(local.config_files.harbor_db)).version
+  chorus_priority_class_chart_version = jsondecode(file(local.config_files.chorus_priority_class)).version
 
   ingress_nginx_namespace = jsondecode(file(local.config_files.ingress_nginx)).namespace
   cert_manager_namespace  = jsondecode(file(local.config_files.cert_manager)).namespace

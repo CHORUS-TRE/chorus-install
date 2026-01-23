@@ -28,6 +28,17 @@ resource "null_resource" "validate_values_files" {
 
 # Install charts
 
+module "chorus_priority_class" {
+  source = "../modules/chorus_priority_class"
+
+  cluster_name       = var.cluster_name
+  helm_registry      = var.helm_registry
+  chart_name         = var.chorus_priority_class_chart_name
+  chart_version      = local.chorus_priority_class_chart_version
+  kubeconfig_path    = var.kubeconfig_path
+  kubeconfig_context = var.kubeconfig_context
+}
+
 module "ingress_nginx" {
   source = "../modules/ingress_nginx"
 

@@ -127,3 +127,9 @@ variable "templates_path" {
   type        = string
   default     = "../templates"
 }
+
+variable "chorus_priority_class_chart_name" {
+  description = "CHORUS Priority Class Helm chart folder name"
+  type        = string
+  default     = "chorus-priority-class"
+}
