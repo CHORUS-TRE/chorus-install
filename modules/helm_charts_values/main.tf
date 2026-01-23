@@ -33,7 +33,7 @@ resource "null_resource" "fetch_helm_charts_values" {
 
   provisioner "local-exec" {
     when        = destroy
-    command     = "rm -r ${self.triggers.target_path}"
+    command     = "rm -rf ${self.triggers.target_path}"
     interpreter = ["/bin/sh", "-c"]
   }
 
