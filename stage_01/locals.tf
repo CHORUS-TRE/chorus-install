@@ -52,13 +52,14 @@ locals {
   harbor_db_chart_version             = jsondecode(file(local.config_files.harbor_db)).version
   chorus_priority_class_chart_version = jsondecode(file(local.config_files.chorus_priority_class)).version
 
-  ingress_nginx_namespace = jsondecode(file(local.config_files.ingress_nginx)).namespace
-  cert_manager_namespace  = jsondecode(file(local.config_files.cert_manager)).namespace
-  keycloak_namespace      = jsondecode(file(local.config_files.keycloak)).namespace
-  harbor_namespace        = jsondecode(file(local.config_files.harbor)).namespace
-  prometheus_namespace    = jsondecode(file(local.config_files.kube_prometheus_stack)).namespace
-  alertmanager_namespace  = local.prometheus_namespace
-  grafana_namespace       = local.prometheus_namespace
+  ingress_nginx_namespace  = jsondecode(file(local.config_files.ingress_nginx)).namespace
+  cert_manager_namespace   = jsondecode(file(local.config_files.cert_manager)).namespace
+  keycloak_namespace       = jsondecode(file(local.config_files.keycloak)).namespace
+  harbor_namespace         = jsondecode(file(local.config_files.harbor)).namespace
+  prometheus_namespace     = jsondecode(file(local.config_files.kube_prometheus_stack)).namespace
+  alertmanager_namespace   = local.prometheus_namespace
+  grafana_namespace        = local.prometheus_namespace
+  argo_workflows_namespace = jsondecode(file(local.config_files.argo_workflows)).namespace
 
   keycloak_values_parsed = yamldecode(file(local.values_files.keycloak))
   keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
@@ -140,4 +141,11 @@ locals {
   oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_values_parsed.valkey.auth.existingSecret
   oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_values_parsed.valkey.auth.existingSecretPasswordKey
   oauth2_proxy_cache_namespace                   = jsondecode(file(local.config_files.oauth2_proxy_cache)).namespace
+
+  argo_workflows_values_parsed                 = yamldecode(file(local.values_files.argo_workflows))
+  argo_workflows_sso_server_client_id_name     = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.name
+  argo_workflows_sso_server_client_id_key      = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientId.key
+  argo_workflows_sso_server_client_secret_name = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.name
+  argo_workflows_sso_server_client_secret_key  = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.key
+  argo_workflows_workflows_namespaces          = try(toset(local.argo_workflows_values_parsed.argo-workflows.controller.workflowNamespaces), {})
 }

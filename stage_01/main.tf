@@ -201,3 +201,21 @@ module "oauth2_proxy" {
   oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_session_storage_secret_name
   oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
 }
+
+module "argo_workflows" {
+  source = "../modules/argo_workflows"
+
+  namespace                     = local.argo_workflows_namespace
+  workflows_namespaces          = local.argo_workflows_workflows_namespaces
+  keycloak_client_id            = var.argo_workflows_keycloak_client_id
+  keycloak_client_secret        = module.keycloak.argo_workflows_keycloak_client_secret
+  sso_server_client_id_name     = local.argo_workflows_sso_server_client_id_name
+  sso_server_client_id_key      = local.argo_workflows_sso_server_client_id_key
+  sso_server_client_secret_name = local.argo_workflows_sso_server_client_secret_name
+  sso_server_client_secret_key  = local.argo_workflows_sso_server_client_secret_key
+
+  depends_on = [
+    module.certificate_authorities,
+    module.ingress_nginx,
+  ]
+}

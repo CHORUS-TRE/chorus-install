@@ -219,3 +219,9 @@ variable "prometheus_keycloak_client_id" {
   type        = string
   default     = "prometheus"
 }
+
+variable "argo_workflows_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Argo Workflows"
+  type        = string
+  default     = "argo-workflows"
+}
