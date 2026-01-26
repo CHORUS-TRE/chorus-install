@@ -1,9 +1,3 @@
-locals {
-  chorusci_values_parsed         = yamldecode(var.chorusci_helm_values)
-  chorusci_sensor_regcred_secret = local.chorusci_values_parsed.sensor.dockerConfig.secretName
-  webhook_events                 = { for event in local.chorusci_values_parsed.webhookEvents : event.name => event.secretName }
-}
-
 # Workbench operator
 
 resource "random_password" "chorusci_github_workbench_operator_secret" {
@@ -13,7 +7,7 @@ resource "random_password" "chorusci_github_workbench_operator_secret" {
 
 resource "kubernetes_secret" "chorusci_github_workbench_operator" {
   metadata {
-    name      = local.webhook_events["workbench-operator"]
+    name      = var.webhook_events_map["workbench-operator"]
     namespace = var.chorusci_namespace
   }
 
@@ -24,7 +18,7 @@ resource "kubernetes_secret" "chorusci_github_workbench_operator" {
 
   lifecycle {
     precondition {
-      condition     = contains(keys(local.webhook_events), "workbench-operator")
+      condition     = contains(keys(var.webhook_events_map), "workbench-operator")
       error_message = "Not found: 'workbench-operator' webhook event missing in chorus-ci Helm values"
     }
   }
@@ -51,7 +45,7 @@ resource "random_password" "chorusci_github_chorus_web_ui_secret" {
 
 resource "kubernetes_secret" "chorusci_github_chorus_web_ui" {
   metadata {
-    name      = local.webhook_events["chorus-web-ui"]
+    name      = var.webhook_events_map["chorus-web-ui"]
     namespace = var.chorusci_namespace
   }
 
@@ -62,7 +56,7 @@ resource "kubernetes_secret" "chorusci_github_chorus_web_ui" {
 
   lifecycle {
     precondition {
-      condition     = contains(keys(local.webhook_events), "chorus-web-ui")
+      condition     = contains(keys(var.webhook_events_map), "chorus-web-ui")
       error_message = "Not found: 'chorus-web-ui' webhook event missing in chorus-ci Helm values"
     }
   }
@@ -89,7 +83,7 @@ resource "random_password" "chorusci_github_images_secret" {
 
 resource "kubernetes_secret" "chorusci_github_images" {
   metadata {
-    name      = local.webhook_events["ci"]
+    name      = var.webhook_events_map["ci"]
     namespace = var.chorusci_namespace
   }
 
@@ -100,7 +94,7 @@ resource "kubernetes_secret" "chorusci_github_images" {
 
   lifecycle {
     precondition {
-      condition     = contains(keys(local.webhook_events), "ci")
+      condition     = contains(keys(var.webhook_events_map), "ci")
       error_message = "Not found: 'ci' webhook event missing in chorus-ci Helm values"
     }
   }
@@ -127,7 +121,7 @@ resource "random_password" "chorusci_github_chorus_backend_secret" {
 
 resource "kubernetes_secret" "chorusci_github_chorus_backend" {
   metadata {
-    name      = local.webhook_events["chorus-backend"]
+    name      = var.webhook_events_map["chorus-backend"]
     namespace = var.chorusci_namespace
   }
 
@@ -138,7 +132,7 @@ resource "kubernetes_secret" "chorusci_github_chorus_backend" {
 
   lifecycle {
     precondition {
-      condition     = contains(keys(local.webhook_events), "chorus-backend")
+      condition     = contains(keys(var.webhook_events_map), "chorus-backend")
       error_message = "Not found: 'chorus-backend' webhook event missing in chorus-ci Helm values"
     }
   }
@@ -160,7 +154,7 @@ resource "kubernetes_secret" "argo_workflows_github_chorus_backend" {
 
 resource "kubernetes_secret" "chorusci_sensor_regcred_secret" {
   metadata {
-    name      = local.chorusci_sensor_regcred_secret
+    name      = var.sensor_regcred_secret_name
     namespace = var.chorusci_namespace
   }
 

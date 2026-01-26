@@ -1,3 +1,8 @@
+variable "webhook_events" {
+  description = "A map of webhook event names to secret names. Example: { ci = \"ci-secret\", ... }"
+  type        = map(string)
+  default     = {}
+}
 variable "chorusci_namespace" {
   description = "Namespace where ChorusCI is deployed"
   type        = string
@@ -5,21 +10,6 @@ variable "chorusci_namespace" {
   validation {
     condition     = length(var.chorusci_namespace) > 0
     error_message = "chorusci_namespace cannot be empty."
-  }
-}
-
-variable "chorusci_helm_values" {
-  description = "ChorusCI Helm chart values"
-  type        = string
-
-  validation {
-    condition     = length(var.chorusci_helm_values) > 0
-    error_message = "chorusci_helm_values cannot be empty."
-  }
-
-  validation {
-    condition     = can(yamldecode(var.chorusci_helm_values))
-    error_message = "chorusci_helm_values must be valid YAML."
   }
 }
 
@@ -105,5 +95,23 @@ variable "registry_password" {
   validation {
     condition     = length(var.registry_password) > 0
     error_message = "registry_password cannot be empty."
+  }
+}
+
+variable "sensor_regcred_secret_name" {
+  description = "The name of the Kubernetes secret for the sensor Docker registry credentials."
+  type        = string
+  validation {
+    condition     = length(var.sensor_regcred_secret_name) > 0
+    error_message = "sensor_regcred_secret_name cannot be empty."
+  }
+}
+
+variable "webhook_events_map" {
+  description = "A map of the webhook event names to their corresponding secret names."
+  type        = map(string)
+  validation {
+    condition     = length(var.webhook_events_map) > 0
+    error_message = "webhook_events_map cannot be empty."
   }
 }

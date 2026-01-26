@@ -225,3 +225,32 @@ variable "argo_workflows_keycloak_client_id" {
   type        = string
   default     = "argo-workflows"
 }
+
+variable "github_username" {
+  description = "GitHub username owner of all the tokens"
+  type        = string
+}
+
+variable "github_workbench_operator_token" {
+  description = "GitHub token for the Workbench Operator repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_chorus_backend_token" {
+  description = "GitHub token for the Chorus Backend repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_images_token" {
+  description = "GitHub token for the Images repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_chorus_web_ui_token" {
+  description = "GitHub token for the Chorus Web UI repository"
+  type        = string
+  sensitive   = true
+}

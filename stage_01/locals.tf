@@ -60,6 +60,7 @@ locals {
   alertmanager_namespace   = local.prometheus_namespace
   grafana_namespace        = local.prometheus_namespace
   argo_workflows_namespace = jsondecode(file(local.config_files.argo_workflows)).namespace
+  chorusci_namespace       = jsondecode(file(local.config_files.chorusci)).namespace
 
   keycloak_values_parsed = yamldecode(file(local.values_files.keycloak))
   keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
@@ -101,6 +102,7 @@ locals {
   harbor_registry_http_secret_key         = local.harbor_values_parsed.harbor.registry.existingSecretKey
   harbor_registry_credentials_secret_name = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
   harbor_robots                           = toset([for robot in local.harbor_values_parsed.robots : robot.name])
+  harbor_url                              = local.harbor_values_parsed.harbor.externalURL
 
   harbor_oidc_config_env = [
     for env in local.harbor_values_parsed.harbor.core.extraEnvVars :
@@ -148,4 +150,11 @@ locals {
   argo_workflows_sso_server_client_secret_name = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.name
   argo_workflows_sso_server_client_secret_key  = local.argo_workflows_values_parsed.argo-workflows.server.sso.clientSecret.key
   argo_workflows_workflows_namespaces          = try(toset(local.argo_workflows_values_parsed.argo-workflows.controller.workflowNamespaces), {})
+
+  chorusci_values_parsed              = yamldecode(file(local.values_files.chorusci))
+  chorusci_sensor_regcred_secret_name = try(local.chorusci_values_parsed.sensor.dockerConfig.secretName, "regcred")
+  chorusci_webhook_events_map = {
+    for event in local.chorusci_values_parsed.webhookEvents :
+    event.name => event.secretName
+  }
 }
