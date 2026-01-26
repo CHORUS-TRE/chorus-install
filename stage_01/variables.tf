@@ -133,3 +133,16 @@ variable "chorus_priority_class_chart_name" {
   type        = string
   default     = "chorus-priority-class"
 }
+
+variable "google_identity_provider_client_id" {
+  description = "The Google client identifier"
+  type        = string
+  default     = ""
+}
+
+variable "google_identity_provider_client_secret" {
+  description = "The Google client secret used for authentication"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
