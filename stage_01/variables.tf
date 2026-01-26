@@ -200,3 +200,10 @@ variable "prometheus_oauth2_proxy_chart_name" {
   type        = string
   default     = "prometheus-oauth2-proxy"
 }
+
+variable "webex_access_token" {
+  description = "The Webex access token for the Alertmanager integration"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

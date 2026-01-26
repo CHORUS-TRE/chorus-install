@@ -121,4 +121,6 @@ locals {
   kube_prometheus_stack_values_parsed = yamldecode(file(local.values_files.kube_prometheus_stack))
   grafana_oauth_client_secret_name    = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
   grafana_oauth_client_secret_key     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
+  alertmanager_webex_secret_name      = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.name, "")
+  alertmanager_webex_secret_key       = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.key, "")
 }

@@ -167,3 +167,14 @@ module "grafana" {
     module.keycloak,
   ]
 }
+
+module "alertmanager" {
+  source = "../modules/alertmanager"
+
+  webex_secret_name      = local.alertmanager_webex_secret_name
+  webex_secret_key       = local.alertmanager_webex_secret_key
+  alertmanager_namespace = local.alertmanager_namespace
+  webex_access_token     = var.webex_access_token
+
+  count = var.webex_access_token != "" ? 1 : 0
+}
