@@ -207,3 +207,15 @@ variable "webex_access_token" {
   sensitive   = true
   default     = ""
 }
+
+variable "alertmanager_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Alertmanager"
+  type        = string
+  default     = "alertmanager"
+}
+
+variable "prometheus_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Prometheus"
+  type        = string
+  default     = "prometheus"
+}

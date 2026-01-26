@@ -178,3 +178,26 @@ module "alertmanager" {
 
   count = var.webex_access_token != "" ? 1 : 0
 }
+
+module "oauth2_proxy" {
+  source = "../modules/oauth2_proxy"
+
+  alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
+  prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
+  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
+
+  prometheus_keycloak_client_id          = var.prometheus_keycloak_client_id
+  prometheus_keycloak_client_secret      = module.keycloak.prometheus_keycloak_client_secret
+  prometheus_session_storage_secret_name = local.prometheus_session_storage_secret_name
+  prometheus_session_storage_secret_key  = local.prometheus_session_storage_secret_key
+  prometheus_oidc_secret_name            = local.prometheus_oidc_secret_name
+
+  alertmanager_keycloak_client_id          = var.alertmanager_keycloak_client_id
+  alertmanager_keycloak_client_secret      = module.keycloak.alertmanager_keycloak_client_secret
+  alertmanager_session_storage_secret_name = local.alertmanager_session_storage_secret_name
+  alertmanager_session_storage_secret_key  = local.alertmanager_session_storage_secret_key
+  alertmanager_oidc_secret_name            = local.alertmanager_oidc_secret_name
+
+  oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_session_storage_secret_name
+  oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
+}

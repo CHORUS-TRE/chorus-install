@@ -123,4 +123,21 @@ locals {
   grafana_oauth_client_secret_key     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
   alertmanager_webex_secret_name      = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.name, "")
   alertmanager_webex_secret_key       = try(local.kube_prometheus_stack_values_parsed.alertmanagerConfiguration.webex.credentials.key, "")
+
+  alertmanager_oauth2_proxy_values_parsed  = yamldecode(file(local.values_files.alertmanager_oauth2_proxy))
+  alertmanager_session_storage_secret_name = local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.existingSecret
+  alertmanager_session_storage_secret_key  = local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.passwordKey
+  alertmanager_oidc_secret_name            = local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.config.existingSecret
+  alertmanager_oauth2_proxy_namespace      = jsondecode(file(local.config_files.alertmanager_oauth2_proxy)).namespace
+
+  prometheus_oauth2_proxy_values_parsed  = yamldecode(file(local.values_files.prometheus_oauth2_proxy))
+  prometheus_session_storage_secret_name = local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.existingSecret
+  prometheus_session_storage_secret_key  = local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.sessionStorage.redis.passwordKey
+  prometheus_oidc_secret_name            = local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.config.existingSecret
+  prometheus_oauth2_proxy_namespace      = jsondecode(file(local.config_files.prometheus_oauth2_proxy)).namespace
+
+  oauth2_proxy_cache_values_parsed               = yamldecode(file(local.values_files.oauth2_proxy_cache))
+  oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_values_parsed.valkey.auth.existingSecret
+  oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_values_parsed.valkey.auth.existingSecretPasswordKey
+  oauth2_proxy_cache_namespace                   = jsondecode(file(local.config_files.oauth2_proxy_cache)).namespace
 }
