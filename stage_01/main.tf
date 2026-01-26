@@ -144,7 +144,7 @@ module "keycloak" {
   source = "../modules/keycloak"
 
   cluster_name  = var.cluster_name
-  cluster_type = "build"
+  cluster_type  = "build"
   helm_registry = var.helm_registry
 
   keycloak_chart_name    = var.keycloak_chart_name
@@ -153,6 +153,9 @@ module "keycloak" {
   keycloak_namespace     = local.keycloak_namespace
   keycloak_secret_name   = local.keycloak_secret_name
   keycloak_secret_key    = local.keycloak_secret_key
+
+  keycloak_client_credentials_secret_name         = local.keycloak_client_credentials_secret_name
+  keycloak_remotestate_encryption_key_secret_name = local.keycloak_remotestate_encryption_key_secret_name
 
   keycloak_db_chart_name       = var.postgresql_chart_name
   keycloak_db_chart_version    = local.keycloak_db_chart_version
@@ -167,9 +170,6 @@ module "keycloak" {
   depends_on = [
     module.certificate_authorities,
     module.ingress_nginx,
-    kubernetes_namespace.keycloak,
-    kubernetes_secret.keycloak_client_credentials,
-    kubernetes_secret.keycloak_remotestate_encryption_key,
   ]
 }
 

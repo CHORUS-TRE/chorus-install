@@ -201,7 +201,7 @@ resource "helm_release" "keycloak" {
     }
   ]
 
-  depends_on = [kubernetes_namespace.keycloak, helm_release.keycloak_db, module.keycloak_secret]
+  depends_on = [kubernetes_namespace.keycloak, helm_release.keycloak_db]
 }
 
 # Retrieve data for outputs

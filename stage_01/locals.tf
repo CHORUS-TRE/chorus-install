@@ -44,6 +44,17 @@ locals {
   keycloak_secret_key    = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_url           = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
+  keycloak_client_credentials_secret_name = coalesce(
+    local.keycloak_values_parsed.client.existingSecret,
+    "keycloak-client-credentials"
+  )
+
+  keycloak_encryptionkey_idx = index(local.keycloak_values_parsed.keycloak.keycloakConfigCli.extraEnvVars.*.name, "IMPORT_REMOTESTATE_ENCRYPTIONKEY")
+  keycloak_remotestate_encryption_key_secret_name = coalesce(
+    local.keycloak_values_parsed.keycloak.keycloakConfigCli.extraEnvVars[local.keycloak_encryptionkey_idx].valueFrom.secretKeyRef.name,
+    "keycloak-remotestate-encryption-key"
+  )
+
   keycloak_db_values_parsed    = yamldecode(file(local.values_files.keycloak_db))
   keycloak_db_secret_name      = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   keycloak_db_admin_secret_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
@@ -79,7 +90,7 @@ locals {
     {
       oidc_endpoint      = local.harbor_oidc_endpoint
       oidc_client_id     = var.harbor_keycloak_client_id
-      oidc_client_secret = random_password.harbor_keycloak_client_secret.result
+      oidc_client_secret = module.keycloak.harbor_keycloak_client_secret
       oidc_admin_group   = var.harbor_keycloak_oidc_admin_group
     }
   ))
