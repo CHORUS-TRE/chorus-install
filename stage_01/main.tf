@@ -230,6 +230,7 @@ module "keycloak" {
   depends_on = [
     module.certificate_authorities,
     module.ingress_nginx,
+    kubernetes_namespace.keycloak,
     kubernetes_secret.keycloak_client_credentials,
     kubernetes_secret.keycloak_remotestate_encryption_key,
   ]
@@ -277,6 +278,7 @@ module "harbor" {
   depends_on = [
     module.certificate_authorities,
     module.ingress_nginx,
+    kubernetes_namespace.harbor,
     kubernetes_secret.harbor_robot_argo_cd_secret,
     kubernetes_secret.harbor_robot_chorus_ci_secret,
     kubernetes_secret.harbor_robot_renovate_secret,
