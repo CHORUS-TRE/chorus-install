@@ -77,6 +77,7 @@ locals {
   harbor_registry_http_secret_name        = local.harbor_values_parsed.harbor.registry.existingSecret
   harbor_registry_http_secret_key         = local.harbor_values_parsed.harbor.registry.existingSecretKey
   harbor_registry_credentials_secret_name = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
+  harbor_robots                           = toset([for robot in local.harbor_values_parsed.robots : robot.name])
 
   harbor_oidc_config_env = [
     for env in local.harbor_values_parsed.harbor.core.extraEnvVars :
