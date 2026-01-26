@@ -83,6 +83,19 @@ resource "random_password" "harbor_robot_renovate_secret" {
   special = false
 }
 
+# Kubernetes namespaces
+resource "kubernetes_namespace" "keycloak" {
+  metadata {
+    name = local.keycloak_namespace
+  }
+}
+
+resource "kubernetes_namespace" "harbor" {
+  metadata {
+    name = local.harbor_namespace
+  }
+}
+
 # Kubernetes secrets
 
 resource "kubernetes_secret" "keycloak_client_credentials" {
