@@ -241,3 +241,56 @@ module "chorus_ci" {
 
   depends_on = [module.argo_workflows]
 }
+
+module "argo_cd" {
+  source = "../modules/argo_cd"
+
+  cluster_name  = var.cluster_name
+  helm_registry = var.helm_registry
+
+  argocd_chart_name    = var.argocd_chart_name
+  argocd_chart_version = local.argocd_chart_version
+  argocd_helm_values   = file(local.values_files.argocd)
+  argocd_namespace     = local.argocd_namespace
+
+  argocd_cache_chart_name    = var.valkey_chart_name
+  argocd_cache_chart_version = local.argocd_cache_chart_version
+  argocd_cache_helm_values   = file(local.values_files.argocd_cache)
+
+  helm_charts_values_credentials_secret = var.helm_values_credentials_secret
+  helm_values_url                       = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
+  helm_values_pat                       = var.helm_values_pat
+  harbor_domain                         = replace(local.harbor_url, "https://", "")
+  harbor_robot_username                 = var.argocd_harbor_robot_username
+  harbor_robot_password                 = module.harbor.harbor_robot_secrets[var.argocd_harbor_robot_username]
+}
+
+resource "helm_release" "argo_deploy" {
+  name             = "${var.cluster_name}-${var.argo_deploy_chart_name}"
+  repository       = "oci://${var.helm_registry}"
+  chart            = "charts/${var.argo_deploy_chart_name}"
+  version          = local.argo_deploy_chart_version
+  namespace        = local.argocd_namespace
+  create_namespace = false
+  wait             = true
+  values           = [file(local.values_files.argo_deploy)]
+
+  depends_on = [module.argo_cd]
+}
+
+resource "kubernetes_secret" "argocd_secret" {
+  metadata {
+    name      = local.argocd_oidc_secret_name
+    namespace = local.argocd_namespace
+    labels = {
+      "app.kubernetes.io/name"    = local.argocd_oidc_secret_name
+      "app.kubernetes.io/part-of" = "argocd"
+    }
+  }
+
+  data = {
+    "${local.argocd_keycloak_issuer_key}"        = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
+    "${local.argocd_keycloak_client_id_key}"     = var.argocd_keycloak_client_id
+    "${local.argocd_keycloak_client_secret_key}" = module.keycloak.argocd_keycloak_client_secret
+  }
+}

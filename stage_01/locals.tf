@@ -51,6 +51,9 @@ locals {
   harbor_cache_chart_version          = jsondecode(file(local.config_files.harbor_cache)).version
   harbor_db_chart_version             = jsondecode(file(local.config_files.harbor_db)).version
   chorus_priority_class_chart_version = jsondecode(file(local.config_files.chorus_priority_class)).version
+  argocd_chart_version                = jsondecode(file(local.config_files.argocd)).version
+  argocd_cache_chart_version          = jsondecode(file(local.config_files.argocd_cache)).version
+  argo_deploy_chart_version           = jsondecode(file(local.config_files.argo_deploy)).version
 
   ingress_nginx_namespace  = jsondecode(file(local.config_files.ingress_nginx)).namespace
   cert_manager_namespace   = jsondecode(file(local.config_files.cert_manager)).namespace
@@ -61,6 +64,7 @@ locals {
   grafana_namespace        = local.prometheus_namespace
   argo_workflows_namespace = jsondecode(file(local.config_files.argo_workflows)).namespace
   chorusci_namespace       = jsondecode(file(local.config_files.chorusci)).namespace
+  argocd_namespace         = jsondecode(file(local.config_files.argocd)).namespace
 
   keycloak_values_parsed = yamldecode(file(local.values_files.keycloak))
   keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
@@ -157,4 +161,13 @@ locals {
     for event in local.chorusci_values_parsed.webhookEvents :
     event.name => event.secretName
   }
+
+  argocd_values_parsed = yamldecode(file(local.values_files.argocd))
+  argocd_oidc_config   = yamldecode(local.argocd_values_parsed.argo-cd.configs.cm["oidc.config"])
+  # Extract key and secret name from  format: $secret-name:key-name
+  # We assume all three (issuer, clientId, clientSecret) use the same secret
+  argocd_keycloak_issuer_key        = regex("\\$[^:]+:(.+)", local.argocd_oidc_config.issuer)[0]
+  argocd_keycloak_client_id_key     = regex("\\$[^:]+:(.+)", local.argocd_oidc_config.clientId)[0]
+  argocd_keycloak_client_secret_key = regex("\\$[^:]+:(.+)", local.argocd_oidc_config.clientSecret)[0]
+  argocd_oidc_secret_name           = regex("\\$([^:]+):", local.argocd_oidc_config.clientSecret)[0]
 }

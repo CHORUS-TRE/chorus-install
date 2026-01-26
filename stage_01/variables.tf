@@ -254,3 +254,40 @@ variable "github_chorus_web_ui_token" {
   type        = string
   sensitive   = true
 }
+
+variable "helm_values_credentials_secret" {
+  description = "Secret to store the Helm charts values repository credentials in for ArgoCD"
+  type        = string
+  default     = "argo-cd-github-environments"
+}
+
+variable "helm_values_pat" {
+  description = "Fine-grained personal access token (PAT) to access the Helm chart values repository (e.g. CHORUS-TRE/environment-template)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "argocd_harbor_robot_username" {
+  description = "Harbor robot username used by ArgoCD"
+  type        = string
+  default     = "argo-cd"
+}
+
+variable "argocd_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to ArgoCD"
+  type        = string
+  default     = "argocd"
+}
+
+variable "github_orga" {
+  description = "GitHub organization to use repositories from"
+  type        = string
+  default     = "CHORUS-TRE"
+}
+
+variable "helm_values_repo" {
+  description = "GitHub repository to get the Helm charts values from"
+  type        = string
+  default     = "environment-template"
+}
