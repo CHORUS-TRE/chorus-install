@@ -28,44 +28,6 @@ resource "null_resource" "validate_values_files" {
 
 # Random passwords
 
-## Keycloak client secrets
-
-resource "random_password" "argocd_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "argo_workflows_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "grafana_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "alertmanager_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "prometheus_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "keycloak_remotestate_encryption_key" {
-  length  = 32
-  special = false
-  upper   = false
-}
-
 ## Harbor robot account secrets
 
 resource "random_password" "harbor_robot_argo_cd_secret" {
@@ -97,35 +59,6 @@ resource "kubernetes_namespace" "harbor" {
 }
 
 # Kubernetes secrets
-
-resource "kubernetes_secret" "keycloak_client_credentials" {
-  metadata {
-    name      = "keycloak-client-secret"
-    namespace = local.keycloak_namespace
-  }
-
-  data = {
-    GOOGLE_CLIENT_ID             = var.google_identity_provider_client_id
-    GOOGLE_CLIENT_SECRET         = var.google_identity_provider_client_secret
-    ALERTMANAGER_CLIENT_SECRET   = random_password.alertmanager_keycloak_client_secret.result
-    ARGO_CD_CLIENT_SECRET        = random_password.argocd_keycloak_client_secret.result
-    ARGO_WORKFLOWS_CLIENT_SECRET = random_password.argo_workflows_keycloak_client_secret.result
-    GRAFANA_CLIENT_SECRET        = random_password.grafana_keycloak_client_secret.result
-    HARBOR_CLIENT_SECRET         = random_password.harbor_keycloak_client_secret.result
-    PROMETHEUS_CLIENT_SECRET     = random_password.prometheus_keycloak_client_secret.result
-  }
-}
-
-resource "kubernetes_secret" "keycloak_remotestate_encryption_key" {
-  metadata {
-    name      = "keycloak-remotestate-encryption-key"
-    namespace = local.keycloak_namespace
-  }
-
-  data = {
-    encryptionKey = random_password.keycloak_remotestate_encryption_key.result
-  }
-}
 
 resource "kubernetes_secret" "harbor_robot_argo_cd_secret" {
   metadata {
@@ -211,6 +144,7 @@ module "keycloak" {
   source = "../modules/keycloak"
 
   cluster_name  = var.cluster_name
+  cluster_type = "build"
   helm_registry = var.helm_registry
 
   keycloak_chart_name    = var.keycloak_chart_name
@@ -226,6 +160,9 @@ module "keycloak" {
   keycloak_db_secret_name      = local.keycloak_db_secret_name
   keycloak_db_admin_secret_key = local.keycloak_db_admin_secret_key
   keycloak_db_user_secret_key  = local.keycloak_db_user_secret_key
+
+  google_identity_provider_client_id     = var.google_identity_provider_client_id
+  google_identity_provider_client_secret = var.google_identity_provider_client_secret
 
   depends_on = [
     module.certificate_authorities,
