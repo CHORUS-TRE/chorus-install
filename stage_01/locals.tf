@@ -49,9 +49,10 @@ locals {
     "keycloak-client-credentials"
   )
 
-  keycloak_encryptionkey_idx = index(local.keycloak_values_parsed.keycloak.keycloakConfigCli.extraEnvVars.*.name, "IMPORT_REMOTESTATE_ENCRYPTIONKEY")
-  keycloak_remotestate_encryption_key_secret_name = coalesce(
-    local.keycloak_values_parsed.keycloak.keycloakConfigCli.extraEnvVars[local.keycloak_encryptionkey_idx].valueFrom.secretKeyRef.name,
+  keycloak_remotestate_encryption_key_secret_name = try(
+    local.keycloak_values_parsed.keycloak.keycloakConfigCli.extraEnvVars[
+      index(local.keycloak_values_parsed.keycloak.keycloakConfigCli.extraEnvVars.*.name, "IMPORT_REMOTESTATE_ENCRYPTIONKEY")
+    ].valueFrom.secretKeyRef.name,
     "keycloak-remotestate-encryption-key"
   )
 
