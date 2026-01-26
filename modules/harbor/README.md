@@ -7,26 +7,30 @@ This module deploys and configures [Harbor](https://goharbor.io/) on a Kubernete
 - Creates a dedicated namespace for Harbor
 - Installs Harbor, its database (PostgreSQL), and cache (Valkey) via Helm
 - Manages all required Kubernetes secrets for Harbor and its components
+- Generates random passwords for Harbor admin, registry, job service, and database
+- Creates robot account secrets for automated access
 - Configures OIDC authentication with Keycloak
-- Exposes Harbor URLs and credentials as Terraform outputs
+- Disables metrics collection by default (can be enabled via values)
+- Exposes Harbor credentials and robot account secrets as Terraform outputs
 
 ## Outputs
 
 | Name                      | Description                                             |
 |---------------------------|---------------------------------------------------------|
-| `harbor_url`              | Harbor external URL                                     |
-| `harbor_url_admin_login`  | Harbor admin login URL                                  |
-| `harbor_username`         | Harbor admin username                                   |
 | `harbor_password`         | Harbor admin password                                   |
+| `harbor_db_password`      | Harbor DB password for Harbor user                      |
+| `harbor_db_admin_password`| Harbor DB password for PostgreSQL admin user            |
+| `harbor_robot_secrets`    | Map of Harbor robot account names to their secrets      |
 
 ## Prerequisites
 
 - An existing Kubernetes cluster
 - Helm and Kubernetes providers configured in Terraform
 - Sufficient permissions to create namespaces, secrets, and install cluster-wide resources
+- PostgreSQL and Valkey/Redis compatible storage
 
 ## References
 
 - [Harbor Documentation](https://goharbor.io/docs/)
 - [Terraform Kubernetes Provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)
-- [Terraform Helm Provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) 
+- [Terraform Helm Provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs)
