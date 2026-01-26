@@ -318,3 +318,8 @@ variable "harbor_oidc_config" {
     error_message = "harbor_oidc_config must be valid JSON."
   }
 }
+
+variable "harbor_robots" {
+  type        = set(string)
+  description = "The list of Harbor robot accounts"
+}

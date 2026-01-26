@@ -157,3 +157,8 @@ variable "oidc_config" {
     error_message = "oidc_config cannot be empty."
   }
 }
+
+variable "harbor_robots" {
+  type        = set(string)
+  description = "The list of Harbor robot accounts"
+}

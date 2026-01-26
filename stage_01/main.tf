@@ -26,73 +26,6 @@ resource "null_resource" "validate_values_files" {
   }
 }
 
-# Random passwords
-
-## Harbor robot account secrets
-
-resource "random_password" "harbor_robot_argo_cd_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_robot_chorus_ci_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_robot_renovate_secret" {
-  length  = 32
-  special = false
-}
-
-# Kubernetes namespaces
-resource "kubernetes_namespace" "keycloak" {
-  metadata {
-    name = local.keycloak_namespace
-  }
-}
-
-resource "kubernetes_namespace" "harbor" {
-  metadata {
-    name = local.harbor_namespace
-  }
-}
-
-# Kubernetes secrets
-
-resource "kubernetes_secret" "harbor_robot_argo_cd_secret" {
-  metadata {
-    name      = "harbor-robot-argo-cd"
-    namespace = local.harbor_namespace
-  }
-
-  data = {
-    encryptionKey = random_password.harbor_robot_argo_cd_secret.result
-  }
-}
-
-resource "kubernetes_secret" "harbor_robot_chorus_ci_secret" {
-  metadata {
-    name      = "harbor-robot-chorus-ci"
-    namespace = local.harbor_namespace
-  }
-
-  data = {
-    encryptionKey = random_password.harbor_robot_chorus_ci_secret.result
-  }
-}
-
-resource "kubernetes_secret" "harbor_robot_renovate_secret" {
-  metadata {
-    name      = "harbor-robot-renovate"
-    namespace = local.harbor_namespace
-  }
-
-  data = {
-    encryptionKey = random_password.harbor_robot_renovate_secret.result
-  }
-}
-
 # Install charts
 
 module "chorus_priority_class" {
@@ -211,13 +144,10 @@ module "harbor" {
   harbor_oidc_secret_name = local.harbor_oidc_secret_name
   harbor_oidc_secret_key  = local.harbor_oidc_secret_key
   harbor_oidc_config      = jsonencode(local.harbor_oidc_config)
+  harbor_robots           = local.harbor_robots
 
   depends_on = [
     module.certificate_authorities,
     module.ingress_nginx,
-    kubernetes_namespace.harbor,
-    kubernetes_secret.harbor_robot_argo_cd_secret,
-    kubernetes_secret.harbor_robot_chorus_ci_secret,
-    kubernetes_secret.harbor_robot_renovate_secret,
   ]
 }

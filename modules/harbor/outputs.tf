@@ -15,3 +15,9 @@ output "harbor_db_admin_password" {
   description = "Harbor DB password for Postgres user"
   sensitive   = true
 }
+
+output "harbor_robot_secrets" {
+  value       = try(module.harbor_secret.harbor_robot_secrets, null)
+  description = "Map of Harbor robot account names to their secrets"
+  sensitive   = true
+}

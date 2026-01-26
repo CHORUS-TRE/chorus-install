@@ -44,6 +44,30 @@ resource "random_password" "salt" {
   special = false
 }
 
+# Robots
+
+resource "random_password" "harbor_robot_secret" {
+  for_each = var.harbor_robots
+
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "harbor_robot_secret" {
+  for_each = var.harbor_robots
+
+  metadata {
+    name      = "harbor-robot-${each.value}"
+    namespace = var.namespace
+  }
+
+  data = {
+    "secret" = random_password.harbor_robot_secret[each.key].result
+  }
+}
+
+# Core
+
 resource "kubernetes_secret" "harbor_core_secret" {
   metadata {
     name      = var.core_secret_name
