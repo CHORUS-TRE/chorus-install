@@ -15,6 +15,12 @@ resource "kubernetes_namespace" "workflows" {
   }
 }
 
+# Given Argo Workflows values.yaml file,
+# the SSO server clientId and clientSecret
+# are potentially stored in two different secrets
+# we use Terraform's "count" with conditional check
+# to account for each case
+
 resource "kubernetes_secret" "oidc_client_id_and_secret" {
   metadata {
     name      = var.sso_server_client_id_name
