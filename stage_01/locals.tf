@@ -2,26 +2,44 @@ locals {
   cert_manager_crds_path = join("/", [var.cert_manager_crds_folder_name, var.cluster_name, var.cert_manager_crds_file_name])
 
   config_files = {
-    ingress_nginx         = "${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json"
-    cert_manager          = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"
-    selfsigned            = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/config.json"
-    keycloak              = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json"
-    keycloak_db           = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/config.json"
-    harbor                = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json"
-    harbor_cache          = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/config.json"
-    harbor_db             = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/config.json"
-    chorus_priority_class = "${var.helm_values_path}/${var.cluster_name}/${var.chorus_priority_class_chart_name}/config.json"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json"
+    argo_deploy               = "${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/config.json"
+    argo_workflows            = "${var.helm_values_path}/${var.cluster_name}/${var.argo_workflows_chart_name}/config.json"
+    argocd                    = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json"
+    argocd_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json"
+    cert_manager              = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"
+    chorus_priority_class     = "${var.helm_values_path}/${var.cluster_name}/${var.chorus_priority_class_chart_name}/config.json"
+    chorusci                  = "${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/config.json"
+    harbor                    = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json"
+    harbor_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/config.json"
+    harbor_db                 = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/config.json"
+    ingress_nginx             = "${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json"
+    keycloak                  = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json"
+    keycloak_db               = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/config.json"
+    kube_prometheus_stack     = "${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
+    selfsigned                = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/config.json"
   }
 
   values_files = {
-    ingress_nginx = "${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/values.yaml"
-    cert_manager  = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/values.yaml"
-    selfsigned    = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/values.yaml"
-    keycloak      = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml"
-    keycloak_db   = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
-    harbor        = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml"
-    harbor_cache  = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/values.yaml"
-    harbor_db     = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/values.yaml"
+    alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
+    argo_deploy               = "${var.helm_values_path}/${var.cluster_name}/${var.argo_deploy_chart_name}/values.yaml"
+    argo_workflows            = "${var.helm_values_path}/${var.cluster_name}/${var.argo_workflows_chart_name}/values.yaml"
+    argocd                    = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml"
+    argocd_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/values.yaml"
+    cert_manager              = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/values.yaml"
+    chorusci                  = "${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/values.yaml"
+    harbor                    = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml"
+    harbor_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/values.yaml"
+    harbor_db                 = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/values.yaml"
+    ingress_nginx             = "${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/values.yaml"
+    keycloak                  = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml"
+    keycloak_db               = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
+    kube_prometheus_stack     = "${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
+    selfsigned                = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/values.yaml"
   }
 
   ingress_nginx_chart_version         = jsondecode(file(local.config_files.ingress_nginx)).version
@@ -38,6 +56,9 @@ locals {
   cert_manager_namespace  = jsondecode(file(local.config_files.cert_manager)).namespace
   keycloak_namespace      = jsondecode(file(local.config_files.keycloak)).namespace
   harbor_namespace        = jsondecode(file(local.config_files.harbor)).namespace
+  prometheus_namespace    = jsondecode(file(local.config_files.kube_prometheus_stack)).namespace
+  alertmanager_namespace  = local.prometheus_namespace
+  grafana_namespace       = local.prometheus_namespace
 
   keycloak_values_parsed = yamldecode(file(local.values_files.keycloak))
   keycloak_secret_name   = local.keycloak_values_parsed.keycloak.auth.existingSecret
@@ -96,4 +117,8 @@ locals {
       oidc_admin_group   = var.harbor_keycloak_oidc_admin_group
     }
   ))
+
+  kube_prometheus_stack_values_parsed = yamldecode(file(local.values_files.kube_prometheus_stack))
+  grafana_oauth_client_secret_name    = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
+  grafana_oauth_client_secret_key     = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
 }

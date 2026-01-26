@@ -151,3 +151,19 @@ module "harbor" {
     module.ingress_nginx,
   ]
 }
+
+module "grafana" {
+  source = "../modules/grafana"
+
+  namespace                        = local.grafana_namespace
+  grafana_admin_username           = var.grafana_admin_username
+  grafana_keycloak_client_secret   = module.keycloak.grafana_keycloak_client_secret
+  grafana_oauth_client_secret_name = local.grafana_oauth_client_secret_name
+  grafana_oauth_client_secret_key  = local.grafana_oauth_client_secret_key
+
+  depends_on = [
+    module.certificate_authorities,
+    module.ingress_nginx,
+    module.keycloak,
+  ]
+}

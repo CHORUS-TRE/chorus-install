@@ -122,6 +122,12 @@ variable "harbor_admin_username" {
   default     = "admin"
 }
 
+variable "grafana_admin_username" {
+  description = "Grafana admin username"
+  type        = string
+  default     = "admin"
+}
+
 variable "templates_path" {
   description = "Path to the templates directory"
   type        = string
@@ -145,4 +151,52 @@ variable "google_identity_provider_client_secret" {
   type        = string
   sensitive   = true
   default     = ""
+}
+
+variable "alertmanager_oauth2_proxy_chart_name" {
+  description = "Alertmanager OAuth2 Proxy Helm chart folder name"
+  type        = string
+  default     = "alertmanager-oauth2-proxy"
+}
+
+variable "argo_deploy_chart_name" {
+  description = "Argo Deploy Helm chart folder name"
+  type        = string
+  default     = "argo-deploy"
+}
+
+variable "argo_workflows_chart_name" {
+  description = "Argo Workflows Helm chart folder name"
+  type        = string
+  default     = "argo-workflows"
+}
+
+variable "argocd_chart_name" {
+  description = "ArgoCD Helm chart folder name"
+  type        = string
+  default     = "argo-cd"
+}
+
+variable "chorusci_chart_name" {
+  description = "Chorus CI Helm chart folder name"
+  type        = string
+  default     = "chorus-ci"
+}
+
+variable "kube_prometheus_stack_chart_name" {
+  description = "Kube Prometheus Stack Helm chart folder name"
+  type        = string
+  default     = "kube-prometheus-stack"
+}
+
+variable "oauth2_proxy_cache_chart_name" {
+  description = "OAuth2 Proxy Cache Helm chart folder name"
+  type        = string
+  default     = "oauth2-proxy-cache"
+}
+
+variable "prometheus_oauth2_proxy_chart_name" {
+  description = "Prometheus OAuth2 Proxy Helm chart folder name"
+  type        = string
+  default     = "prometheus-oauth2-proxy"
 }
