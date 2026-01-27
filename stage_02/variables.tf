@@ -141,3 +141,118 @@ variable "google_identity_provider_client_secret" {
   sensitive   = true
   default     = ""
 }
+
+variable "grafana_admin_username" {
+  description = "Grafana admin username"
+  type        = string
+  default     = "admin"
+}
+
+variable "prometheus_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Prometheus"
+  type        = string
+  default     = "prometheus"
+}
+
+variable "alertmanager_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Alertmanager"
+  type        = string
+  default     = "alertmanager"
+}
+
+variable "oauth2_proxy_cache_chart_name" {
+  description = "OAuth2 proxy cache Helm chart name"
+  type        = string
+  default     = "oauth2-proxy-cache"
+}
+
+variable "matomo_chart_name" {
+  description = "Matomo Helm chart name"
+  type        = string
+  default     = "matomo"
+}
+
+variable "i2b2_chart_name" {
+  description = "i2b2 Helm chart name"
+  type        = string
+  default     = "i2b2"
+}
+
+variable "didata_chart_name" {
+  description = "didata Helm chart name"
+  type        = string
+  default     = "didata"
+}
+
+variable "didata_app_key" {
+  description = "DiData app key (base64 encoded)"
+  type        = string
+  default     = ""
+}
+
+variable "didata_registry_username" {
+  description = "Username used to fetch the DiData image"
+  type        = string
+  default     = "didatadevops"
+}
+
+variable "didata_registry_password" {
+  description = "Password used to fetch the DiData image"
+  type        = string
+  default     = ""
+}
+
+variable "juicefs_chart_name" {
+  description = "JuiceFS Helm chart name used as prefix for CSI driver, S3 gateway and cache"
+  type        = string
+  default     = "juicefs"
+}
+
+variable "frontend_chart_name" {
+  description = "Frontend Helm chart name"
+  type        = string
+  default     = "web-ui"
+}
+
+variable "s3_bucket_name" {
+  description = "S3 access key"
+  type        = string
+  default     = ""
+}
+
+variable "s3_endpoint" {
+  description = "S3 endpoint"
+  type        = string
+  default     = ""
+}
+
+variable "s3_access_key" {
+  description = "S3 access key"
+  type        = string
+  default     = ""
+}
+
+variable "s3_secret_key" {
+  description = "S3 secret key"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "i2b2_db_password" {
+  description = "i2b2 database password"
+  type        = string
+}
+
+variable "remote_cluster_webex_access_token" {
+  description = "The Webex access token for the Alertmanager integration"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "juicefs_dashboard_username" {
+  description = "JuiceFS dashboard username"
+  type        = string
+  default     = "chorus"
+}
