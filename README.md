@@ -220,7 +220,7 @@ The following requirements serve as a lower bound estimate, you might want to in
     > In case of issues, refer to the official [Kubernetes documentation](https://kubernetes.io/docs/tasks/debug/debug-application/).
 
 
-1. To deploy a second remote cluster (e.g. to use in the context of a multi-stage deployment), update the ```.env``` file with the new environment's values and follow the remote cluster installation steps once again. 
+1. To deploy a second remote cluster (e.g. to use in the context of a multi-stage deployment), update the ```.env``` file with the new environment's values and follow the remote cluster installation steps once again.
 
     > Make sure to use dedicated Terraform workspaces to save that new remote cluster state.
 
