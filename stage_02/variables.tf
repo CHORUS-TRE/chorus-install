@@ -1,17 +1,25 @@
-variable "kubeconfig_path" {
-  description = "Path to the Kubernetes config file"
+variable "alertmanager_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Alertmanager"
   type        = string
+  default     = "alertmanager"
 }
 
-variable "kubeconfig_context" {
-  description = "Kubernetes context to use"
+variable "alertmanager_oauth2_proxy_chart_name" {
+  description = "Alertmanager OAuth2 Proxy Helm chart name"
   type        = string
+  default     = "alertmanager-oauth2-proxy"
 }
 
-variable "helm_values_path" {
-  description = "Path to the repository storing the Helm chart values"
+variable "argocd_chart_name" {
+  description = "ArgoCD Helm chart name"
   type        = string
-  default     = "../values"
+  default     = "argo-cd"
+}
+
+variable "backend_chart_name" {
+  description = "Chorus backend Helm chart name"
+  type        = string
+  default     = "backend"
 }
 
 variable "cert_manager_crds_path" {
@@ -25,108 +33,34 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "argocd_chart_name" {
-  description = "ArgoCD Helm chart name"
+variable "didata_app_key" {
+  description = "DiData app key (base64 encoded)"
   type        = string
-  default     = "argo-cd"
+  default     = ""
 }
 
-variable "remote_cluster_kubeconfig_path" {
-  description = "Path to the Kubernetes config file for the remote cluster"
+variable "didata_chart_name" {
+  description = "didata Helm chart name"
   type        = string
+  default     = "didata"
 }
 
-variable "remote_cluster_insecure" {
-  description = "Allow insecure connection to remote cluster"
-  type        = bool
-  default     = false
+variable "didata_registry_password" {
+  description = "Password used to fetch the DiData image"
+  type        = string
+  default     = ""
 }
 
-variable "remote_cluster_kubeconfig_context" {
-  description = "Kubernetes context to use for the remote cluster"
+variable "didata_registry_username" {
+  description = "Username used to fetch the DiData image"
   type        = string
+  default     = "didatadevops"
 }
 
-variable "remote_cluster_name" {
-  description = "The name of the remote cluster"
+variable "frontend_chart_name" {
+  description = "Frontend Helm chart name"
   type        = string
-}
-
-variable "remote_cluster_server" {
-  description = "API server endpoint URL of the remote Kubernetes cluster"
-  type        = string
-}
-
-variable "keycloak_chart_name" {
-  description = "Keycloak Helm chart folder name"
-  type        = string
-  default     = "keycloak"
-}
-
-variable "harbor_chart_name" {
-  description = "Harbor Helm chart name"
-  type        = string
-  default     = "harbor"
-}
-
-variable "keycloak_infra_realm" {
-  description = "Keycloak infrastructure realm name"
-  type        = string
-  default     = "infra"
-}
-
-variable "keycloak_admin_username" {
-  description = "Keycloak admin username"
-  type        = string
-  default     = "admin"
-}
-
-variable "harbor_keycloak_client_id" {
-  description = "Keycloak client ID assigned to Harbor"
-  type        = string
-  default     = "harbor"
-}
-
-variable "harbor_keycloak_oidc_admin_group" {
-  description = "Keycloak client ID assigned to Harbor"
-  type        = string
-  default     = "HarborAdmins"
-}
-
-variable "alertmanager_oauth2_proxy_chart_name" {
-  description = "Alertmanager OAuth2 Proxy Helm chart name"
-  type        = string
-  default     = "alertmanager-oauth2-proxy"
-}
-
-variable "prometheus_oauth2_proxy_chart_name" {
-  description = "Prometheus OAuth2 Proxy Helm chart name"
-  type        = string
-  default     = "prometheus-oauth2-proxy"
-}
-
-variable "backend_chart_name" {
-  description = "Chorus backend Helm chart name"
-  type        = string
-  default     = "backend"
-}
-
-variable "kube_prometheus_stack_chart_name" {
-  description = "Kube Prometheus stack Helm chart name (i.e. Prometheus, Alertmanager, Grafana)"
-  type        = string
-  default     = "kube-prometheus-stack"
-}
-
-variable "harbor_admin_username" {
-  description = "Harbor admin username"
-  type        = string
-  default     = "admin"
-}
-
-variable "templates_path" {
-  description = "Path to the templates directory"
-  type        = string
-  default     = "../templates"
+  default     = "web-ui"
 }
 
 variable "google_identity_provider_client_id" {
@@ -148,28 +82,34 @@ variable "grafana_admin_username" {
   default     = "admin"
 }
 
-variable "prometheus_keycloak_client_id" {
-  description = "Keycloak client ID used assigned to Prometheus"
+variable "harbor_admin_username" {
+  description = "Harbor admin username"
   type        = string
-  default     = "prometheus"
+  default     = "admin"
 }
 
-variable "alertmanager_keycloak_client_id" {
-  description = "Keycloak client ID used assigned to Alertmanager"
+variable "harbor_chart_name" {
+  description = "Harbor Helm chart name"
   type        = string
-  default     = "alertmanager"
+  default     = "harbor"
 }
 
-variable "oauth2_proxy_cache_chart_name" {
-  description = "OAuth2 proxy cache Helm chart name"
+variable "harbor_keycloak_client_id" {
+  description = "Keycloak client ID assigned to Harbor"
   type        = string
-  default     = "oauth2-proxy-cache"
+  default     = "harbor"
 }
 
-variable "matomo_chart_name" {
-  description = "Matomo Helm chart name"
+variable "harbor_keycloak_oidc_admin_group" {
+  description = "Keycloak client ID assigned to Harbor"
   type        = string
-  default     = "matomo"
+  default     = "HarborAdmins"
+}
+
+variable "helm_values_path" {
+  description = "Path to the repository storing the Helm chart values"
+  type        = string
+  default     = "../values"
 }
 
 variable "i2b2_chart_name" {
@@ -178,28 +118,9 @@ variable "i2b2_chart_name" {
   default     = "i2b2"
 }
 
-variable "didata_chart_name" {
-  description = "didata Helm chart name"
+variable "i2b2_db_password" {
+  description = "i2b2 database password"
   type        = string
-  default     = "didata"
-}
-
-variable "didata_app_key" {
-  description = "DiData app key (base64 encoded)"
-  type        = string
-  default     = ""
-}
-
-variable "didata_registry_username" {
-  description = "Username used to fetch the DiData image"
-  type        = string
-  default     = "didatadevops"
-}
-
-variable "didata_registry_password" {
-  description = "Password used to fetch the DiData image"
-  type        = string
-  default     = ""
 }
 
 variable "juicefs_chart_name" {
@@ -208,10 +129,113 @@ variable "juicefs_chart_name" {
   default     = "juicefs"
 }
 
-variable "frontend_chart_name" {
-  description = "Frontend Helm chart name"
+variable "juicefs_dashboard_username" {
+  description = "JuiceFS dashboard username"
   type        = string
-  default     = "web-ui"
+  default     = "chorus"
+}
+
+variable "keycloak_admin_username" {
+  description = "Keycloak admin username"
+  type        = string
+  default     = "admin"
+}
+
+variable "keycloak_chart_name" {
+  description = "Keycloak Helm chart folder name"
+  type        = string
+  default     = "keycloak"
+}
+
+variable "keycloak_infra_realm" {
+  description = "Keycloak infrastructure realm name"
+  type        = string
+  default     = "infra"
+}
+
+variable "kube_prometheus_stack_chart_name" {
+  description = "Kube Prometheus stack Helm chart name (i.e. Prometheus, Alertmanager, Grafana)"
+  type        = string
+  default     = "kube-prometheus-stack"
+}
+
+variable "kubeconfig_context" {
+  description = "Kubernetes context to use"
+  type        = string
+}
+
+variable "kubeconfig_path" {
+  description = "Path to the Kubernetes config file"
+  type        = string
+}
+
+variable "matomo_chart_name" {
+  description = "Matomo Helm chart name"
+  type        = string
+  default     = "matomo"
+}
+
+variable "oauth2_proxy_cache_chart_name" {
+  description = "OAuth2 proxy cache Helm chart name"
+  type        = string
+  default     = "oauth2-proxy-cache"
+}
+
+variable "prometheus_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Prometheus"
+  type        = string
+  default     = "prometheus"
+}
+
+variable "prometheus_oauth2_proxy_chart_name" {
+  description = "Prometheus OAuth2 Proxy Helm chart name"
+  type        = string
+  default     = "prometheus-oauth2-proxy"
+}
+
+variable "reflector_chart_name" {
+  description = "Reflector Helm chart name"
+  type        = string
+  default     = "reflector"
+}
+
+variable "remote_cluster_insecure" {
+  description = "Allow insecure connection to remote cluster"
+  type        = bool
+  default     = false
+}
+
+variable "remote_cluster_kubeconfig_context" {
+  description = "Kubernetes context to use for the remote cluster"
+  type        = string
+}
+
+variable "remote_cluster_kubeconfig_path" {
+  description = "Path to the Kubernetes config file for the remote cluster"
+  type        = string
+}
+
+variable "remote_cluster_name" {
+  description = "The name of the remote cluster"
+  type        = string
+}
+
+variable "remote_cluster_server" {
+  description = "API server endpoint URL of the remote Kubernetes cluster"
+  type        = string
+}
+
+variable "remote_cluster_webex_access_token" {
+  description = "The Webex access token for the Alertmanager integration"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "s3_access_key" {
+  description = "S3 access key"
+  type        = string
+  default     = ""
 }
 
 variable "s3_bucket_name" {
@@ -226,12 +250,6 @@ variable "s3_endpoint" {
   default     = ""
 }
 
-variable "s3_access_key" {
-  description = "S3 access key"
-  type        = string
-  default     = ""
-}
-
 variable "s3_secret_key" {
   description = "S3 secret key"
   type        = string
@@ -239,26 +257,8 @@ variable "s3_secret_key" {
   default     = ""
 }
 
-variable "i2b2_db_password" {
-  description = "i2b2 database password"
+variable "templates_path" {
+  description = "Path to the templates directory"
   type        = string
-}
-
-variable "remote_cluster_webex_access_token" {
-  description = "The Webex access token for the Alertmanager integration"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "juicefs_dashboard_username" {
-  description = "JuiceFS dashboard username"
-  type        = string
-  default     = "chorus"
-}
-
-variable "reflector_chart_name" {
-  description = "Reflector Helm chart name"
-  type        = string
-  default     = "reflector"
+  default     = "../templates"
 }
