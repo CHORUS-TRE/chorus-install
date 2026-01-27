@@ -34,13 +34,6 @@ provider "kubernetes" {
   config_context = var.kubeconfig_context
 }
 
-# Random passwords
-
-resource "random_password" "harbor_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
 # Cert-Manager CRDs
 
 module "cert_manager_crds" {
@@ -121,6 +114,7 @@ module "harbor_secret" {
   oidc_secret_name                 = local.harbor_oidc_secret_name
   oidc_secret_key                  = local.harbor_oidc_secret_key
   oidc_config                      = jsonencode(local.harbor_oidc_config)
+  harbor_robots                    = local.harbor_robots
 
   depends_on = [kubernetes_namespace.harbor]
 }
@@ -182,30 +176,31 @@ data "kubernetes_config_map" "ca_data" {
   }
 }
 
-resource "kubernetes_secret" "remote_clusters" {
-  provider = kubernetes.build_cluster
-
-  metadata {
-    name      = "${var.remote_cluster_name}-cluster"
-    namespace = local.argocd_namespace
-    labels = {
-      "argocd.argoproj.io/secret-type" = "cluster"
-    }
-  }
-
-  data = {
-    name   = var.remote_cluster_name
-    server = var.remote_cluster_server
-    config = local.remote_cluster_config
-  }
-
-  # We wait for the remote cluster configuration
-  # to complete to avoid race condition on
-  # namespace creation
-  depends_on = [
-    module.harbor_db_secret,
-    module.harbor_secret,
-    module.keycloak_db_secret,
-    module.keycloak_secret
-  ]
-}
+# TODO: UNCOMMENT WHEN READY TO CONNECT REMOTE CLUSTER TO BUILD CLUSTER
+# resource "kubernetes_secret" "remote_clusters" {
+#   provider = kubernetes.build_cluster
+# 
+#   metadata {
+#     name      = "${var.remote_cluster_name}-cluster"
+#     namespace = local.argocd_namespace
+#     labels = {
+#       "argocd.argoproj.io/secret-type" = "cluster"
+#     }
+#   }
+# 
+#   data = {
+#     name   = var.remote_cluster_name
+#     server = var.remote_cluster_server
+#     config = local.remote_cluster_config
+#   }
+# 
+#   # We wait for the remote cluster configuration
+#   # to complete to avoid race condition on
+#   # namespace creation
+#   depends_on = [
+#     module.harbor_db_secret,
+#     module.harbor_secret,
+#     module.keycloak_db_secret,
+#     module.keycloak_secret
+#   ]
+# }

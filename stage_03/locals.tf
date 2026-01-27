@@ -101,13 +101,15 @@ locals {
     {
       oidc_endpoint      = local.harbor_oidc_endpoint
       oidc_client_id     = var.harbor_keycloak_client_id
-      oidc_client_secret = random_password.harbor_keycloak_client_secret.result
+      oidc_client_secret = module.keycloak_secret.harbor_client_secret
       oidc_admin_group   = var.harbor_keycloak_oidc_admin_group
     }
   ))
 
+  harbor_robots = toset([for robot in local.harbor_values_parsed.robots : robot.name])
+
   prometheus_url   = "https://${local.prometheus_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
   alertmanager_url = "https://${local.alertmanager_oauth2_proxy_values_parsed.oauth2-proxy.ingress.hosts.0}"
   grafana_url      = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
-  backend_url      = "https://${local.backend_values_parsed.ingress.host}"
+  backend_url      = "https://${local.backend_values_parsed.ingress.hosts.0.host}"
 }
