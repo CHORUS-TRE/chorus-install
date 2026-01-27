@@ -256,3 +256,9 @@ variable "juicefs_dashboard_username" {
   type        = string
   default     = "chorus"
 }
+
+variable "reflector_chart_name" {
+  description = "Reflector Helm chart name"
+  type        = string
+  default     = "reflector"
+}

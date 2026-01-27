@@ -139,6 +139,14 @@ module "juicefs" {
   count = var.s3_secret_key == "" ? 0 : 1
 }
 
+# Prometheus
+
+resource "kubernetes_namespace" "prometheus" {
+  metadata {
+    name = local.prometheus_namespace
+  }
+}
+
 # Grafana
 
 resource "random_password" "grafana_admin_password" {
@@ -149,14 +157,15 @@ resource "random_password" "grafana_admin_password" {
 resource "kubernetes_secret" "grafana_oauth_client_secret" {
   metadata {
     name      = local.grafana_oauth_client_secret_name
-    namespace = local.grafana_namespace
+    namespace = local.prometheus_namespace
   }
-
   data = {
     "admin-password"                           = random_password.grafana_admin_password.result
     "admin-user"                               = var.grafana_admin_username
     "${local.grafana_oauth_client_secret_key}" = module.keycloak_secret.grafana_client_secret
   }
+
+  depends_on = [kubernetes_namespace.prometheus]
 }
 
 # Alertmanager
@@ -166,10 +175,11 @@ module "alertmanager" {
 
   webex_secret_name      = local.alertmanager_webex_secret_name
   webex_secret_key       = local.alertmanager_webex_secret_key
-  alertmanager_namespace = local.alertmanager_namespace
+  alertmanager_namespace = local.prometheus_namespace
   webex_access_token     = var.remote_cluster_webex_access_token
 
-  count = var.remote_cluster_webex_access_token != "" ? 1 : 0
+  count      = var.remote_cluster_webex_access_token != "" ? 1 : 0
+  depends_on = [kubernetes_namespace.prometheus]
 }
 
 # OAuth2 proxy
@@ -195,9 +205,17 @@ module "oauth2_proxy" {
 
   oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_session_storage_secret_name
   oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
+
+  depends_on = [kubernetes_namespace.keycloak]
 }
 
 # Matomo
+
+resource "kubernetes_namespace" "matomo" {
+  metadata {
+    name = local.matomo_namespace
+  }
+}
 
 resource "random_password" "matomo_password" {
   length  = 32
@@ -205,16 +223,15 @@ resource "random_password" "matomo_password" {
 }
 
 resource "kubernetes_secret" "matomo_secret" {
-
   metadata {
     name      = local.matomo_secret_name
     namespace = local.matomo_namespace
 
   }
-
   data = {
     matomo-password = random_password.matomo_password.result
   }
+  depends_on = [kubernetes_namespace.matomo]
 }
 
 resource "random_password" "matomo_db_password" {
@@ -237,34 +254,40 @@ resource "random_password" "matomo_db_root_password" {
 # can be changed so that we don't have to duplicate
 # the mariadb password twice
 resource "kubernetes_secret" "matomo_db_secret" {
-
   metadata {
     name      = local.matomo_db_secret_name
     namespace = local.matomo_db_namespace
-
   }
-
   data = {
     db-password                  = random_password.matomo_db_password.result
     mariadb-password             = random_password.matomo_db_password.result
     mariadb-replication-password = random_password.matomo_db_replication_password.result
     mariadb-root-password        = random_password.matomo_db_root_password.result
   }
+
+  depends_on = [kubernetes_namespace.matomo]
 }
 
 # i2b2
 # we do not generate the password
 # because it is harcoded in the container image
 
+resource "kubernetes_namespace" "i2b2" {
+  metadata {
+    name = local.i2b2_wildfly_namespace
+  }
+}
+
 resource "kubernetes_secret" "i2b2_db_secret" {
   metadata {
     name      = "i2b2-postgres-secret"
     namespace = local.i2b2_db_namespace
   }
-
   data = {
     "postgres-password" = var.i2b2_db_password
   }
+
+  depends_on = [kubernetes_namespace.i2b2]
 }
 
 # i2b2-wildfly
@@ -274,7 +297,6 @@ resource "kubernetes_secret" "i2b2_wildfly" {
     name      = "i2b2-wildfly-secret"
     namespace = local.i2b2_wildfly_namespace
   }
-
   data = {
     ds_crc_pass  = var.i2b2_db_password
     ds_hive_pass = var.i2b2_db_password
@@ -284,9 +306,17 @@ resource "kubernetes_secret" "i2b2_wildfly" {
     ds_wd_pass   = var.i2b2_db_password
     pg_pass      = var.i2b2_db_password
   }
+
+  depends_on = [kubernetes_namespace.i2b2]
 }
 
 # didata
+
+resource "kubernetes_namespace" "didata" {
+  metadata {
+    name = local.didata_namespace
+  }
+}
 
 resource "random_password" "didata_db_password" {
   length  = 32
@@ -313,42 +343,46 @@ resource "kubernetes_secret" "didata_env" {
     name      = "didata-env"
     namespace = local.didata_namespace
   }
-
   data = {
     "didata.env" = local.didata_secrets_content
   }
 
-  count = var.didata_registry_password != "" ? 1 : 0
+  count      = var.didata_registry_password != "" ? 1 : 0
+  depends_on = [kubernetes_namespace.didata]
 }
 
 resource "kubernetes_secret" "didata_db_secret" {
-
   metadata {
     name      = local.didata_db_secret_name
     namespace = local.didata_db_namespace
 
   }
-
   data = {
     mariadb-password             = random_password.didata_db_password.result
     mariadb-replication-password = random_password.didata_db_replication_password.result
     mariadb-root-password        = random_password.didata_db_root_password.result
   }
 
-  count = var.didata_registry_password != "" ? 1 : 0
+  count      = var.didata_registry_password != "" ? 1 : 0
+  depends_on = [kubernetes_namespace.didata]
+}
+
+resource "kubernetes_namespace" "reflector" {
+  metadata {
+    name = local.reflector_namespace
+  }
 }
 
 resource "kubernetes_secret" "regcred_didata" {
   metadata {
     name      = "regcred-didata"
-    namespace = "reflector"
+    namespace = local.reflector_namespace
     annotations = {
       "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
       "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "didata"
       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
     }
   }
-
   data = {
     ".dockerconfigjson" = jsonencode({
       "auths" = {
@@ -358,13 +392,19 @@ resource "kubernetes_secret" "regcred_didata" {
       }
     })
   }
-
   type = "kubernetes.io/dockerconfigjson"
 
-  count = var.didata_registry_password != "" ? 1 : 0
+  count      = var.didata_registry_password != "" ? 1 : 0
+  depends_on = [kubernetes_namespace.reflector]
 }
 
 # Backend
+
+resource "kubernetes_namespace" "backend" {
+  metadata {
+    name = local.backend_namespace
+  }
+}
 
 module "backend_db_secret" {
   source = "../modules/db_secret"
@@ -373,6 +413,8 @@ module "backend_db_secret" {
   secret_name         = local.backend_db_secret_name
   db_user_secret_key  = local.backend_db_user_secret_key
   db_admin_secret_key = local.backend_db_admin_secret_key
+
+  depends_on = [kubernetes_namespace.backend]
 }
 
 resource "random_password" "jwt_signature" {
@@ -396,15 +438,15 @@ resource "random_password" "steward_password" {
 }
 
 resource "kubernetes_secret" "backend_secrets" {
-
   metadata {
-    name      = "${var.cluster_name}-backend"
+    name      = "${var.remote_cluster_name}-backend"
     namespace = local.backend_namespace
   }
-
   data = {
     "secrets.yaml" = local.backend_secrets_content
   }
+
+  depends_on = [kubernetes_namespace.backend]
 }
 
 # Remote Cluster Connection for ArgoCD running on build cluster (see stage_01)
@@ -488,7 +530,20 @@ data "kubernetes_config_map" "ca_data" {
 #     module.harbor_db_secret,
 #     module.harbor_secret,
 #     module.keycloak_db_secret,
-#     module.keycloak_secret
+#     module.keycloak_secret,
+#     module.juicefs,
+#     kubernetes_secret.grafana_oauth_client_secret,
+#     module.alertmanager,
+#     module.oauth2_proxy,
+#     kubernetes_secret.matomo_secret,
+#     kubernetes_secret.matomo_db_secret,
+#     kubernetes_secret.i2b2_db_secret,
+#     kubernetes_secret.i2b2_wildfly,
+#     kubernetes_secret.didata_env,
+#     kubernetes_secret.didata_db_secret,
+#     kubernetes_secret.regcred_didata,
+#     module.backend_db_secret,
+#     kubernetes_secret.backend_secrets
 #   ]
 # }
 

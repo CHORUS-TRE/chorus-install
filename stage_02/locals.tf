@@ -30,6 +30,7 @@ locals {
     juicefs_csi_driver        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/config.json"
     juicefs_s3_gateway        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-s3-gateway/config.json"
     juicefs_cache             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-cache/config.json"
+    reflector                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.reflector_chart_name}/config.json"
   }
 
   values_files = {
@@ -55,8 +56,6 @@ locals {
   harbor_namespace             = jsondecode(file(local.config_files.harbor)).namespace
   argocd_namespace             = jsondecode(file(local.config_files.argocd)).namespace
   prometheus_namespace         = jsondecode(file(local.config_files.kube_prometheus_stack)).namespace
-  alertmanager_namespace       = local.prometheus_namespace
-  grafana_namespace            = local.prometheus_namespace
   matomo_namespace             = jsondecode(file(local.config_files.matomo)).namespace
   matomo_db_namespace          = jsondecode(file(local.config_files.matomo_db)).namespace
   i2b2_db_namespace            = jsondecode(file(local.config_files.i2b2_db)).namespace
@@ -67,6 +66,7 @@ locals {
   juicefs_csi_driver_namespace = jsondecode(file(local.config_files.juicefs_csi_driver)).namespace
   backend_db_namespace         = jsondecode(file(local.config_files.backend_db)).namespace
   backend_namespace            = jsondecode(file(local.config_files.backend)).namespace
+  reflector_namespace          = jsondecode(file(local.config_files.reflector)).namespace
 
   keycloak_values                  = file(local.values_files.keycloak)
   keycloak_db_values               = file(local.values_files.keycloak_db)
