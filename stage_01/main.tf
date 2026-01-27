@@ -296,6 +296,7 @@ resource "kubernetes_secret" "argocd_secret" {
 
 locals {
   output = {
+    loadbalancer_ip       = module.ingress_nginx.loadbalancer_ip
     harbor_admin_username = var.harbor_admin_username
     harbor_admin_password = module.harbor.harbor_password
     harbor_url            = local.harbor_url
