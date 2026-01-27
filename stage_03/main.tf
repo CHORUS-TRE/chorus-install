@@ -71,9 +71,14 @@ module "keycloak_db_secret" {
 module "keycloak_secret" {
   source = "../modules/keycloak_secret"
 
-  namespace   = local.keycloak_namespace
-  secret_name = local.keycloak_secret_name
-  secret_key  = local.keycloak_secret_key
+  namespace                              = local.keycloak_namespace
+  admin_secret_name                      = local.keycloak_secret_name
+  admin_secret_key                       = local.keycloak_secret_key
+  cluster_type                           = "remote"
+  client_credentials_secret_name         = local.keycloak_client_credentials_secret_name
+  google_identity_provider_client_id     = var.google_identity_provider_client_id
+  google_identity_provider_client_secret = var.google_identity_provider_client_secret
+  remotestate_encryption_key_secret_name = local.keycloak_remotestate_encryption_key_secret_name
 
   depends_on = [kubernetes_namespace.keycloak]
 }

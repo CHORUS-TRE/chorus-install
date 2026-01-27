@@ -77,7 +77,6 @@ module "keycloak" {
   source = "../modules/keycloak"
 
   cluster_name  = var.cluster_name
-  cluster_type  = "build"
   helm_registry = var.helm_registry
 
   keycloak_chart_name    = var.keycloak_chart_name
@@ -298,7 +297,7 @@ resource "kubernetes_secret" "argocd_secret" {
 locals {
   output = {
     harbor_admin_username = var.harbor_admin_username
-    harbor_admin_password = module.harbor.harbor_admin_password
+    harbor_admin_password = module.harbor.harbor_password
     harbor_url            = local.harbor_url
     harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
 
@@ -311,7 +310,7 @@ locals {
     harbor_db_admin_password       = module.harbor.harbor_db_admin_password
 
     keycloak_admin_username    = "admin"
-    keycloak_admin_password    = module.keycloak.keycloak_admin_password
+    keycloak_admin_password    = module.keycloak.keycloak_password
     keycloak_url               = local.keycloak_url
     keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
     keycloak_db_password       = module.keycloak.keycloak_db_password

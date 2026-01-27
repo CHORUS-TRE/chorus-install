@@ -8,16 +8,6 @@ variable "cluster_name" {
   }
 }
 
-variable "cluster_type" {
-  description = "The type of cluster - determines which set of Keycloak clients to configure"
-  type        = string
-
-  validation {
-    condition     = var.cluster_type == "build" || var.cluster_type == "remote"
-    error_message = "cluster_type must be either 'build' or 'remote'."
-  }
-}
-
 variable "helm_registry" {
   description = "Helm chart registry to get the chart from"
   type        = string

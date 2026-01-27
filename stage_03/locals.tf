@@ -54,6 +54,19 @@ locals {
   keycloak_secret_key  = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_url         = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
 
+  keycloak_client_credentials_secret_name = coalesce(
+    local.keycloak_values_parsed.client.existingSecret,
+    "keycloak-client-credentials"
+  )
+
+
+  keycloak_remotestate_encryption_key_secret_name = try(
+    local.keycloak_values_parsed.keycloak.keycloakConfigCli.extraEnvVars[
+      index(local.keycloak_values_parsed.keycloak.keycloakConfigCli.extraEnvVars.*.name, "IMPORT_REMOTESTATE_ENCRYPTIONKEY")
+    ].valueFrom.secretKeyRef.name,
+    "keycloak-remotestate-encryption-key"
+  )
+
   keycloak_db_secret_name      = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
   keycloak_db_admin_secret_key = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
   keycloak_db_user_secret_key  = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey

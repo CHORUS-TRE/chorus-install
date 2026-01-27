@@ -6,63 +6,6 @@ resource "kubernetes_namespace" "keycloak" {
   }
 }
 
-# Random passwords
-
-## Keycloak admin password
-
-resource "random_password" "keycloak_password" {
-  length  = 32
-  special = false
-}
-
-## Keycloak client secrets
-
-resource "random_password" "argocd_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "argo_workflows_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "grafana_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "alertmanager_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "prometheus_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "harbor_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "matomo_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "chorus_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "keycloak_remotestate_encryption_key" {
-  length  = 32
-  special = false
-  upper   = false
-}
-
 # Secrets
 
 module "db_secret" {
@@ -76,76 +19,17 @@ module "db_secret" {
   depends_on = [kubernetes_namespace.keycloak]
 }
 
-# Kubernetes secret
+module "keycloak_secret" {
+  source = "../keycloak_secret"
 
-resource "kubernetes_secret" "keycloak_secret" {
-  metadata {
-    name      = var.keycloak_secret_name
-    namespace = var.keycloak_namespace
-  }
-
-  data = {
-    "${var.keycloak_secret_key}" = random_password.keycloak_password.result
-  }
-
-  depends_on = [kubernetes_namespace.keycloak]
-}
-
-resource "kubernetes_secret" "build_keycloak_client_credentials" {
-  # Build cluster
-  count = var.cluster_type == "build" ? 1 : 0
-
-  metadata {
-    name      = var.keycloak_client_credentials_secret_name
-    namespace = var.keycloak_namespace
-  }
-
-  data = {
-    GOOGLE_CLIENT_ID             = var.google_identity_provider_client_id
-    GOOGLE_CLIENT_SECRET         = var.google_identity_provider_client_secret
-    ALERTMANAGER_CLIENT_SECRET   = random_password.alertmanager_keycloak_client_secret.result
-    ARGO_CD_CLIENT_SECRET        = random_password.argocd_keycloak_client_secret.result
-    ARGO_WORKFLOWS_CLIENT_SECRET = random_password.argo_workflows_keycloak_client_secret.result
-    GRAFANA_CLIENT_SECRET        = random_password.grafana_keycloak_client_secret.result
-    HARBOR_CLIENT_SECRET         = random_password.harbor_keycloak_client_secret.result
-    PROMETHEUS_CLIENT_SECRET     = random_password.prometheus_keycloak_client_secret.result
-  }
-
-  depends_on = [kubernetes_namespace.keycloak]
-}
-
-resource "kubernetes_secret" "remote_keycloak_client_credentials" {
-  # Remote cluster
-  count = var.cluster_type == "build" ? 0 : 1
-
-  metadata {
-    name      = var.keycloak_client_credentials_secret_name
-    namespace = var.keycloak_namespace
-  }
-
-  data = {
-    GOOGLE_CLIENT_ID           = var.google_identity_provider_client_id
-    GOOGLE_CLIENT_SECRET       = var.google_identity_provider_client_secret
-    ALERTMANAGER_CLIENT_SECRET = random_password.alertmanager_keycloak_client_secret.result
-    GRAFANA_CLIENT_SECRET      = random_password.grafana_keycloak_client_secret.result
-    HARBOR_CLIENT_SECRET       = random_password.harbor_keycloak_client_secret.result
-    MATOMO_CLIENT_SECRET       = random_password.matomo_keycloak_client_secret.result
-    PROMETHEUS_CLIENT_SECRET   = random_password.prometheus_keycloak_client_secret.result
-    CHORUS_CLIENT_SECRET       = random_password.chorus_keycloak_client_secret.result
-  }
-
-  depends_on = [kubernetes_namespace.keycloak]
-}
-
-resource "kubernetes_secret" "keycloak_remotestate_encryption_key" {
-  metadata {
-    name      = var.keycloak_remotestate_encryption_key_secret_name
-    namespace = var.keycloak_namespace
-  }
-
-  data = {
-    encryptionKey = random_password.keycloak_remotestate_encryption_key.result
-  }
+  namespace                              = var.keycloak_namespace
+  admin_secret_name                      = var.keycloak_secret_name
+  admin_secret_key                       = var.keycloak_secret_key
+  cluster_type                           = "build"
+  client_credentials_secret_name         = var.keycloak_client_credentials_secret_name
+  google_identity_provider_client_id     = var.google_identity_provider_client_id
+  google_identity_provider_client_secret = var.google_identity_provider_client_secret
+  remotestate_encryption_key_secret_name = var.keycloak_remotestate_encryption_key_secret_name
 
   depends_on = [kubernetes_namespace.keycloak]
 }
@@ -202,15 +86,4 @@ resource "helm_release" "keycloak" {
   ]
 
   depends_on = [kubernetes_namespace.keycloak, helm_release.keycloak_db]
-}
-
-# Retrieve data for outputs
-
-data "kubernetes_secret" "keycloak_admin_password" {
-  metadata {
-    name      = var.keycloak_secret_name
-    namespace = var.keycloak_namespace
-  }
-
-  depends_on = [helm_release.keycloak]
 }
