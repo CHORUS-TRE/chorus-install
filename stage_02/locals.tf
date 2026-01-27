@@ -196,21 +196,21 @@ locals {
     }
   })
   values_files = {
-    keycloak                  = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml"
-    keycloak_db               = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
-    harbor                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/values.yaml"
-    harbor_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml"
-    kube_prometheus_stack     = "${var.helm_values_path}/${var.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
-    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
     alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.remote_cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/values.yaml"
-    oauth2_proxy_cache        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
-    matomo                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}/values.yaml"
-    matomo_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml"
-    frontend                  = "${var.helm_values_path}/${var.remote_cluster_name}/${var.frontend_chart_name}/values.yaml"
     backend                   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
     backend_db                = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml"
     didata_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml"
-    juicefs_csi_driver        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/values.yaml"
+    frontend                  = "${var.helm_values_path}/${var.remote_cluster_name}/${var.frontend_chart_name}/values.yaml"
+    harbor                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/values.yaml"
+    harbor_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml"
     juicefs_cache             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-cache/values.yaml"
+    juicefs_csi_driver        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/values.yaml"
+    keycloak                  = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/values.yaml"
+    keycloak_db               = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
+    kube_prometheus_stack     = "${var.helm_values_path}/${var.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"
+    matomo                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}/values.yaml"
+    matomo_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml"
+    oauth2_proxy_cache        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
+    prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
   }
 }
