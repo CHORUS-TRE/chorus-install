@@ -186,8 +186,8 @@ The following requirements serve as a lower bound estimate, you might want to in
     You'll be prompted to select a workspace.
     Once you selected a workspace, run ```terraform workspace show``` to make sure your selection was correct.
     ```sh
-    terraform plan -out="stage_03.plan"
-    terraform apply "stage_03.plan"
+    terraform plan -out="stage_02.plan"
+    terraform apply "stage_02.plan"
     ```
 
 1. Make sure to add the remote cluster to the list of environments in the overriding values of the argo-deploy Helm chart deployed on the build cluster.
@@ -242,7 +242,7 @@ Error example
 Import command
 
 ```sh
-terraform import module.ingress_nginx.kubernetes_namespace.ingress_nginx ingress-nginx 
+terraform import module.ingress_nginx.kubernetes_namespace.ingress_nginx ingress-nginx
 ```
 
 Where
