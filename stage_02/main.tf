@@ -505,47 +505,46 @@ data "kubernetes_config_map" "ca_data" {
   }
 }
 
-# TODO: UNCOMMENT WHEN READY TO CONNECT REMOTE CLUSTER TO BUILD CLUSTER
-# resource "kubernetes_secret" "remote_clusters" {
-#   provider = kubernetes.build_cluster
-# 
-#   metadata {
-#     name      = "${var.remote_cluster_name}-cluster"
-#     namespace = local.argocd_namespace
-#     labels = {
-#       "argocd.argoproj.io/secret-type" = "cluster"
-#     }
-#   }
-# 
-#   data = {
-#     name   = var.remote_cluster_name
-#     server = var.remote_cluster_server
-#     config = local.remote_cluster_config
-#   }
-# 
-#   # We wait for the remote cluster configuration
-#   # to complete to avoid race condition on
-#   # namespace creation
-#   depends_on = [
-#     module.harbor_db_secret,
-#     module.harbor_secret,
-#     module.keycloak_db_secret,
-#     module.keycloak_secret,
-#     module.juicefs,
-#     kubernetes_secret.grafana_oauth_client_secret,
-#     module.alertmanager,
-#     module.oauth2_proxy,
-#     kubernetes_secret.matomo_secret,
-#     kubernetes_secret.matomo_db_secret,
-#     kubernetes_secret.i2b2_db_secret,
-#     kubernetes_secret.i2b2_wildfly,
-#     kubernetes_secret.didata_env,
-#     kubernetes_secret.didata_db_secret,
-#     kubernetes_secret.regcred_didata,
-#     module.backend_db_secret,
-#     kubernetes_secret.backend_secrets
-#   ]
-# }
+resource "kubernetes_secret" "remote_clusters" {
+  provider = kubernetes.build_cluster
+
+  metadata {
+    name      = "${var.remote_cluster_name}-cluster"
+    namespace = local.argocd_namespace
+    labels = {
+      "argocd.argoproj.io/secret-type" = "cluster"
+    }
+  }
+
+  data = {
+    name   = var.remote_cluster_name
+    server = var.remote_cluster_server
+    config = local.remote_cluster_config
+  }
+
+  # We wait for the remote cluster configuration
+  # to complete to avoid race condition on
+  # namespace creation
+  depends_on = [
+    module.harbor_db_secret,
+    module.harbor_secret,
+    module.keycloak_db_secret,
+    module.keycloak_secret,
+    module.juicefs,
+    kubernetes_secret.grafana_oauth_client_secret,
+    module.alertmanager,
+    module.oauth2_proxy,
+    kubernetes_secret.matomo_secret,
+    kubernetes_secret.matomo_db_secret,
+    kubernetes_secret.i2b2_db_secret,
+    kubernetes_secret.i2b2_wildfly,
+    kubernetes_secret.didata_env,
+    kubernetes_secret.didata_db_secret,
+    kubernetes_secret.regcred_didata,
+    module.backend_db_secret,
+    kubernetes_secret.backend_secrets
+  ]
+}
 
 locals {
   output = {
