@@ -8,6 +8,27 @@ variable "cluster_name" {
   }
 }
 
+variable "google_identity_provider_client_id" {
+  description = "Google identity provider client ID for Keycloak"
+  type        = string
+
+  validation {
+    condition     = length(var.google_identity_provider_client_id) > 0
+    error_message = "google_identity_provider_client_id cannot be empty."
+  }
+}
+
+variable "google_identity_provider_client_secret" {
+  description = "Google identity provider client secret for Keycloak"
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = length(var.google_identity_provider_client_secret) > 0
+    error_message = "google_identity_provider_client_secret cannot be empty."
+  }
+}
+
 variable "helm_registry" {
   description = "Helm chart registry to get the chart from"
   type        = string
@@ -38,28 +59,23 @@ variable "keycloak_chart_version" {
   }
 }
 
-variable "keycloak_helm_values" {
-  description = "Keycloak Helm chart values"
+variable "keycloak_client_credentials_secret_name" {
+  description = "Name of the Kubernetes Secret containing Keycloak client credentials"
   type        = string
 
   validation {
-    condition     = length(var.keycloak_helm_values) > 0
-    error_message = "keycloak_helm_values cannot be empty."
-  }
-
-  validation {
-    condition     = can(yamldecode(var.keycloak_helm_values))
-    error_message = "keycloak_helm_values must be valid YAML."
+    condition     = length(var.keycloak_client_credentials_secret_name) > 0
+    error_message = "keycloak_client_credentials_secret_name cannot be empty."
   }
 }
 
-variable "keycloak_namespace" {
-  description = "Namespace to deploy Keycloak Helm chart into"
+variable "keycloak_db_admin_secret_key" {
+  description = "The specific key within the Keycloak database secret to retrieve the admin password"
   type        = string
 
   validation {
-    condition     = length(var.keycloak_namespace) > 0
-    error_message = "keycloak_namespace cannot be empty."
+    condition     = length(var.keycloak_db_admin_secret_key) > 0
+    error_message = "keycloak_db_admin_secret_key cannot be empty."
   }
 }
 
@@ -98,26 +114,6 @@ variable "keycloak_db_helm_values" {
   }
 }
 
-variable "keycloak_secret_name" {
-  description = "Name of the Kubernetes Secret containing Keycloak credentials"
-  type        = string
-
-  validation {
-    condition     = length(var.keycloak_secret_name) > 0
-    error_message = "keycloak_secret_name cannot be empty."
-  }
-}
-
-variable "keycloak_secret_key" {
-  description = "The specific key within the Keycloak secret to retrieve"
-  type        = string
-
-  validation {
-    condition     = length(var.keycloak_secret_key) > 0
-    error_message = "keycloak_secret_key cannot be empty."
-  }
-}
-
 variable "keycloak_db_secret_name" {
   description = "Name of the Kubernetes Secret containing Keycloak database credentials"
   type        = string
@@ -125,16 +121,6 @@ variable "keycloak_db_secret_name" {
   validation {
     condition     = length(var.keycloak_db_secret_name) > 0
     error_message = "keycloak_db_secret_name cannot be empty."
-  }
-}
-
-variable "keycloak_db_admin_secret_key" {
-  description = "The specific key within the Keycloak database secret to retrieve the admin password"
-  type        = string
-
-  validation {
-    condition     = length(var.keycloak_db_admin_secret_key) > 0
-    error_message = "keycloak_db_admin_secret_key cannot be empty."
   }
 }
 
@@ -148,34 +134,28 @@ variable "keycloak_db_user_secret_key" {
   }
 }
 
-variable "google_identity_provider_client_id" {
-  description = "Google identity provider client ID for Keycloak"
+variable "keycloak_helm_values" {
+  description = "Keycloak Helm chart values"
   type        = string
 
   validation {
-    condition     = length(var.google_identity_provider_client_id) > 0
-    error_message = "google_identity_provider_client_id cannot be empty."
+    condition     = length(var.keycloak_helm_values) > 0
+    error_message = "keycloak_helm_values cannot be empty."
+  }
+
+  validation {
+    condition     = can(yamldecode(var.keycloak_helm_values))
+    error_message = "keycloak_helm_values must be valid YAML."
   }
 }
 
-variable "google_identity_provider_client_secret" {
-  description = "Google identity provider client secret for Keycloak"
-  type        = string
-  sensitive   = true
-
-  validation {
-    condition     = length(var.google_identity_provider_client_secret) > 0
-    error_message = "google_identity_provider_client_secret cannot be empty."
-  }
-}
-
-variable "keycloak_client_credentials_secret_name" {
-  description = "Name of the Kubernetes Secret containing Keycloak client credentials"
+variable "keycloak_namespace" {
+  description = "Namespace to deploy Keycloak Helm chart into"
   type        = string
 
   validation {
-    condition     = length(var.keycloak_client_credentials_secret_name) > 0
-    error_message = "keycloak_client_credentials_secret_name cannot be empty."
+    condition     = length(var.keycloak_namespace) > 0
+    error_message = "keycloak_namespace cannot be empty."
   }
 }
 
@@ -186,5 +166,25 @@ variable "keycloak_remotestate_encryption_key_secret_name" {
   validation {
     condition     = length(var.keycloak_remotestate_encryption_key_secret_name) > 0
     error_message = "keycloak_remotestate_encryption_key_secret_name cannot be empty."
+  }
+}
+
+variable "keycloak_secret_key" {
+  description = "The specific key within the Keycloak secret to retrieve"
+  type        = string
+
+  validation {
+    condition     = length(var.keycloak_secret_key) > 0
+    error_message = "keycloak_secret_key cannot be empty."
+  }
+}
+
+variable "keycloak_secret_name" {
+  description = "Name of the Kubernetes Secret containing Keycloak credentials"
+  type        = string
+
+  validation {
+    condition     = length(var.keycloak_secret_name) > 0
+    error_message = "keycloak_secret_name cannot be empty."
   }
 }

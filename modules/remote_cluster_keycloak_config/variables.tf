@@ -1,13 +1,3 @@
-variable "infra_realm_name" {
-  description = "Keycloak infrastructure realm name"
-  type        = string
-
-  validation {
-    condition     = length(var.infra_realm_name) > 0
-    error_message = "infra_realm_name cannot be empty."
-  }
-}
-
 variable "backend_realm_name" {
   description = "Keycloak chorus backend realm name"
   type        = string
@@ -29,4 +19,13 @@ variable "google_identity_provider_client_secret" {
   type        = string
   sensitive   = true
   default     = ""
+}
+variable "infra_realm_name" {
+  description = "Keycloak infrastructure realm name"
+  type        = string
+
+  validation {
+    condition     = length(var.infra_realm_name) > 0
+    error_message = "infra_realm_name cannot be empty."
+  }
 }

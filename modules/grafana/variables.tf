@@ -1,13 +1,3 @@
-variable "namespace" {
-  description = "The Kubernetes namespace where Grafana is deployed"
-  type        = string
-
-  validation {
-    condition     = length(var.namespace) > 0
-    error_message = "namespace cannot be empty."
-  }
-}
-
 variable "grafana_admin_username" {
   description = "The username of the Grafana admin"
   type        = string
@@ -18,13 +8,14 @@ variable "grafana_admin_username" {
   }
 }
 
-variable "grafana_oauth_client_secret_name" {
-  description = "Name of the Kubernetes Secret containing Grafana OAuth client credentials"
+variable "grafana_keycloak_client_secret" {
+  description = "Keycloak client secret for Grafana OAuth authentication"
   type        = string
+  sensitive   = true
 
   validation {
-    condition     = length(var.grafana_oauth_client_secret_name) > 0
-    error_message = "grafana_oauth_client_secret_name cannot be empty."
+    condition     = length(var.grafana_keycloak_client_secret) > 0
+    error_message = "grafana_keycloak_client_secret cannot be empty."
   }
 }
 
@@ -38,13 +29,22 @@ variable "grafana_oauth_client_secret_key" {
   }
 }
 
-variable "grafana_keycloak_client_secret" {
-  description = "Keycloak client secret for Grafana OAuth authentication"
+variable "grafana_oauth_client_secret_name" {
+  description = "Name of the Kubernetes Secret containing Grafana OAuth client credentials"
   type        = string
-  sensitive   = true
 
   validation {
-    condition     = length(var.grafana_keycloak_client_secret) > 0
-    error_message = "grafana_keycloak_client_secret cannot be empty."
+    condition     = length(var.grafana_oauth_client_secret_name) > 0
+    error_message = "grafana_oauth_client_secret_name cannot be empty."
+  }
+}
+
+variable "namespace" {
+  description = "The Kubernetes namespace where Grafana is deployed"
+  type        = string
+
+  validation {
+    condition     = length(var.namespace) > 0
+    error_message = "namespace cannot be empty."
   }
 }

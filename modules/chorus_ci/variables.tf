@@ -1,8 +1,3 @@
-variable "webhook_events" {
-  description = "A map of webhook event names to secret names. Example: { ci = \"ci-secret\", ... }"
-  type        = map(string)
-  default     = {}
-}
 variable "chorusci_namespace" {
   description = "Namespace where ChorusCI is deployed"
   type        = string
@@ -13,14 +8,14 @@ variable "chorusci_namespace" {
   }
 }
 
-variable "github_workbench_operator_token" {
-  description = "GitHub token for the Workbench Operator repository"
+variable "github_chorus_backend_token" {
+  description = "GitHub token for the Chorus Backend repository"
   type        = string
   sensitive   = true
 
   validation {
-    condition     = length(var.github_workbench_operator_token) > 0
-    error_message = "github_workbench_operator_token cannot be empty."
+    condition     = length(var.github_chorus_backend_token) > 0
+    error_message = "github_chorus_backend_token cannot be empty."
   }
 }
 
@@ -46,17 +41,6 @@ variable "github_images_token" {
   }
 }
 
-variable "github_chorus_backend_token" {
-  description = "GitHub token for the Chorus Backend repository"
-  type        = string
-  sensitive   = true
-
-  validation {
-    condition     = length(var.github_chorus_backend_token) > 0
-    error_message = "github_chorus_backend_token cannot be empty."
-  }
-}
-
 variable "github_username" {
   description = "GitHub username for Argo Workflows to use"
   type        = string
@@ -64,6 +48,28 @@ variable "github_username" {
   validation {
     condition     = length(var.github_username) > 0
     error_message = "github_username cannot be empty."
+  }
+}
+
+variable "github_workbench_operator_token" {
+  description = "GitHub token for the Workbench Operator repository"
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = length(var.github_workbench_operator_token) > 0
+    error_message = "github_workbench_operator_token cannot be empty."
+  }
+}
+
+variable "registry_password" {
+  description = "The robot password for the container registry"
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = length(var.registry_password) > 0
+    error_message = "registry_password cannot be empty."
   }
 }
 
@@ -87,17 +93,6 @@ variable "registry_username" {
   }
 }
 
-variable "registry_password" {
-  description = "The robot password for the container registry"
-  type        = string
-  sensitive   = true
-
-  validation {
-    condition     = length(var.registry_password) > 0
-    error_message = "registry_password cannot be empty."
-  }
-}
-
 variable "sensor_regcred_secret_name" {
   description = "The name of the Kubernetes secret for the sensor Docker registry credentials."
   type        = string
@@ -105,6 +100,12 @@ variable "sensor_regcred_secret_name" {
     condition     = length(var.sensor_regcred_secret_name) > 0
     error_message = "sensor_regcred_secret_name cannot be empty."
   }
+}
+
+variable "webhook_events" {
+  description = "A map of webhook event names to secret names. Example: { ci = \"ci-secret\", ... }"
+  type        = map(string)
+  default     = {}
 }
 
 variable "webhook_events_map" {

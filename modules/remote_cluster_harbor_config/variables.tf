@@ -1,3 +1,9 @@
+variable "build_robot_username" {
+  description = "The username of the robot account used for replication (push-based strategy)"
+  type        = string
+  default     = ""
+}
+
 variable "cluster_robot_username" {
   description = "The username of the robot account used for registry credentials"
   type        = string
@@ -6,12 +12,6 @@ variable "cluster_robot_username" {
     condition     = length(var.cluster_robot_username) > 0
     error_message = "cluster_robot_username cannot be empty."
   }
-}
-
-variable "build_robot_username" {
-  description = "The username of the robot account used for replication (push-based strategy)"
-  type        = string
-  default     = ""
 }
 
 variable "pull_replication_registry_name" {

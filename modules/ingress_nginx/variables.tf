@@ -1,23 +1,3 @@
-variable "cluster_name" {
-  description = "The cluster name to be used as a prefix to release names"
-  type        = string
-
-  validation {
-    condition     = length(var.cluster_name) > 0
-    error_message = "cluster_name cannot be empty."
-  }
-}
-
-variable "helm_registry" {
-  description = "Helm chart registry to get the chart from"
-  type        = string
-
-  validation {
-    condition     = length(var.helm_registry) > 0
-    error_message = "helm_registry cannot be empty."
-  }
-}
-
 variable "chart_name" {
   description = "Ingress-Nginx Helm chart name"
   type        = string
@@ -38,6 +18,26 @@ variable "chart_version" {
   }
 }
 
+variable "cluster_name" {
+  description = "The cluster name to be used as a prefix to release names"
+  type        = string
+
+  validation {
+    condition     = length(var.cluster_name) > 0
+    error_message = "cluster_name cannot be empty."
+  }
+}
+
+variable "helm_registry" {
+  description = "Helm chart registry to get the chart from"
+  type        = string
+
+  validation {
+    condition     = length(var.helm_registry) > 0
+    error_message = "helm_registry cannot be empty."
+  }
+}
+
 variable "helm_values" {
   description = "Ingress-Nginx Helm chart values"
   type        = string
@@ -53,13 +53,13 @@ variable "helm_values" {
   */
 }
 
-variable "namespace" {
-  description = "Namespace to deploy Ingress-Nginx Helm chart into"
+variable "kubeconfig_context" {
+  description = "Kubernetes context to use"
   type        = string
 
   validation {
-    condition     = length(var.namespace) > 0
-    error_message = "namespace cannot be empty."
+    condition     = length(var.kubeconfig_context) > 0
+    error_message = "kubeconfig_context cannot be empty."
   }
 }
 
@@ -78,12 +78,12 @@ variable "kubeconfig_path" {
   }
 }
 
-variable "kubeconfig_context" {
-  description = "Kubernetes context to use"
+variable "namespace" {
+  description = "Namespace to deploy Ingress-Nginx Helm chart into"
   type        = string
 
   validation {
-    condition     = length(var.kubeconfig_context) > 0
-    error_message = "kubeconfig_context cannot be empty."
+    condition     = length(var.namespace) > 0
+    error_message = "namespace cannot be empty."
   }
 }
