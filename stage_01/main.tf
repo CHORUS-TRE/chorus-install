@@ -294,3 +294,37 @@ resource "kubernetes_secret" "argocd_secret" {
     "${local.argocd_keycloak_client_secret_key}" = module.keycloak.argocd_keycloak_client_secret
   }
 }
+
+locals {
+  output = {
+    harbor_admin_username = var.harbor_admin_username
+    harbor_admin_password = module.harbor.harbor_admin_password
+    harbor_url            = local.harbor_url
+    harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
+
+    harbor_chorusci_robot_password = module.harbor.harbor_robot_secrets["chorus-ci"]
+    harbor_argocd_robot_password   = module.harbor.harbor_robot_secrets["argocd"]
+    harbor_renovate_robot_password = module.harbor.harbor_robot_secrets["renovate"]
+    harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
+    harbor_db_password             = module.harbor.harbor_db_password
+    harbor_db_admin_username       = "postgres"
+    harbor_db_admin_password       = module.harbor.harbor_db_admin_password
+
+    keycloak_admin_username    = "admin"
+    keycloak_admin_password    = module.keycloak.keycloak_admin_password
+    keycloak_url               = local.keycloak_url
+    keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
+    keycloak_db_password       = module.keycloak.keycloak_db_password
+    keycloak_db_admin_username = "postgres"
+    keycloak_db_admin_password = module.keycloak.keycloak_db_admin_password
+
+    argocd_url      = module.argo_cd.argocd_url
+    argocd_username = module.argo_cd.argocd_username
+    argocd_password = module.argo_cd.argocd_password
+  }
+}
+
+resource "local_file" "stage_01_output" {
+  filename = "../${var.cluster_name}_output.yaml"
+  content  = yamlencode(local.output)
+}
