@@ -3,7 +3,7 @@ terraform {
     organization = "CHORUS-TRE"
     workspaces {
       project = "chorus-install"
-      tags    = ["stage_03"]
+      tags    = ["stage_02"]
     }
   }
 }
