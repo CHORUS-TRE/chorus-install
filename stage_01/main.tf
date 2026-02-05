@@ -303,7 +303,7 @@ locals {
     harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
 
     harbor_chorusci_robot_password = module.harbor.harbor_robot_secrets["chorus-ci"]
-    harbor_argocd_robot_password   = module.harbor.harbor_robot_secrets["argocd"]
+    harbor_argocd_robot_password   = module.harbor.harbor_robot_secrets["argo-cd"]
     harbor_renovate_robot_password = module.harbor.harbor_robot_secrets["renovate"]
     harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
     harbor_db_password             = module.harbor.harbor_db_password
