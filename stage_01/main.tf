@@ -176,6 +176,8 @@ module "alertmanager" {
   webex_access_token     = var.webex_access_token
 
   count = var.webex_access_token != "" ? 1 : 0
+
+  depends_on = [module.grafana]
 }
 
 module "oauth2_proxy" {
@@ -199,6 +201,13 @@ module "oauth2_proxy" {
 
   oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_session_storage_secret_name
   oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
+
+  depends_on = [
+    module.certificate_authorities,
+    module.ingress_nginx,
+    module.keycloak,
+    module.grafana,
+  ]
 }
 
 module "argo_workflows" {
