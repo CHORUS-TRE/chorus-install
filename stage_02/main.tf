@@ -121,6 +121,12 @@ module "harbor_secret" {
 
 # JuiceFS
 
+resource "kubernetes_namespace" "juicefs" {
+  metadata {
+    name = local.juicefs_cache_namespace
+  }
+}
+
 module "juicefs" {
   source = "../modules/juicefs"
 
@@ -137,6 +143,7 @@ module "juicefs" {
   s3_bucket_name                = var.s3_bucket_name
 
   count = var.s3_secret_key == "" ? 0 : 1
+  depends_on = [kubernetes_namespace.juicefs]
 }
 
 # Prometheus
