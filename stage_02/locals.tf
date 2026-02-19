@@ -26,7 +26,7 @@ locals {
       daemon_metrics_authentication_enabled  = "true"
       daemon_metrics_authentication_username = "prometheus"
       daemon_metrics_authentication_password = random_password.metrics_password.result
-      daemon_private_key                     = indent(2, trimspace(tls_private_key.chorus_backend_daemon.private_key_pem))
+      daemon_private_key                     = tls_private_key.chorus_backend_daemon.private_key_pem
       storage_datastores_chorus_password     = module.backend_db_secret.db_password
       k8s_client_is_watcher                  = "true"
       k8s_client_api_server                  = var.remote_cluster_server
@@ -40,7 +40,6 @@ locals {
       keycloak_openid_client_secret = module.keycloak_secret.chorus_client_secret
       keycloak_dev_enabled          = local.backend_keycloak_dev_enabled
       steward_password              = random_password.steward_password.result
-      backend_s3_enabled            = try(local.backend_values_parsed.main.clients.minio_client.enabled, false)
       juicefs_endpoint              = try(local.backend_values_parsed.main.clients.minio_client.endpoint, "")
       s3_access_key                 = var.s3_access_key
       s3_secret_key                 = var.s3_secret_key
