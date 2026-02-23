@@ -232,29 +232,37 @@ variable "remote_cluster_webex_access_token" {
   default     = ""
 }
 
+variable "remote_cluster_loki_s3_access_key_id" {
+  description = "S3 access key ID for Loki storage in the remote cluster"
+  type        = string
+  sensitive   = true
+}
+
+variable "remote_cluster_loki_s3_secret_access_key" {
+  description = "S3 secret access key for Loki storage in the remote cluster"
+  type        = string
+  sensitive   = true
+}
+
 variable "s3_access_key" {
   description = "S3 access key"
   type        = string
-  default     = ""
 }
 
 variable "s3_bucket_name" {
   description = "S3 access key"
   type        = string
-  default     = ""
 }
 
 variable "s3_endpoint" {
   description = "S3 endpoint"
   type        = string
-  default     = ""
 }
 
 variable "s3_secret_key" {
   description = "S3 secret key"
   type        = string
   sensitive   = true
-  default     = ""
 }
 
 variable "templates_path" {

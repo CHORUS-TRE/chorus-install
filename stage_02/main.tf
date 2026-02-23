@@ -142,7 +142,7 @@ module "juicefs" {
   s3_endpoint                   = var.s3_endpoint
   s3_bucket_name                = var.s3_bucket_name
 
-  count = var.s3_secret_key == "" ? 0 : 1
+  count      = var.s3_secret_key == "" ? 0 : 1
   depends_on = [kubernetes_namespace.juicefs]
 }
 
@@ -154,25 +154,34 @@ resource "kubernetes_namespace" "prometheus" {
   }
 }
 
-# Grafana
+# Loki
 
-resource "random_password" "grafana_admin_password" {
-  length  = 32
-  special = false
-}
+module "loki" {
+  source = "../modules/loki"
 
-resource "kubernetes_secret" "grafana_oauth_client_secret" {
-  metadata {
-    name      = local.grafana_oauth_client_secret_name
-    namespace = local.prometheus_namespace
-  }
-  data = {
-    "admin-password"                           = random_password.grafana_admin_password.result
-    "admin-user"                               = var.grafana_admin_username
-    "${local.grafana_oauth_client_secret_key}" = module.keycloak_secret.grafana_client_secret
-  }
+  namespace            = local.loki_namespace
+  loki_clients         = ["${var.cluster_name}-fluentbit", "${var.cluster_name}-grafana"]
+  s3_access_key_id     = var.remote_cluster_loki_s3_access_key_id
+  s3_secret_access_key = var.remote_cluster_loki_s3_secret_access_key
 
   depends_on = [kubernetes_namespace.prometheus]
+}
+
+# Grafana
+
+module "grafana" {
+  source = "../modules/grafana"
+
+  namespace                        = local.prometheus_namespace
+  grafana_admin_username           = var.grafana_admin_username
+  grafana_keycloak_client_secret   = module.keycloak.grafana_keycloak_client_secret
+  grafana_oauth_client_secret_name = local.grafana_oauth_client_secret_name
+  grafana_oauth_client_secret_key  = local.grafana_oauth_client_secret_key
+  loki_http_user                   = "${var.cluster_name}-grafana"
+  loki_http_password               = module.loki.loki_client_passwords["${var.cluster_name}-grafana"]
+  loki_tenant_id                   = var.cluster_name
+
+  depends_on = [module.loki]
 }
 
 # Alertmanager
@@ -187,6 +196,20 @@ module "alertmanager" {
 
   count      = var.remote_cluster_webex_access_token != "" ? 1 : 0
   depends_on = [kubernetes_namespace.prometheus]
+}
+
+# Fluent
+
+module "fluent_operator" {
+  source = "../modules/fluent_operator"
+
+  namespace = local.fluent_operator_namespace
+
+  loki_http_user     = "${var.cluster_name}-fluentbit"
+  loki_http_password = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
+  loki_tenant_id     = var.cluster_name
+
+  depends_on = [module.loki]
 }
 
 # OAuth2 proxy
