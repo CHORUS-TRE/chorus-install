@@ -73,6 +73,7 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | `s3_bucket_name` | S3 bucket name for JuiceFS storage backend | `""` |
 | `s3_endpoint` | S3 endpoint URL for JuiceFS storage backend | `""` |
 | `s3_secret_key` | S3 secret key for JuiceFS storage backend | `""` |
+
 ### Logging and Observability Configuration
 
 | Variable | Description | Default |
