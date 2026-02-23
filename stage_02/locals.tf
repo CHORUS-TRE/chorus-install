@@ -71,6 +71,8 @@ locals {
     juicefs_csi_driver        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-csi-driver/config.json"
     juicefs_s3_gateway        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-s3-gateway/config.json"
     juicefs_cache             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.juicefs_chart_name}-cache/config.json"
+    loki                      = "${var.helm_values_path}/${var.remote_cluster_name}/${var.loki_chart_name}/config.json"
+    fluent_operator           = "${var.helm_values_path}/${var.remote_cluster_name}/${var.fluent_operator_chart_name}/config.json"
     reflector                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.reflector_chart_name}/config.json"
   }
   didata_db_namespace     = jsondecode(file(local.config_files.didata_db)).namespace
@@ -94,6 +96,7 @@ locals {
   frontend_url                      = "https://${local.frontend_values_parsed.ingress.hosts.0.host}"
   frontend_values                   = file(local.values_files.frontend)
   frontend_values_parsed            = yamldecode(local.frontend_values)
+  fluent_operator_namespace          = jsondecode(file(local.config_files.fluent_operator)).namespace
   grafana_oauth_client_secret_key   = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
   grafana_oauth_client_secret_name  = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
   grafana_url                       = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
@@ -164,6 +167,7 @@ locals {
   keycloak_values_parsed                         = yamldecode(local.keycloak_values)
   kube_prometheus_stack_values                   = file(local.values_files.kube_prometheus_stack)
   kube_prometheus_stack_values_parsed            = yamldecode(local.kube_prometheus_stack_values)
+  loki_namespace                                 = jsondecode(file(local.config_files.loki)).namespace
   matomo_db_host                                 = local.matomo_values_parsed.matomo.externalDatabase.host
   matomo_db_namespace                            = jsondecode(file(local.config_files.matomo_db)).namespace
   matomo_db_secret_name                          = local.matomo_db_values_parsed.mariadb.auth.existingSecret

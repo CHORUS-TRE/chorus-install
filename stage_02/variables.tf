@@ -82,6 +82,12 @@ variable "grafana_admin_username" {
   default     = "admin"
 }
 
+variable "fluent_operator_chart_name" {
+  description = "Fluent Operator Helm chart name"
+  type        = string
+  default     = "fluent-operator"
+}
+
 variable "harbor_admin_username" {
   description = "Harbor admin username"
   type        = string
@@ -167,6 +173,12 @@ variable "kubeconfig_context" {
 variable "kubeconfig_path" {
   description = "Path to the Kubernetes config file"
   type        = string
+}
+
+variable "loki_chart_name" {
+  description = "Loki Helm chart name"
+  type        = string
+  default     = "loki"
 }
 
 variable "matomo_chart_name" {

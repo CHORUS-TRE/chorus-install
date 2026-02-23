@@ -174,7 +174,7 @@ module "grafana" {
 
   namespace                        = local.prometheus_namespace
   grafana_admin_username           = var.grafana_admin_username
-  grafana_keycloak_client_secret   = module.keycloak.grafana_keycloak_client_secret
+  grafana_keycloak_client_secret   = module.keycloak_secret.grafana_client_secret
   grafana_oauth_client_secret_name = local.grafana_oauth_client_secret_name
   grafana_oauth_client_secret_key  = local.grafana_oauth_client_secret_key
   loki_http_user                   = "${var.cluster_name}-grafana"
@@ -562,7 +562,7 @@ resource "kubernetes_secret" "remote_clusters" {
     module.keycloak_db_secret,
     module.keycloak_secret,
     module.juicefs,
-    kubernetes_secret.grafana_oauth_client_secret,
+    module.grafana,
     module.alertmanager,
     module.oauth2_proxy,
     kubernetes_secret.matomo_secret,
@@ -592,7 +592,6 @@ locals {
     alertmanager_url       = local.alertmanager_url
     grafana_url            = local.grafana_url
     grafana_admin_username = var.grafana_admin_username
-    grafana_admin_password = random_password.grafana_admin_password.result
 
     matomo_url   = local.matomo_url
     frontend_url = local.frontend_url
