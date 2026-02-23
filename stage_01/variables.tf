@@ -236,6 +236,26 @@ variable "kubeconfig_path" {
   type        = string
 }
 
+variable "loki_s3_access_key_id" {
+  description = "S3 access key ID for Loki storage"
+  type        = string
+  sensitive   = true
+}
+
+variable "loki_s3_secret_access_key" {
+  description = "S3 secret access key for Loki storage"
+  type        = string
+  sensitive   = true
+}
+
+variable "loki_chart_name" {
+  description = "Loki Helm chart folder name"
+  type        = string
+  default     = "loki"
+}
+
+
+
 variable "oauth2_proxy_cache_chart_name" {
   description = "OAuth2 Proxy Cache Helm chart folder name"
   type        = string

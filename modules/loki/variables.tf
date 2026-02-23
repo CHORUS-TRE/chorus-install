@@ -9,10 +9,8 @@ variable "namespace" {
 }
 
 variable "loki_clients" {
-  description = "List of Loki client names for basic auth"
-  type = list(object({
-    name = string
-  }))
+  description = "List of Loki client names for basic auth (passwords will be auto-generated)"
+  type        = list(string)
 
   validation {
     condition     = length(var.loki_clients) > 0
@@ -20,7 +18,7 @@ variable "loki_clients" {
   }
 
   validation {
-    condition     = alltrue([for client in var.loki_clients : length(client.name) > 0])
+    condition     = alltrue([for client in var.loki_clients : length(client) > 0])
     error_message = "All client names must be non-empty."
   }
 }

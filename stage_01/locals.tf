@@ -53,6 +53,7 @@ locals {
     keycloak                  = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json"
     keycloak_db               = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/config.json"
     kube_prometheus_stack     = "${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
+    loki                      = "${var.helm_values_path}/${var.cluster_name}/${var.loki_chart_name}/config.json"
     oauth2_proxy_cache        = "${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json"
     prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
     selfsigned                = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/config.json"
@@ -122,6 +123,7 @@ locals {
   keycloak_values_parsed                         = yamldecode(file(local.values_files.keycloak))
   kube_prometheus_stack_values_parsed            = yamldecode(file(local.values_files.kube_prometheus_stack))
   oauth2_proxy_cache_namespace                   = jsondecode(file(local.config_files.oauth2_proxy_cache)).namespace
+  loki_namespace                                 = jsondecode(file(local.config_files.loki)).namespace
   oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_values_parsed.valkey.auth.existingSecretPasswordKey
   oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_values_parsed.valkey.auth.existingSecret
   oauth2_proxy_cache_values_parsed               = yamldecode(file(local.values_files.oauth2_proxy_cache))

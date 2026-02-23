@@ -180,6 +180,30 @@ module "alertmanager" {
   depends_on = [module.grafana]
 }
 
+module "loki" {
+  source = "../modules/loki"
+
+  namespace            = local.loki_namespace
+  loki_clients         = ["${var.cluster_name}-fluentbit", "${var.cluster_name}-grafana"]
+  s3_access_key_id     = var.loki_s3_access_key_id
+  s3_secret_access_key = var.loki_s3_secret_access_key
+
+  depends_on = [module.alertmanager]
+}
+
+resource "kubernetes_secret" "prometheus_loki_client_credentials" {
+  metadata {
+    name      = "loki-client-credentials"
+    namespace = local.prometheus_namespace
+  }
+
+  data = {
+    httpUser = "${var.cluster_name}-fluentbit"
+    httpPassword = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
+    tenantID = "${var.cluster_name}"
+  }
+}
+
 module "oauth2_proxy" {
   source = "../modules/oauth2_proxy"
 

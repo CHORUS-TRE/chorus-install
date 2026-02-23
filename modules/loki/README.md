@@ -15,7 +15,7 @@ This module manages Loki secrets on a Kubernetes cluster using Terraform. The Lo
 | Name                     | Description                                                    | Type   | Required | Sensitive |
 |--------------------------|----------------------------------------------------------------|--------|----------|-----------|
 | `namespace`              | The Kubernetes namespace where Loki is deployed (shared with Prometheus) | string | Yes      | No        |
-| `loki_clients`           | List of Loki client objects with `name` field. Passwords are auto-generated. | list(object) | Yes | No |
+| `loki_clients`           | List of Loki client names. Passwords are auto-generated.       | list(string) | Yes | No |
 | `s3_access_key_id`       | S3 access key ID for Loki storage                              | string | Yes      | Yes       |
 | `s3_secret_access_key`   | S3 secret access key for Loki storage                          | string | Yes      | Yes       |
 
@@ -41,8 +41,8 @@ module "loki" {
   namespace = "prometheus"
   
   loki_clients = [
-    { name = "chorus-dev-fluentbit" },
-    { name = "chorus-dev-grafana" }
+    "chorus-dev-fluentbit",
+    "chorus-dev-grafana"
   ]
   
   s3_access_key_id     = var.loki_s3_access_key_id

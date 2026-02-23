@@ -373,6 +373,7 @@ resource "kubernetes_namespace" "reflector" {
   }
 }
 
+# TODO: add core regcred too?
 resource "kubernetes_secret" "regcred_didata" {
   metadata {
     name      = "regcred-didata"

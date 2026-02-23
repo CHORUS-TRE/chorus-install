@@ -2,7 +2,7 @@
 
 # Generate random passwords for each Loki client
 resource "random_password" "loki_client_password" {
-  for_each = { for client in var.loki_clients : client.name => client }
+  for_each = toset(var.loki_clients)
 
   length  = 32
   special = false
@@ -12,7 +12,7 @@ resource "random_password" "loki_client_password" {
 locals {
   htpasswd_entries = [
     for client in var.loki_clients :
-    "${client.name}:${bcrypt(random_password.loki_client_password[client.name].result)}"
+    "${client}:${bcrypt(random_password.loki_client_password[client].result)}"
   ]
   htpasswd_content = join("\n", local.htpasswd_entries)
 }
