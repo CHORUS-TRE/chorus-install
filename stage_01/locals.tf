@@ -46,6 +46,7 @@ locals {
     cert_manager              = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"
     chorus_priority_class     = "${var.helm_values_path}/${var.cluster_name}/${var.chorus_priority_class_chart_name}/config.json"
     chorusci                  = "${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/config.json"
+    fluent_operator           = "${var.helm_values_path}/${var.cluster_name}/${var.fluent_operator_chart_name}/config.json"
     harbor                    = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json"
     harbor_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/config.json"
     harbor_db                 = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/config.json"
@@ -58,6 +59,7 @@ locals {
     prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
     selfsigned                = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/config.json"
   }
+  fluent_operator_namespace         = jsondecode(file(local.config_files.fluent_operator)).namespace
   grafana_namespace                 = local.prometheus_namespace
   grafana_oauth_client_secret_key   = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
   grafana_oauth_client_secret_name  = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name

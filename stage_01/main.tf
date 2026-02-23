@@ -198,10 +198,22 @@ resource "kubernetes_secret" "prometheus_loki_client_credentials" {
   }
 
   data = {
-    httpUser = "${var.cluster_name}-fluentbit"
+    httpUser     = "${var.cluster_name}-fluentbit"
     httpPassword = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
-    tenantID = "${var.cluster_name}"
+    tenantID     = "${var.cluster_name}"
   }
+}
+
+module "fluent_operator" {
+  source = "../modules/fluent_operator"
+
+  namespace = local.fluent_operator_namespace
+
+  loki_http_user     = "${var.cluster_name}-fluentbit"
+  loki_http_password = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
+  loki_tenant_id     = var.cluster_name
+
+  depends_on = [module.loki]
 }
 
 module "oauth2_proxy" {

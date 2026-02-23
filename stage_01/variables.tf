@@ -81,6 +81,12 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "fluent_operator_chart_name" {
+  description = "Fluent Operator Helm chart folder name"
+  type        = string
+  default     = "fluent-operator"
+}
+
 variable "github_chorus_backend_token" {
   description = "GitHub token for the Chorus Backend repository"
   type        = string
@@ -253,8 +259,6 @@ variable "loki_chart_name" {
   type        = string
   default     = "loki"
 }
-
-
 
 variable "oauth2_proxy_cache_chart_name" {
   description = "OAuth2 Proxy Cache Helm chart folder name"
