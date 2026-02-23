@@ -151,6 +151,23 @@ module "harbor" {
   ]
 }
 
+resource "kubernetes_namespace" "prometheus" {
+  metadata {
+    name = local.prometheus_namespace
+  }
+}
+
+module "loki" {
+  source = "../modules/loki"
+
+  namespace            = local.loki_namespace
+  loki_clients         = ["${var.cluster_name}-fluentbit", "${var.cluster_name}-grafana"]
+  s3_access_key_id     = var.loki_s3_access_key_id
+  s3_secret_access_key = var.loki_s3_secret_access_key
+
+  depends_on = [kubernetes_namespace.prometheus]
+}
+
 module "grafana" {
   source = "../modules/grafana"
 
@@ -159,11 +176,15 @@ module "grafana" {
   grafana_keycloak_client_secret   = module.keycloak.grafana_keycloak_client_secret
   grafana_oauth_client_secret_name = local.grafana_oauth_client_secret_name
   grafana_oauth_client_secret_key  = local.grafana_oauth_client_secret_key
+  loki_http_user                   = "${var.cluster_name}-grafana"
+  loki_http_password               = module.loki.loki_client_passwords["${var.cluster_name}-grafana"]
+  loki_tenant_id                   = var.cluster_name
 
   depends_on = [
     module.certificate_authorities,
     module.ingress_nginx,
     module.keycloak,
+    module.loki,
   ]
 }
 
@@ -178,30 +199,6 @@ module "alertmanager" {
   count = var.webex_access_token != "" ? 1 : 0
 
   depends_on = [module.grafana]
-}
-
-module "loki" {
-  source = "../modules/loki"
-
-  namespace            = local.loki_namespace
-  loki_clients         = ["${var.cluster_name}-fluentbit", "${var.cluster_name}-grafana"]
-  s3_access_key_id     = var.loki_s3_access_key_id
-  s3_secret_access_key = var.loki_s3_secret_access_key
-
-  depends_on = [module.alertmanager]
-}
-
-resource "kubernetes_secret" "prometheus_loki_client_credentials" {
-  metadata {
-    name      = "loki-client-credentials"
-    namespace = local.prometheus_namespace
-  }
-
-  data = {
-    httpUser     = "${var.cluster_name}-fluentbit"
-    httpPassword = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
-    tenantID     = "${var.cluster_name}"
-  }
 }
 
 module "fluent_operator" {
