@@ -403,7 +403,6 @@ resource "kubernetes_namespace" "reflector" {
   }
 }
 
-# TODO: add core regcred too?
 resource "kubernetes_secret" "regcred_didata" {
   metadata {
     name      = "regcred-didata"
@@ -478,6 +477,32 @@ resource "kubernetes_secret" "backend_secrets" {
   }
 
   depends_on = [kubernetes_namespace.backend]
+}
+
+# RegCred
+
+resource "kubernetes_secret" "regcred" {
+  metadata {
+    name      = "regcred"
+    namespace = local.reflector_namespace
+    annotations = {
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "kube-system,workbench-operator-system,backend,frontend,workspace[0-9]+"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
+    }
+  }
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      "auths" = {
+        "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}" = {
+          "auth" = base64encode(join(":", [join("$", ["robot", "${var.remote_cluster_name}"]), module.harbor_secret.harbor_robot_secrets["${var.remote_cluster_name}"]]))
+        }
+      }
+    })
+  }
+  type = "kubernetes.io/dockerconfigjson"
+
+  depends_on = [kubernetes_namespace.reflector]
 }
 
 # Remote Cluster Connection for ArgoCD running on build cluster (see stage_01)
@@ -593,7 +618,10 @@ locals {
     grafana_url            = local.grafana_url
     grafana_admin_username = var.grafana_admin_username
 
-    matomo_url   = local.matomo_url
+    matomo_url      = local.matomo_url
+    matomo_username = "admin"
+    matomo_password = random_password.matomo_password.result
+
     frontend_url = local.frontend_url
     backend_url  = local.backend_url
     didata_url   = local.didata_url
