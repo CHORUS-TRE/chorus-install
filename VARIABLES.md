@@ -73,6 +73,14 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | `s3_bucket_name` | S3 bucket name for JuiceFS storage backend | `""` |
 | `s3_endpoint` | S3 endpoint URL for JuiceFS storage backend | `""` |
 | `s3_secret_key` | S3 secret key for JuiceFS storage backend | `""` |
+### Logging and Observability Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------||
+| `loki_s3_access_key_id` | S3 access key ID for Loki storage backend (build cluster) | `""` |
+| `loki_s3_secret_access_key` | S3 secret access key for Loki storage backend (build cluster) | `""` |
+| `remote_cluster_loki_s3_access_key_id` | S3 access key ID for Loki storage backend (remote cluster) | `""` |
+| `remote_cluster_loki_s3_secret_access_key` | S3 secret access key for Loki storage backend (remote cluster) | `""` |
 
 ### Applications Configuration
 
