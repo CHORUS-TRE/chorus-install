@@ -39,12 +39,12 @@ module "loki" {
   source = "./modules/loki"
 
   namespace = "prometheus"
-  
+
   loki_clients = [
     "chorus-dev-fluentbit",
     "chorus-dev-grafana"
   ]
-  
+
   s3_access_key_id     = var.loki_s3_access_key_id
   s3_secret_access_key = var.loki_s3_secret_access_key
 }
