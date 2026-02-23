@@ -69,8 +69,8 @@ module "keycloak_secret" {
   admin_secret_key                       = local.keycloak_secret_key
   cluster_type                           = "remote"
   client_credentials_secret_name         = local.keycloak_client_credentials_secret_name
-  google_identity_provider_client_id     = var.google_identity_provider_client_id
-  google_identity_provider_client_secret = var.google_identity_provider_client_secret
+  google_identity_provider_client_id     = var.remote_cluster_google_identity_provider_client_id
+  google_identity_provider_client_secret = var.remote_cluster_google_identity_provider_client_secret
   remotestate_encryption_key_secret_name = local.keycloak_remotestate_encryption_key_secret_name
 
   depends_on = [kubernetes_namespace.keycloak]
@@ -121,6 +121,12 @@ module "harbor_secret" {
 
 # JuiceFS
 
+resource "kubernetes_namespace" "juicefs" {
+  metadata {
+    name = local.juicefs_cache_namespace
+  }
+}
+
 module "juicefs" {
   source = "../modules/juicefs"
 
@@ -137,6 +143,7 @@ module "juicefs" {
   s3_bucket_name                = var.s3_bucket_name
 
   count = var.s3_secret_key == "" ? 0 : 1
+  depends_on = [kubernetes_namespace.juicefs]
 }
 
 # Prometheus
