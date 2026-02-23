@@ -33,7 +33,7 @@ locals {
       k8s_client_image_pull_secrets = [
         {
           registry = "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}"
-          username = join("", ["robot$", "${var.remote_cluster_name}"])
+          username = join("$", ["robot", "${var.remote_cluster_name}"])
           password = module.harbor_secret.harbor_robot_secrets["${var.remote_cluster_name}"]
         }
       ]
@@ -96,7 +96,7 @@ locals {
   frontend_url                      = "https://${local.frontend_values_parsed.ingress.hosts.0.host}"
   frontend_values                   = file(local.values_files.frontend)
   frontend_values_parsed            = yamldecode(local.frontend_values)
-  fluent_operator_namespace          = jsondecode(file(local.config_files.fluent_operator)).namespace
+  fluent_operator_namespace         = jsondecode(file(local.config_files.fluent_operator)).namespace
   grafana_oauth_client_secret_key   = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.key
   grafana_oauth_client_secret_name  = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana.envValueFrom.GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET.secretKeyRef.name
   grafana_url                       = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.grafana["grafana.ini"].server.root_url
