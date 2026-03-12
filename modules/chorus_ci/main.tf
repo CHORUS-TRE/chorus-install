@@ -7,13 +7,12 @@ resource "random_password" "chorusci_github_workbench_operator_secret" {
 
 resource "kubernetes_secret" "chorusci_github_workbench_operator" {
   metadata {
-    name      = var.webhook_events_map["workbench-operator"]
+    name      = var.webhook_events_map["workbench-operator"].secretName
     namespace = var.chorusci_namespace
   }
 
   data = {
-    secret = random_password.chorusci_github_workbench_operator_secret.result
-    token  = var.github_workbench_operator_token
+    (var.webhook_events_map["workbench-operator"].secretKey) = random_password.chorusci_github_workbench_operator_secret.result
   }
 
   lifecycle {
@@ -21,18 +20,6 @@ resource "kubernetes_secret" "chorusci_github_workbench_operator" {
       condition     = contains(keys(var.webhook_events_map), "workbench-operator")
       error_message = "Not found: 'workbench-operator' webhook event missing in chorus-ci Helm values"
     }
-  }
-}
-
-resource "kubernetes_secret" "argo_workflows_github_workbench_operator" {
-  metadata {
-    name      = "argo-workflows-github-workbench-operator"
-    namespace = var.chorusci_namespace
-  }
-
-  data = {
-    username = var.github_username
-    password = var.github_workbench_operator_token
   }
 }
 
@@ -45,13 +32,12 @@ resource "random_password" "chorusci_github_chorus_web_ui_secret" {
 
 resource "kubernetes_secret" "chorusci_github_chorus_web_ui" {
   metadata {
-    name      = var.webhook_events_map["chorus-web-ui"]
+    name      = var.webhook_events_map["chorus-web-ui"].secretName
     namespace = var.chorusci_namespace
   }
 
   data = {
-    secret = random_password.chorusci_github_chorus_web_ui_secret.result
-    token  = var.github_chorus_web_ui_token
+    (var.webhook_events_map["chorus-web-ui"].secretKey) = random_password.chorusci_github_chorus_web_ui_secret.result
   }
 
   lifecycle {
@@ -59,18 +45,6 @@ resource "kubernetes_secret" "chorusci_github_chorus_web_ui" {
       condition     = contains(keys(var.webhook_events_map), "chorus-web-ui")
       error_message = "Not found: 'chorus-web-ui' webhook event missing in chorus-ci Helm values"
     }
-  }
-}
-
-resource "kubernetes_secret" "argo_workflows_github_chorus_web_ui" {
-  metadata {
-    name      = "argo-workflows-github-chorus-web-ui"
-    namespace = var.chorusci_namespace
-  }
-
-  data = {
-    username = var.github_username
-    password = var.github_chorus_web_ui_token
   }
 }
 
@@ -83,13 +57,12 @@ resource "random_password" "chorusci_github_images_secret" {
 
 resource "kubernetes_secret" "chorusci_github_images" {
   metadata {
-    name      = var.webhook_events_map["ci"]
+    name      = var.webhook_events_map["ci"].secretName
     namespace = var.chorusci_namespace
   }
 
   data = {
-    secret = random_password.chorusci_github_images_secret.result
-    token  = var.github_images_token
+    (var.webhook_events_map["ci"].secretKey) = random_password.chorusci_github_images_secret.result
   }
 
   lifecycle {
@@ -97,18 +70,6 @@ resource "kubernetes_secret" "chorusci_github_images" {
       condition     = contains(keys(var.webhook_events_map), "ci")
       error_message = "Not found: 'ci' webhook event missing in chorus-ci Helm values"
     }
-  }
-}
-
-resource "kubernetes_secret" "argo_workflows_github_images" {
-  metadata {
-    name      = "argo-workflows-github-images"
-    namespace = var.chorusci_namespace
-  }
-
-  data = {
-    username = var.github_username
-    password = var.github_images_token
   }
 }
 
@@ -121,13 +82,12 @@ resource "random_password" "chorusci_github_chorus_backend_secret" {
 
 resource "kubernetes_secret" "chorusci_github_chorus_backend" {
   metadata {
-    name      = var.webhook_events_map["chorus-backend"]
+    name      = var.webhook_events_map["chorus-backend"].secretName
     namespace = var.chorusci_namespace
   }
 
   data = {
-    secret = random_password.chorusci_github_chorus_backend_secret.result
-    token  = var.github_chorus_backend_token
+    (var.webhook_events_map["chorus-backend"].secretKey) = random_password.chorusci_github_chorus_backend_secret.result
   }
 
   lifecycle {
@@ -138,15 +98,28 @@ resource "kubernetes_secret" "chorusci_github_chorus_backend" {
   }
 }
 
-resource "kubernetes_secret" "argo_workflows_github_chorus_backend" {
+# Argo Workflows GitHub Credentials
+
+resource "kubernetes_secret" "argo_workflows_github_pat" {
   metadata {
-    name      = "argo-workflows-github-chorus-backend"
+    name      = var.github_pat_secret_name
     namespace = var.chorusci_namespace
   }
 
   data = {
-    username = var.github_username
-    password = var.github_chorus_backend_token
+    username = "x-access-token"
+    password = var.github_pat
+  }
+}
+
+resource "kubernetes_secret" "argo_workflows_github_app" {
+  metadata {
+    name      = var.github_app_secret_name
+    namespace = var.chorusci_namespace
+  }
+
+  data = {
+    privateKey = var.github_app_private_key
   }
 }
 

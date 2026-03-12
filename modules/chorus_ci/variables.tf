@@ -8,57 +8,45 @@ variable "chorusci_namespace" {
   }
 }
 
-variable "github_chorus_backend_token" {
-  description = "GitHub token for the Chorus Backend repository"
+variable "github_pat" {
+  description = "GitHub Personal Access Token for Argo Workflows"
   type        = string
   sensitive   = true
 
   validation {
-    condition     = length(var.github_chorus_backend_token) > 0
-    error_message = "github_chorus_backend_token cannot be empty."
+    condition     = length(var.github_pat) > 0
+    error_message = "github_pat cannot be empty."
   }
 }
 
-variable "github_chorus_web_ui_token" {
-  description = "GitHub token for the Chorus Web UI repository"
+variable "github_app_private_key" {
+  description = "GitHub App private key for Argo Workflows"
   type        = string
   sensitive   = true
 
   validation {
-    condition     = length(var.github_chorus_web_ui_token) > 0
-    error_message = "github_chorus_web_ui_token cannot be empty."
+    condition     = length(var.github_app_private_key) > 0
+    error_message = "github_app_private_key cannot be empty."
   }
 }
 
-variable "github_images_token" {
-  description = "GitHub token for the Images repository"
+variable "github_pat_secret_name" {
+  description = "Name of the Kubernetes secret for Argo Workflows GitHub PAT"
   type        = string
-  sensitive   = true
 
   validation {
-    condition     = length(var.github_images_token) > 0
-    error_message = "github_images_token cannot be empty."
+    condition     = length(var.github_pat_secret_name) > 0
+    error_message = "github_pat_secret_name cannot be empty."
   }
 }
 
-variable "github_username" {
-  description = "GitHub username for Argo Workflows to use"
+variable "github_app_secret_name" {
+  description = "Name of the Kubernetes secret for Argo Workflows GitHub App"
   type        = string
 
   validation {
-    condition     = length(var.github_username) > 0
-    error_message = "github_username cannot be empty."
-  }
-}
-
-variable "github_workbench_operator_token" {
-  description = "GitHub token for the Workbench Operator repository"
-  type        = string
-  sensitive   = true
-
-  validation {
-    condition     = length(var.github_workbench_operator_token) > 0
-    error_message = "github_workbench_operator_token cannot be empty."
+    condition     = length(var.github_app_secret_name) > 0
+    error_message = "github_app_secret_name cannot be empty."
   }
 }
 
@@ -109,8 +97,8 @@ variable "webhook_events" {
 }
 
 variable "webhook_events_map" {
-  description = "A map of the webhook event names to their corresponding secret names."
-  type        = map(string)
+  description = "A map of the webhook event names to their corresponding secret name and secret key."
+  type        = map(map(string))
   validation {
     condition     = length(var.webhook_events_map) > 0
     error_message = "webhook_events_map cannot be empty."
