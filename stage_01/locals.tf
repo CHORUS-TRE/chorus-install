@@ -35,7 +35,7 @@ locals {
   chorusci_values_parsed              = yamldecode(file(local.values_files.chorusci))
   chorusci_webhook_events_map = {
     for event in local.chorusci_values_parsed.webhookEvents :
-    event.name => event.secretName
+    event.name => { secretName = event.webhookSecretName, secretKey = event.webhookSecretKey }
   }
   config_files = {
     alertmanager_oauth2_proxy = "${var.helm_values_path}/${var.cluster_name}/${var.alertmanager_oauth2_proxy_chart_name}/config.json"

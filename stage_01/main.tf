@@ -266,12 +266,10 @@ module "chorus_ci" {
 
   chorusci_namespace = local.chorusci_namespace
 
-  github_chorus_web_ui_token      = var.github_chorus_web_ui_token
-  github_images_token             = var.github_images_token
-  github_chorus_backend_token     = var.github_chorus_backend_token
-  github_workbench_operator_token = var.github_workbench_operator_token
-
-  github_username = var.github_username
+  github_pat             = var.github_pat
+  github_app_private_key = var.github_app_private_key
+  github_pat_secret_name = "${var.cluster_name}-argo-workflows-github-pat"
+  github_app_secret_name = "${var.cluster_name}-argo-workflows-github-app"
 
   registry_server   = local.harbor_url
   registry_username = "chorus-ci"

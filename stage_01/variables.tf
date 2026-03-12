@@ -87,20 +87,14 @@ variable "fluent_operator_chart_name" {
   default     = "fluent-operator"
 }
 
-variable "github_chorus_backend_token" {
-  description = "GitHub token for the Chorus Backend repository"
+variable "github_pat" {
+  description = "GitHub Personal Access Token for Argo Workflows"
   type        = string
   sensitive   = true
 }
 
-variable "github_chorus_web_ui_token" {
-  description = "GitHub token for the Chorus Web UI repository"
-  type        = string
-  sensitive   = true
-}
-
-variable "github_images_token" {
-  description = "GitHub token for the Images repository"
+variable "github_app_private_key" {
+  description = "GitHub App private key for Argo Workflows"
   type        = string
   sensitive   = true
 }
@@ -109,17 +103,6 @@ variable "github_orga" {
   description = "GitHub organization to use repositories from"
   type        = string
   default     = "CHORUS-TRE"
-}
-
-variable "github_username" {
-  description = "GitHub username owner of all the tokens"
-  type        = string
-}
-
-variable "github_workbench_operator_token" {
-  description = "GitHub token for the Workbench Operator repository"
-  type        = string
-  sensitive   = true
 }
 
 variable "google_identity_provider_client_id" {
