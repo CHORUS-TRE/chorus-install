@@ -52,17 +52,25 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 #### Build cluster (ArgoCD)
 
-| Role               | CPU | Memory (GB)  | Storage (GB) | Amount |
-|--------------------|-----|--------------|--------------|--------|
-| control-plane,etcd | 8   | 16           | 52           | 3      |
-| worker             | 16  | 32           | 208          | 3      |
+| Role               | CPU | Memory (GB)  | Node Storage (GB) | Amount |
+|--------------------|-----|--------------|-------------------|--------|
+| control-plane,etcd | 8   | 16           | 52                | 3      |
+| worker             | 16  | 32           | 208               | 3      |
+
+| PVC amount | PVC total storage (Gi) |
+|------------|------------------------|
+| 20         | 1500                   |
 
 #### Remote cluster (Chorus)
 
-| Role               | CPU | Memory (GB) | Storage (GB) | Amount |
-|--------------------|-----|-------------|--------------|--------|
-| control-plane,etcd | 16  | 32          | 52           | 3      |
-| worker             | 16  | 32          | 1000         | 3      |
+| Role               | CPU | Memory (GB) | Node Storage (GB) | Amount |
+|--------------------|-----|-------------|-------------------|--------|
+| control-plane,etcd | 16  | 32          | 52                | 3      |
+| worker             | 16  | 32          | 1000              | 3      |
+
+| PVC amount | PVC total storage (Gi) |
+|------------|------------------------|
+| 50         | 1500                   |
 
 ### Networks requirements
 
