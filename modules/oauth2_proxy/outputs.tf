@@ -1,12 +1,12 @@
-output "prometheus_cookie_secret" {
-  description = "The generated cookie secret for Prometheus OAuth2 Proxy"
-  value       = random_password.prometheus_cookie_secret.result
-  sensitive   = true
-}
-
 output "alertmanager_cookie_secret" {
   description = "The generated cookie secret for Alertmanager OAuth2 Proxy"
   value       = random_password.alertmanager_cookie_secret.result
+  sensitive   = true
+}
+
+output "prometheus_cookie_secret" {
+  description = "The generated cookie secret for Prometheus OAuth2 Proxy"
+  value       = random_password.prometheus_cookie_secret.result
   sensitive   = true
 }
 

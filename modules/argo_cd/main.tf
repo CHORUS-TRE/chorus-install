@@ -91,7 +91,8 @@ resource "kubernetes_secret" "oci-build" {
 
   data = {
     enableOCI = "true"
-    name      = "chorus-build-harbor"
+    insecure  = "false"
+    name      = "${var.cluster_name}-harbor"
     password  = var.harbor_robot_password
     type      = "helm"
     url       = var.harbor_domain

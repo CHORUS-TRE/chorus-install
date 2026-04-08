@@ -5,7 +5,7 @@ resource "null_resource" "validate_config_files" {
       condition     = alltrue([for path in values(local.config_files) : can(file(path))])
       error_message = <<-EOT
         Missing configuration files!
-        
+
         ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v))])}
       EOT
     }
@@ -19,7 +19,7 @@ resource "null_resource" "validate_values_files" {
       condition     = alltrue([for path in values(local.values_files) : can(file(path))])
       error_message = <<-EOT
         Missing values files!
-        
+
         ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v))])}
       EOT
     }
@@ -28,468 +28,610 @@ resource "null_resource" "validate_values_files" {
 
 # Providers
 
-provider "keycloak" {
-  alias     = "kcadmin-provider"
-  client_id = "admin-cli"
-  username  = var.keycloak_admin_username
-  password  = local.keycloak_admin_password
-  url       = local.keycloak_url
-  # Ignoring certificate errors
-  # because it might take some times
-  # for certificates to be signed
-  # by a trusted authority
-  tls_insecure_skip_verify = true
+provider "kubernetes" {
+  alias          = "build_cluster"
+  config_path    = var.kubeconfig_path
+  config_context = var.kubeconfig_context
 }
 
-provider "harbor" {
-  alias    = "harboradmin-provider"
-  url      = local.harbor_url
-  username = var.harbor_admin_username
-  password = local.harbor_admin_password
-  # Ignoring certificate errors
-  # because it might take some times
-  # for certificates to be signed
-  # by a trusted authority
-  insecure = true
+# Cert-Manager CRDs
+
+module "cert_manager_crds" {
+  source = "../modules/cert_manager_crds"
+
+  cert_manager_crds_content = local.cert_manager_crds_content
 }
 
-# Random passwords
+# Keycloak
 
-resource "random_password" "argocd_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "argo_workflows_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "grafana_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "alertmanager_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "prometheus_keycloak_client_secret" {
-  length  = 32
-  special = false
-}
-
-resource "random_password" "grafana_admin_password" {
-  length  = 32
-  special = false
-}
-
-data "kubernetes_secret" "harbor_admin_password" {
+resource "kubernetes_namespace" "keycloak" {
   metadata {
-    name      = local.harbor_admin_password_secret
-    namespace = local.harbor_namespace
+    name = local.keycloak_namespace
   }
 }
 
-data "kubernetes_secret" "keycloak_admin_password" {
+module "keycloak_db_secret" {
+  source = "../modules/db_secret"
+
+  namespace           = local.keycloak_namespace
+  secret_name         = local.keycloak_db_secret_name
+  db_user_secret_key  = local.keycloak_db_user_secret_key
+  db_admin_secret_key = local.keycloak_db_admin_secret_key
+
+  depends_on = [kubernetes_namespace.keycloak]
+}
+
+module "keycloak_secret" {
+  source = "../modules/keycloak_secret"
+
+  namespace                              = local.keycloak_namespace
+  admin_secret_name                      = local.keycloak_secret_name
+  admin_secret_key                       = local.keycloak_secret_key
+  cluster_type                           = "remote"
+  client_credentials_secret_name         = local.keycloak_client_credentials_secret_name
+  google_identity_provider_client_id     = var.remote_cluster_google_identity_provider_client_id
+  google_identity_provider_client_secret = var.remote_cluster_google_identity_provider_client_secret
+  remotestate_encryption_key_secret_name = local.keycloak_remotestate_encryption_key_secret_name
+
+  depends_on = [kubernetes_namespace.keycloak]
+}
+
+# Harbor
+
+resource "kubernetes_namespace" "harbor" {
   metadata {
-    name      = local.keycloak_admin_password_secret
-    namespace = local.keycloak_namespace
+    name = local.harbor_namespace
   }
 }
 
-data "kubernetes_secret" "harbor_oidc" {
+module "harbor_db_secret" {
+  source = "../modules/db_secret"
+
+  namespace           = local.harbor_namespace
+  secret_name         = local.harbor_db_secret_name
+  db_user_secret_key  = local.harbor_db_user_secret_key
+  db_admin_secret_key = local.harbor_db_admin_secret_key
+
+  depends_on = [kubernetes_namespace.harbor]
+}
+
+module "harbor_secret" {
+  source = "../modules/harbor_secret"
+
+  namespace                        = local.harbor_namespace
+  core_secret_name                 = local.harbor_core_secret_name
+  encryption_key_secret_name       = local.harbor_encryption_key_secret_name
+  xsrf_secret_name                 = local.harbor_xsrf_secret_name
+  xsrf_secret_key                  = local.harbor_xsrf_secret_key
+  admin_username                   = var.harbor_admin_username
+  admin_secret_name                = local.harbor_admin_secret_name
+  admin_secret_key                 = local.harbor_admin_secret_key
+  jobservice_secret_name           = local.harbor_jobservice_secret_name
+  jobservice_secret_key            = local.harbor_jobservice_secret_key
+  registry_secret_name             = local.harbor_registry_http_secret_name
+  registry_secret_key              = local.harbor_registry_http_secret_key
+  registry_credentials_secret_name = local.harbor_registry_credentials_secret_name
+  oidc_secret_name                 = local.harbor_oidc_secret_name
+  oidc_secret_key                  = local.harbor_oidc_secret_key
+  oidc_config                      = jsonencode(local.harbor_oidc_config)
+  harbor_robots                    = local.harbor_robots
+
+  depends_on = [kubernetes_namespace.harbor]
+}
+
+# JuiceFS
+
+resource "kubernetes_namespace" "juicefs" {
   metadata {
-    name      = local.harbor_oidc_secret
-    namespace = local.harbor_namespace
+    name = local.juicefs_cache_namespace
   }
 }
 
-data "kubernetes_secret" "keycloak_db_secret" {
+module "juicefs" {
+  source = "../modules/juicefs"
+
+  cluster_name                  = var.remote_cluster_name
+  juicefs_cache_secret_name     = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
+  juicefs_cache_secret_key      = local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey
+  juicefs_cache_namespace       = local.juicefs_cache_namespace
+  juicefs_dashboard_secret_name = local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret
+  juicefs_csi_driver_namespace  = local.juicefs_csi_driver_namespace
+  juicefs_dashboard_username    = var.juicefs_dashboard_username
+  s3_access_key                 = var.s3_access_key
+  s3_secret_key                 = var.s3_secret_key
+  s3_endpoint                   = var.s3_endpoint
+  s3_bucket_name                = var.s3_bucket_name
+
+  count      = var.s3_secret_key == "" ? 0 : 1
+  depends_on = [kubernetes_namespace.juicefs]
+}
+
+# Prometheus
+
+resource "kubernetes_namespace" "prometheus" {
   metadata {
-    name      = local.keycloak_db_secret
-    namespace = local.keycloak_namespace
+    name = local.prometheus_namespace
   }
 }
 
-data "kubernetes_secret" "harbor_db_secret" {
-  metadata {
-    name      = local.harbor_db_secret
-    namespace = local.harbor_namespace
-  }
+# Loki
+
+module "loki" {
+  source = "../modules/loki"
+
+  namespace            = local.loki_namespace
+  loki_clients         = ["${var.cluster_name}-fluentbit", "${var.cluster_name}-grafana"]
+  s3_access_key_id     = var.remote_cluster_loki_s3_access_key_id
+  s3_secret_access_key = var.remote_cluster_loki_s3_secret_access_key
+
+  depends_on = [kubernetes_namespace.prometheus]
 }
 
 # Grafana
 
-resource "kubernetes_namespace" "grafana" {
-  metadata {
-    name = local.grafana_namespace
-  }
-}
+module "grafana" {
+  source = "../modules/grafana"
 
-resource "kubernetes_secret" "grafana_oauth_client_secret" {
-  metadata {
-    name      = local.grafana_oauth_client_secret
-    namespace = local.grafana_namespace
-  }
+  namespace                        = local.prometheus_namespace
+  grafana_admin_username           = var.grafana_admin_username
+  grafana_keycloak_client_secret   = module.keycloak_secret.grafana_client_secret
+  grafana_oauth_client_secret_name = local.grafana_oauth_client_secret_name
+  grafana_oauth_client_secret_key  = local.grafana_oauth_client_secret_key
+  loki_http_user                   = "${var.cluster_name}-grafana"
+  loki_http_password               = module.loki.loki_client_passwords["${var.cluster_name}-grafana"]
+  loki_tenant_id                   = var.cluster_name
 
-  data = {
-    "admin-password"                           = random_password.grafana_admin_password.result
-    "admin-user"                               = var.grafana_admin_username
-    "${local.grafana_oauth_client_secret_key}" = random_password.grafana_keycloak_client_secret.result
-  }
-
-  depends_on = [kubernetes_namespace.grafana]
-}
-
-# Argo Workflows
-
-# Given Argo Workflows values.yaml file,
-# the SSO server clientId and clientSecret
-# are potentially stored in two different secrets
-# we use Terraform's "count" with conditional check
-# to account for each case
-
-resource "kubernetes_namespace" "argo" {
-  metadata {
-    name = local.argo_workflows_workflow_namespace
-  }
-}
-
-resource "kubernetes_secret" "argo_workflows_oidc_client_id_and_secret" {
-  metadata {
-    name      = local.argo_workflows_sso_server_client_id_name
-    namespace = local.argo_workflows_namespace
-  }
-
-  data = {
-    "${local.argo_workflows_sso_server_client_id_key}"     = var.argo_workflows_keycloak_client_id
-    "${local.argo_workflows_sso_server_client_secret_key}" = random_password.argo_workflows_keycloak_client_secret.result
-  }
-  count = local.argo_workflows_sso_server_client_secret_name == local.argo_workflows_sso_server_client_id_name ? 1 : 0
-}
-
-resource "kubernetes_secret" "argo_workflows_oidc_client_id" {
-  metadata {
-    name      = local.argo_workflows_sso_server_client_id_name
-    namespace = local.argo_workflows_namespace
-  }
-
-  data = {
-    "${local.argo_workflows_sso_server_client_id_key}" = var.argo_workflows_keycloak_client_id
-  }
-  count = local.argo_workflows_sso_server_client_secret_name != local.argo_workflows_sso_server_client_id_name ? 1 : 0
-}
-
-resource "kubernetes_secret" "argo_workflows_oidc_client_secret" {
-  metadata {
-    name      = local.argo_workflows_sso_server_client_secret_name
-    namespace = local.argo_workflows_namespace
-  }
-
-  data = {
-    "${local.argo_workflows_sso_server_client_secret_key}" = random_password.argo_workflows_keycloak_client_secret.result
-  }
-  count = local.argo_workflows_sso_server_client_secret_name != local.argo_workflows_sso_server_client_id_name ? 1 : 0
-}
-
-module "oauth2_proxy" {
-  source = "../modules/oauth2_proxy"
-
-  alertmanager_oauth2_proxy_values    = local.alertmanager_oauth2_proxy_values
-  prometheus_oauth2_proxy_values      = local.prometheus_oauth2_proxy_values
-  oauth2_proxy_cache_values           = local.oauth2_proxy_cache_values
-  alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
-  prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
-  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
-  prometheus_keycloak_client_id       = var.prometheus_keycloak_client_id
-  prometheus_keycloak_client_secret   = random_password.prometheus_keycloak_client_secret.result
-  alertmanager_keycloak_client_id     = var.alertmanager_keycloak_client_id
-  alertmanager_keycloak_client_secret = random_password.alertmanager_keycloak_client_secret.result
-}
-
-module "keycloak_config" {
-  source = "../modules/keycloak_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  infra_realm_name = var.keycloak_realm
-
-  google_identity_provider_client_id     = var.google_identity_provider_client_id
-  google_identity_provider_client_secret = var.google_identity_provider_client_secret
-}
-
-module "keycloak_harbor_client_config" {
-  source = "../modules/keycloak_generic_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.harbor_keycloak_client_id
-  client_secret       = local.harbor_keycloak_client_secret
-  root_url            = local.harbor_url
-  base_url            = var.harbor_keycloak_base_url
-  admin_url           = local.harbor_url
-  web_origins         = [local.harbor_url]
-  valid_redirect_uris = [join("/", [local.harbor_url, "c/oidc/callback"])]
-  client_group        = var.harbor_keycloak_oidc_admin_group
-}
-
-module "keycloak_argocd_client_config" {
-  source = "../modules/keycloak_generic_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.argocd_keycloak_client_id
-  client_secret       = random_password.argocd_keycloak_client_secret.result
-  root_url            = module.argo_cd.argocd_url
-  base_url            = var.argocd_keycloak_base_url
-  admin_url           = module.argo_cd.argocd_url
-  web_origins         = [module.argo_cd.argocd_url]
-  valid_redirect_uris = [join("/", [module.argo_cd.argocd_url, "auth/callback"])]
-  client_group        = var.argocd_keycloak_oidc_admin_group
-}
-
-module "keycloak_argo_workflows_client_config" {
-  source = "../modules/keycloak_generic_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.argo_workflows_keycloak_client_id
-  client_secret       = random_password.argo_workflows_keycloak_client_secret.result
-  root_url            = local.argo_workflows_url
-  base_url            = var.argo_workflows_keycloak_base_url
-  admin_url           = local.argo_workflows_url
-  web_origins         = [local.argo_workflows_url]
-  valid_redirect_uris = [local.argo_workflows_redirect_uri]
-  client_group        = var.argo_workflows_keycloak_oidc_admin_group
-}
-
-module "keycloak_grafana_client_config" {
-  source = "../modules/keycloak_grafana_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.grafana_keycloak_client_id
-  client_secret       = random_password.grafana_keycloak_client_secret.result
-  root_url            = local.grafana_url
-  base_url            = var.grafana_keycloak_base_url
-  admin_url           = local.grafana_url
-  web_origins         = [local.grafana_url]
-  valid_redirect_uris = [join("/", [local.grafana_url, "login/generic_oauth"])]
-  client_group        = var.grafana_keycloak_oidc_admin_group
-}
-
-module "keycloak_alertmanager_client_config" {
-  source = "../modules/keycloak_oauth2_proxy_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.alertmanager_keycloak_client_id
-  client_secret       = random_password.alertmanager_keycloak_client_secret.result
-  root_url            = local.alertmanager_url
-  base_url            = var.alertmanager_keycloak_base_url
-  admin_url           = local.alertmanager_url
-  web_origins         = [local.alertmanager_url]
-  valid_redirect_uris = [join("/", [local.alertmanager_url, "*"])]
-}
-
-module "keycloak_prometheus_client_config" {
-  source = "../modules/keycloak_oauth2_proxy_client_config"
-
-  providers = {
-    keycloak = keycloak.kcadmin-provider
-  }
-
-  realm_id            = module.keycloak_config.infra_realm_id
-  client_id           = var.prometheus_keycloak_client_id
-  client_secret       = random_password.prometheus_keycloak_client_secret.result
-  root_url            = local.prometheus_url
-  base_url            = var.prometheus_keycloak_base_url
-  admin_url           = local.prometheus_url
-  web_origins         = [local.prometheus_url]
-  valid_redirect_uris = [join("/", [local.prometheus_url, "*"]), join("/", [local.alertmanager_url, "*"])]
-}
-
-module "harbor_config" {
-  source = "../modules/harbor_config"
-
-  providers = {
-    harbor = harbor.harboradmin-provider
-  }
-
-  charts_versions               = local.charts_versions
-  source_helm_registry          = var.helm_registry
-  source_helm_registry_username = var.helm_registry_username
-  source_helm_registry_password = var.helm_registry_password
-
-  harbor_admin_username = var.harbor_admin_username
-  harbor_admin_password = local.harbor_admin_password
-  harbor_helm_values    = file(local.values_files.harbor)
-
-  github_actions_robot_username = var.github_actions_harbor_robot_username
-  argocd_robot_username         = var.argocd_harbor_robot_username
-  chorusci_robot_username       = var.chorusci_harbor_robot_username
-  renovate_robot_username       = var.renovate_harbor_robot_username
-}
-
-module "chorus_ci" {
-  source = "../modules/chorus_ci"
-
-  chorusci_namespace   = local.chorusci_namespace
-  chorusci_helm_values = file(local.values_files.chorusci)
-
-  github_chorus_web_ui_token      = var.github_chorus_web_ui_token
-  github_images_token             = var.github_images_token
-  github_chorus_backend_token     = var.github_chorus_backend_token
-  github_workbench_operator_token = var.github_workbench_operator_token
-
-  github_username = var.github_username
-
-  registry_server   = local.harbor_url
-  registry_username = var.chorusci_harbor_robot_username
-  registry_password = module.harbor_config.chorusci_robot_password
-
-  depends_on = [kubernetes_namespace.argo]
-}
-
-module "argo_cd" {
-  source = "../modules/argo_cd"
-
-  cluster_name  = var.cluster_name
-  helm_registry = var.helm_registry
-
-  argocd_chart_name    = var.argocd_chart_name
-  argocd_chart_version = local.argocd_chart_version
-  argocd_helm_values   = file(local.values_files.argocd)
-  argocd_namespace     = local.argocd_namespace
-
-  argocd_cache_chart_name    = var.valkey_chart_name
-  argocd_cache_chart_version = local.argocd_cache_chart_version
-  argocd_cache_helm_values   = file(local.values_files.argocd_cache)
-
-  helm_charts_values_credentials_secret = var.helm_values_credentials_secret
-  helm_values_url                       = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
-  helm_values_pat                       = var.helm_values_pat
-  harbor_domain                         = replace(local.harbor_url, "https://", "")
-  harbor_robot_username                 = var.argocd_harbor_robot_username
-  harbor_robot_password                 = module.harbor_config.argocd_robot_password
-}
-
-resource "null_resource" "wait_for_argocd" {
-  provisioner "local-exec" {
-    quiet       = true
-    command     = <<EOT
-      set -e
-      i=0
-      while [ $i -lt 30 ]; do
-        if [ "$(curl -skf -o /dev/null -w "%%{http_code}" ${module.argo_cd.argocd_url}/healthz)" -eq 200 ]; then
-          exit 0
-        else
-          echo "Waiting for ArgoCD... ($i)"
-          sleep 10
-        fi
-        i=$((i+1))
-      done
-      echo "Timed out waiting for ArgoCD" >&2
-      exit 1
-    EOT
-    interpreter = ["/bin/sh", "-c"]
-  }
-
-  triggers = {
-    always_run = timestamp()
-  }
-
-  depends_on = [module.argo_cd]
-}
-
-module "argocd_config" {
-  source = "../modules/argo_cd_config"
-
-  cluster_name = var.cluster_name
-
-  argocd_helm_values = file(local.values_files.argocd)
-  argocd_namespace   = local.argocd_namespace
-
-  helm_values_url      = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
-  helm_values_revision = var.chorus_release
-  helm_registry        = var.helm_registry
-
-  argo_deploy_chart_name    = var.argo_deploy_chart_name
-  argo_deploy_chart_version = local.argo_deploy_chart_version
-  argo_deploy_helm_values   = file(local.values_files.argo_deploy)
-
-  harbor_domain      = replace(local.harbor_url, "https://", "")
-  oidc_endpoint      = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
-  oidc_client_id     = var.argocd_keycloak_client_id
-  oidc_client_secret = random_password.argocd_keycloak_client_secret.result
-
-  depends_on = [
-    module.argo_cd,
-    null_resource.wait_for_argocd
-  ]
+  depends_on = [module.loki]
 }
 
 # Alertmanager
+
 module "alertmanager" {
   source = "../modules/alertmanager"
 
   webex_secret_name      = local.alertmanager_webex_secret_name
   webex_secret_key       = local.alertmanager_webex_secret_key
-  alertmanager_namespace = local.alertmanager_namespace
-  webex_access_token     = var.webex_access_token
+  alertmanager_namespace = local.prometheus_namespace
+  webex_access_token     = var.remote_cluster_webex_access_token
 
-  count = var.webex_access_token != "" ? 1 : 0
+  count      = var.remote_cluster_webex_access_token != "" ? 1 : 0
+  depends_on = [kubernetes_namespace.prometheus]
+}
+
+# Fluent
+
+module "fluent_operator" {
+  source = "../modules/fluent_operator"
+
+  namespace = local.fluent_operator_namespace
+
+  loki_http_user     = "${var.cluster_name}-fluentbit"
+  loki_http_password = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
+  loki_tenant_id     = var.cluster_name
+
+  depends_on = [module.loki]
+}
+
+# OAuth2 proxy
+
+module "oauth2_proxy" {
+  source = "../modules/oauth2_proxy"
+
+  alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
+  prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
+  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
+
+  prometheus_keycloak_client_id          = var.prometheus_keycloak_client_id
+  prometheus_keycloak_client_secret      = module.keycloak_secret.prometheus_client_secret
+  prometheus_session_storage_secret_name = local.prometheus_session_storage_secret_name
+  prometheus_session_storage_secret_key  = local.prometheus_session_storage_secret_key
+  prometheus_oidc_secret_name            = local.prometheus_oidc_secret_name
+
+  alertmanager_keycloak_client_id          = var.alertmanager_keycloak_client_id
+  alertmanager_keycloak_client_secret      = module.keycloak_secret.alertmanager_client_secret
+  alertmanager_session_storage_secret_name = local.alertmanager_session_storage_secret_name
+  alertmanager_session_storage_secret_key  = local.alertmanager_session_storage_secret_key
+  alertmanager_oidc_secret_name            = local.alertmanager_oidc_secret_name
+
+  oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_session_storage_secret_name
+  oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
+
+  depends_on = [kubernetes_namespace.keycloak]
+}
+
+# Matomo
+
+resource "kubernetes_namespace" "matomo" {
+  metadata {
+    name = local.matomo_namespace
+  }
+}
+
+resource "random_password" "matomo_password" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "matomo_secret" {
+  metadata {
+    name      = local.matomo_secret_name
+    namespace = local.matomo_namespace
+
+  }
+  data = {
+    matomo-password = random_password.matomo_password.result
+  }
+  depends_on = [kubernetes_namespace.matomo]
+}
+
+resource "random_password" "matomo_db_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "matomo_db_replication_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "matomo_db_root_password" {
+  length  = 32
+  special = false
+}
+
+# TODO: Currently, the matomo chart looks for
+# the key "db-password". Let's check if this
+# can be changed so that we don't have to duplicate
+# the mariadb password twice
+resource "kubernetes_secret" "matomo_db_secret" {
+  metadata {
+    name      = local.matomo_db_secret_name
+    namespace = local.matomo_db_namespace
+  }
+  data = {
+    db-password                  = random_password.matomo_db_password.result
+    mariadb-password             = random_password.matomo_db_password.result
+    mariadb-replication-password = random_password.matomo_db_replication_password.result
+    mariadb-root-password        = random_password.matomo_db_root_password.result
+  }
+
+  depends_on = [kubernetes_namespace.matomo]
+}
+
+# i2b2
+# we do not generate the password
+# because it is harcoded in the container image
+
+resource "kubernetes_namespace" "i2b2" {
+  metadata {
+    name = local.i2b2_wildfly_namespace
+  }
+}
+
+resource "kubernetes_secret" "i2b2_db_secret" {
+  metadata {
+    name      = "i2b2-postgres-secret"
+    namespace = local.i2b2_db_namespace
+  }
+  data = {
+    "postgres-password" = var.i2b2_db_password
+  }
+
+  depends_on = [kubernetes_namespace.i2b2]
+}
+
+# i2b2-wildfly
+
+resource "kubernetes_secret" "i2b2_wildfly" {
+  metadata {
+    name      = "i2b2-wildfly-secret"
+    namespace = local.i2b2_wildfly_namespace
+  }
+  data = {
+    ds_crc_pass  = var.i2b2_db_password
+    ds_hive_pass = var.i2b2_db_password
+    ds_ont_pass  = var.i2b2_db_password
+    ds_password  = var.i2b2_db_password
+    ds_pm_pass   = var.i2b2_db_password
+    ds_wd_pass   = var.i2b2_db_password
+    pg_pass      = var.i2b2_db_password
+  }
+
+  depends_on = [kubernetes_namespace.i2b2]
+}
+
+# didata
+
+resource "kubernetes_namespace" "didata" {
+  metadata {
+    name = local.didata_namespace
+  }
+}
+
+resource "random_password" "didata_db_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "didata_db_replication_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "didata_db_root_password" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "didata_jwt_secret" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "didata_env" {
+  metadata {
+    name      = "didata-env"
+    namespace = local.didata_namespace
+  }
+  data = {
+    "didata.env" = local.didata_secrets_content
+  }
+
+  count      = var.didata_registry_password != "" ? 1 : 0
+  depends_on = [kubernetes_namespace.didata]
+}
+
+resource "kubernetes_secret" "didata_db_secret" {
+  metadata {
+    name      = local.didata_db_secret_name
+    namespace = local.didata_db_namespace
+
+  }
+  data = {
+    mariadb-password             = random_password.didata_db_password.result
+    mariadb-replication-password = random_password.didata_db_replication_password.result
+    mariadb-root-password        = random_password.didata_db_root_password.result
+  }
+
+  count      = var.didata_registry_password != "" ? 1 : 0
+  depends_on = [kubernetes_namespace.didata]
+}
+
+resource "kubernetes_namespace" "reflector" {
+  metadata {
+    name = local.reflector_namespace
+  }
+}
+
+resource "kubernetes_secret" "regcred_didata" {
+  metadata {
+    name      = "regcred-didata"
+    namespace = local.reflector_namespace
+    annotations = {
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "didata"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
+    }
+  }
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      "auths" = {
+        "https://index.docker.io/v1/" = {
+          "auth" = base64encode(join(":", [var.didata_registry_username, var.didata_registry_password]))
+        }
+      }
+    })
+  }
+  type = "kubernetes.io/dockerconfigjson"
+
+  count      = var.didata_registry_password != "" ? 1 : 0
+  depends_on = [kubernetes_namespace.reflector]
+}
+
+# Backend
+
+resource "kubernetes_namespace" "backend" {
+  metadata {
+    name = local.backend_namespace
+  }
+}
+
+module "backend_db_secret" {
+  source = "../modules/db_secret"
+
+  namespace           = local.backend_db_namespace
+  secret_name         = local.backend_db_secret_name
+  db_user_secret_key  = local.backend_db_user_secret_key
+  db_admin_secret_key = local.backend_db_admin_secret_key
+
+  depends_on = [kubernetes_namespace.backend]
+}
+
+resource "random_password" "jwt_signature" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "metrics_password" {
+  length  = 32
+  special = false
+}
+
+resource "tls_private_key" "chorus_backend_daemon" {
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P256"
+}
+
+resource "random_password" "steward_password" {
+  length  = 32
+  special = false
+}
+
+resource "kubernetes_secret" "backend_secrets" {
+  metadata {
+    name      = "${var.remote_cluster_name}-backend"
+    namespace = local.backend_namespace
+  }
+  data = {
+    "secrets.yaml" = local.backend_secrets_content
+  }
+
+  depends_on = [kubernetes_namespace.backend]
+}
+
+# RegCred
+
+resource "kubernetes_secret" "regcred" {
+  metadata {
+    name      = "regcred"
+    namespace = local.reflector_namespace
+    annotations = {
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "kube-system,workbench-operator-system,backend,frontend,workspace[0-9]+"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
+    }
+  }
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      "auths" = {
+        "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}" = {
+          "auth" = base64encode(join(":", [join("$", ["robot", "${var.remote_cluster_name}"]), module.harbor_secret.harbor_robot_secrets["${var.remote_cluster_name}"]]))
+        }
+      }
+    })
+  }
+  type = "kubernetes.io/dockerconfigjson"
+
+  depends_on = [kubernetes_namespace.reflector]
+}
+
+# Remote Cluster Connection for ArgoCD running on build cluster (see stage_01)
+
+resource "kubernetes_service_account" "argocd_manager" {
+  metadata {
+    name      = "argocd-manager"
+    namespace = "kube-system"
+  }
+}
+
+resource "kubernetes_secret" "argocd_manager_token" {
+  metadata {
+    name      = "argocd-manager-token"
+    namespace = kubernetes_service_account.argocd_manager.metadata[0].namespace
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.argocd_manager.metadata.0.name
+    }
+  }
+
+  type                           = "kubernetes.io/service-account-token"
+  wait_for_service_account_token = true
+}
+
+resource "kubernetes_cluster_role_binding" "argocd_manager_role_binding" {
+  metadata {
+    name = "argocd-manager-role-binding"
+  }
+
+  role_ref {
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+    api_group = "rbac.authorization.k8s.io"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.argocd_manager.metadata[0].name
+    namespace = kubernetes_service_account.argocd_manager.metadata[0].namespace
+  }
+}
+
+data "kubernetes_secret" "argocd_manager_token" {
+  metadata {
+    name      = kubernetes_secret.argocd_manager_token.metadata[0].name
+    namespace = kubernetes_secret.argocd_manager_token.metadata[0].namespace
+  }
+
+  depends_on = [kubernetes_secret.argocd_manager_token]
+}
+
+data "kubernetes_config_map" "ca_data" {
+  metadata {
+    name      = "kube-root-ca.crt"
+    namespace = kubernetes_secret.argocd_manager_token.metadata[0].namespace
+  }
+}
+
+resource "kubernetes_secret" "remote_clusters" {
+  provider = kubernetes.build_cluster
+
+  metadata {
+    name      = "${var.remote_cluster_name}-cluster"
+    namespace = local.argocd_namespace
+    labels = {
+      "argocd.argoproj.io/secret-type" = "cluster"
+    }
+  }
+
+  data = {
+    name   = var.remote_cluster_name
+    server = var.remote_cluster_server
+    config = local.remote_cluster_config
+  }
+
+  # We wait for the remote cluster configuration
+  # to complete to avoid race condition on
+  # namespace creation
+  depends_on = [
+    module.harbor_db_secret,
+    module.harbor_secret,
+    module.keycloak_db_secret,
+    module.keycloak_secret,
+    module.juicefs,
+    module.grafana,
+    module.alertmanager,
+    module.oauth2_proxy,
+    kubernetes_secret.matomo_secret,
+    kubernetes_secret.matomo_db_secret,
+    kubernetes_secret.i2b2_db_secret,
+    kubernetes_secret.i2b2_wildfly,
+    kubernetes_secret.didata_env,
+    kubernetes_secret.didata_db_secret,
+    kubernetes_secret.regcred_didata,
+    module.backend_db_secret,
+    kubernetes_secret.backend_secrets
+  ]
 }
 
 locals {
   output = {
     harbor_admin_username = var.harbor_admin_username
-    harbor_admin_password = local.harbor_admin_password
+    harbor_admin_password = module.harbor_secret.harbor_password
     harbor_url            = local.harbor_url
     harbor_admin_url      = join("/", [local.harbor_url, "account", "sign-in"])
 
-    harbor_chorusci_robot_password = module.harbor_config.chorusci_robot_password
-    harbor_argocd_robot_password   = module.harbor_config.argocd_robot_password
-    harbor_renovate_robot_password = module.harbor_config.renovate_robot_password
-    harbor_db_username             = local.harbor_db_values_parsed.postgresql.global.postgresql.auth.username
-    harbor_db_password             = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_user_password_key}"]
-    harbor_db_admin_username       = "postgres"
-    harbor_db_admin_password       = data.kubernetes_secret.harbor_db_secret.data["${local.harbor_db_admin_password_key}"]
+    keycloak_admin_username = var.keycloak_admin_username
+    keycloak_admin_password = module.keycloak_secret.admin_password
+    keycloak_url            = local.keycloak_url
 
-    keycloak_admin_username    = var.keycloak_admin_username
-    keycloak_admin_password    = local.keycloak_admin_password
-    keycloak_url               = local.keycloak_url
-    keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
-    keycloak_db_password       = data.kubernetes_secret.keycloak_db_secret.data["${local.keycloak_db_user_password_key}"]
-    keycloak_db_admin_username = "postgres"
-    keycloak_db_admin_password = data.kubernetes_secret.keycloak_db_secret.data["${local.keycloak_db_admin_password_key}"]
+    prometheus_url         = local.prometheus_url
+    alertmanager_url       = local.alertmanager_url
+    grafana_url            = local.grafana_url
+    grafana_admin_username = var.grafana_admin_username
 
-    argocd_url      = module.argo_cd.argocd_url
-    argocd_username = module.argo_cd.argocd_username
-    argocd_password = module.argo_cd.argocd_password
+    matomo_url      = local.matomo_url
+    matomo_username = "admin"
+    matomo_password = random_password.matomo_password.result
+
+    frontend_url = local.frontend_url
+    backend_url  = local.backend_url
+    didata_url   = local.didata_url
+
+    juicefs_enabled = var.s3_secret_key != "" ? true : false
+    didata_enabled  = var.didata_registry_password != "" ? true : false
   }
 }
 
-resource "local_file" "stage_02_output" {
-  filename = "../${var.cluster_name}_output.yaml"
+resource "local_file" "stage_04_output" {
+  filename = "../${var.remote_cluster_name}_output.yaml"
   content  = yamlencode(local.output)
 }

@@ -8,72 +8,56 @@ variable "chorusci_namespace" {
   }
 }
 
-variable "chorusci_helm_values" {
-  description = "ChorusCI Helm chart values"
-  type        = string
-
-  validation {
-    condition     = length(var.chorusci_helm_values) > 0
-    error_message = "chorusci_helm_values cannot be empty."
-  }
-
-  validation {
-    condition     = can(yamldecode(var.chorusci_helm_values))
-    error_message = "chorusci_helm_values must be valid YAML."
-  }
-}
-
-variable "github_workbench_operator_token" {
-  description = "GitHub token for the Workbench Operator repository"
+variable "github_pat" {
+  description = "GitHub Personal Access Token for Argo Workflows"
   type        = string
   sensitive   = true
 
   validation {
-    condition     = length(var.github_workbench_operator_token) > 0
-    error_message = "github_workbench_operator_token cannot be empty."
+    condition     = length(var.github_pat) > 0
+    error_message = "github_pat cannot be empty."
   }
 }
 
-variable "github_chorus_web_ui_token" {
-  description = "GitHub token for the Chorus Web UI repository"
+variable "github_app_private_key" {
+  description = "GitHub App private key for Argo Workflows"
   type        = string
   sensitive   = true
 
   validation {
-    condition     = length(var.github_chorus_web_ui_token) > 0
-    error_message = "github_chorus_web_ui_token cannot be empty."
+    condition     = length(var.github_app_private_key) > 0
+    error_message = "github_app_private_key cannot be empty."
   }
 }
 
-variable "github_images_token" {
-  description = "GitHub token for the Images repository"
+variable "github_pat_secret_name" {
+  description = "Name of the Kubernetes secret for Argo Workflows GitHub PAT"
+  type        = string
+
+  validation {
+    condition     = length(var.github_pat_secret_name) > 0
+    error_message = "github_pat_secret_name cannot be empty."
+  }
+}
+
+variable "github_app_secret_name" {
+  description = "Name of the Kubernetes secret for Argo Workflows GitHub App"
+  type        = string
+
+  validation {
+    condition     = length(var.github_app_secret_name) > 0
+    error_message = "github_app_secret_name cannot be empty."
+  }
+}
+
+variable "registry_password" {
+  description = "The robot password for the container registry"
   type        = string
   sensitive   = true
 
   validation {
-    condition     = length(var.github_images_token) > 0
-    error_message = "github_images_token cannot be empty."
-  }
-}
-
-variable "github_chorus_backend_token" {
-  description = "GitHub token for the Chorus Backend repository"
-  type        = string
-  sensitive   = true
-
-  validation {
-    condition     = length(var.github_chorus_backend_token) > 0
-    error_message = "github_chorus_backend_token cannot be empty."
-  }
-}
-
-variable "github_username" {
-  description = "GitHub username for Argo Workflows to use"
-  type        = string
-
-  validation {
-    condition     = length(var.github_username) > 0
-    error_message = "github_username cannot be empty."
+    condition     = length(var.registry_password) > 0
+    error_message = "registry_password cannot be empty."
   }
 }
 
@@ -97,13 +81,26 @@ variable "registry_username" {
   }
 }
 
-variable "registry_password" {
-  description = "The robot password for the container registry"
+variable "sensor_regcred_secret_name" {
+  description = "The name of the Kubernetes secret for the sensor Docker registry credentials."
   type        = string
-  sensitive   = true
-
   validation {
-    condition     = length(var.registry_password) > 0
-    error_message = "registry_password cannot be empty."
+    condition     = length(var.sensor_regcred_secret_name) > 0
+    error_message = "sensor_regcred_secret_name cannot be empty."
+  }
+}
+
+variable "webhook_events" {
+  description = "A map of webhook event names to secret names. Example: { ci = \"ci-secret\", ... }"
+  type        = map(string)
+  default     = {}
+}
+
+variable "webhook_events_map" {
+  description = "A map of the webhook event names to their corresponding secret name and secret key."
+  type        = map(map(string))
+  validation {
+    condition     = length(var.webhook_events_map) > 0
+    error_message = "webhook_events_map cannot be empty."
   }
 }

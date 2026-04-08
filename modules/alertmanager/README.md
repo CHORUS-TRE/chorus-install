@@ -1,6 +1,6 @@
 # alertmanager Terraform Module
 
-This module configures [Prometheus Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) integrations on a Kubernetes cluster using Terraform.  
+This module configures [Prometheus Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/) integrations on a Kubernetes cluster using Terraform.
 It automates the management of sensitive secrets for Webex-based alerting in CHORUS-TRE.
 
 ## Features

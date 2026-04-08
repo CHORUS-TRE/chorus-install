@@ -38,6 +38,7 @@ module "harbor_secret" {
   oidc_secret_name                 = var.harbor_oidc_secret_name
   oidc_secret_key                  = var.harbor_oidc_secret_key
   oidc_config                      = var.harbor_oidc_config
+  harbor_robots                    = var.harbor_robots
 
   depends_on = [kubernetes_namespace.harbor]
 }
@@ -126,6 +127,7 @@ resource "helm_release" "harbor" {
 
   depends_on = [
     helm_release.harbor_cache,
-    helm_release.harbor_db
+    helm_release.harbor_db,
+    module.harbor_secret,
   ]
 }

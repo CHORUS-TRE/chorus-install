@@ -1,82 +1,56 @@
 # oauth2_proxy Terraform Module
 
-This module manages the deployment and secret management for OAuth2 Proxy instances (e.g. for Prometheus, Alertmanager) in a Kubernetes cluster using Terraform. It automates the creation of required Kubernetes secrets and enforces configuration consistency for secure authentication and session storage in CHORUS-TRE.
+This module manages OAuth2 Proxy secrets for Prometheus and Alertmanager on a Kubernetes cluster using Terraform. It automates the creation of OIDC configuration secrets and session storage secrets for secure OAuth2-based authentication in CHORUS-TRE.
 
 ## Features
 
-- Creates Kubernetes secrets for OIDC authentication (client ID, client secret, cookie secret)
-- Generates secure random cookie secrets for each OAuth2 Proxy instance
-- Creates shared session storage secret for Redis/Valkey backend
-- Manages secrets for both Prometheus and Alertmanager OAuth2 Proxy instances
-- Parses Helm values to extract secret names and configuration
-- Supports custom Helm values for each OAuth2 Proxy instance
+- Generates random cookie secrets for Prometheus and Alertmanager OAuth2 Proxy
+- Generates shared session storage password
+- Creates OIDC configuration secrets with Keycloak client credentials for Prometheus and Alertmanager
+- Creates session storage secrets for Prometheus and Alertmanager
+- Creates session storage secret for OAuth2 Proxy cache (Valkey/Redis)
+- All secrets are stored securely in Kubernetes with appropriate namespacing
 
 ## Outputs
 
-| Name                            | Description                                                       |
-|---------------------------------|-------------------------------------------------------------------|
-| `prometheus_cookie_secret`      | The generated cookie secret for Prometheus OAuth2 Proxy          |
-| `alertmanager_cookie_secret`    | The generated cookie secret for Alertmanager OAuth2 Proxy        |
-| `session_storage_secret`        | The generated session storage password shared by both proxies    |
-| `prometheus_oidc_secret_name`   | The name of the Prometheus OIDC Kubernetes Secret                |
-| `alertmanager_oidc_secret_name` | The name of the Alertmanager OIDC Kubernetes Secret              |
+| Name                      | Description                                                            |
+|---------------------------|------------------------------------------------------------------------|
+| `prometheus_cookie_secret`| The generated cookie secret for Prometheus OAuth2 Proxy               |
+| `alertmanager_cookie_secret` | The generated cookie secret for Alertmanager OAuth2 Proxy          |
+| `session_storage_secret`  | The generated session storage password shared by Prometheus and Alertmanager |
 
 ## Variables
 
-| Name                                  | Description                                                    | Type   | Required |
-|---------------------------------------|----------------------------------------------------------------|--------|----------|
-| `alertmanager_oauth2_proxy_values`    | Alertmanager OAuth2 Proxy Helm chart values (YAML)             | string | Yes      |
-| `prometheus_oauth2_proxy_values`      | Prometheus OAuth2 Proxy Helm chart values (YAML)               | string | Yes      |
-| `oauth2_proxy_cache_values`           | OAuth2 Proxy cache Helm chart values (e.g. Valkey, YAML)       | string | Yes      |
-| `alertmanager_oauth2_proxy_namespace` | Namespace to deploy Alertmanager OAuth2 Proxy Helm chart into  | string | Yes      |
-| `prometheus_oauth2_proxy_namespace`   | Namespace to deploy Prometheus OAuth2 Proxy Helm chart into    | string | Yes      |
-| `oauth2_proxy_cache_namespace`        | Namespace to deploy the OAuth2 Proxy cache Helm chart into     | string | Yes      |
-| `prometheus_keycloak_client_id`       | Keycloak client ID assigned to Prometheus                      | string | Yes      |
-| `prometheus_keycloak_client_secret`   | Keycloak client secret assigned to Prometheus                  | string | Yes      |
-| `alertmanager_keycloak_client_id`     | Keycloak client ID assigned to Alertmanager                    | string | Yes      |
-| `alertmanager_keycloak_client_secret` | Keycloak client secret assigned to Alertmanager                | string | Yes      |
+| Name                                              | Description                                                                 | Type   | Required |
+|---------------------------------------------------|-----------------------------------------------------------------------------|--------|----------|
+| `alertmanager_oauth2_proxy_namespace`             | Namespace to deploy Alertmanager OAuth2 Proxy Helm chart into              | string | Yes      |
+| `prometheus_oauth2_proxy_namespace`               | Namespace to deploy Prometheus OAuth2 Proxy Helm chart into                | string | Yes      |
+| `oauth2_proxy_cache_namespace`                    | Namespace to deploy the OAuth2 Proxy cache Helm chart into (e.g. Valkey)   | string | Yes      |
+| `prometheus_keycloak_client_id`                   | Keycloak client ID assigned to Prometheus                                   | string | Yes      |
+| `prometheus_keycloak_client_secret`               | Keycloak client secret assigned to Prometheus (sensitive)                   | string | Yes      |
+| `alertmanager_keycloak_client_id`                 | Keycloak client ID assigned to Alertmanager                                 | string | Yes      |
+| `alertmanager_keycloak_client_secret`             | Keycloak client secret assigned to Alertmanager (sensitive)                 | string | Yes      |
+| `alertmanager_session_storage_secret_name`        | Name of the Kubernetes Secret for Alertmanager OAuth2 Proxy session storage | string | Yes      |
+| `alertmanager_session_storage_secret_key`         | Key within the Alertmanager session storage secret                          | string | Yes      |
+| `alertmanager_oidc_secret_name`                   | Name of the Kubernetes Secret for Alertmanager OAuth2 Proxy OIDC configuration | string | Yes  |
+| `prometheus_session_storage_secret_name`          | Name of the Kubernetes Secret for Prometheus OAuth2 Proxy session storage   | string | Yes      |
+| `prometheus_session_storage_secret_key`           | Key within the Prometheus session storage secret                            | string | Yes      |
+| `prometheus_oidc_secret_name`                     | Name of the Kubernetes Secret for Prometheus OAuth2 Proxy OIDC configuration | string | Yes    |
+| `oauth2_proxy_cache_session_storage_secret_name`  | Name of the Kubernetes Secret for OAuth2 Proxy cache session storage        | string | Yes      |
+| `oauth2_proxy_cache_session_storage_secret_key`   | Key within the OAuth2 Proxy cache session storage secret                    | string | Yes      |
 
-## Usage
+## Prerequisites
 
-```hcl
-module "oauth2_proxy" {
-  source = "../modules/oauth2_proxy"
+- An existing Kubernetes cluster
+- Kubernetes provider configured in Terraform
+- Keycloak instance with Prometheus and Alertmanager clients configured
+- OAuth2 Proxy cache (e.g., Valkey/Redis) deployed
+- Sufficient permissions to create secrets in the target namespaces
 
-  alertmanager_oauth2_proxy_values    = file("${path.module}/values/alertmanager-oauth2-proxy.yaml")
-  prometheus_oauth2_proxy_values      = file("${path.module}/values/prometheus-oauth2-proxy.yaml")
-  oauth2_proxy_cache_values           = file("${path.module}/values/valkey.yaml")
-  
-  alertmanager_oauth2_proxy_namespace = "monitoring"
-  prometheus_oauth2_proxy_namespace   = "monitoring"
-  oauth2_proxy_cache_namespace        = "monitoring"
-  
-  prometheus_keycloak_client_id       = "prometheus-client"
-  prometheus_keycloak_client_secret   = var.prometheus_client_secret
-  alertmanager_keycloak_client_id     = "alertmanager-client"
-  alertmanager_keycloak_client_secret = var.alertmanager_client_secret
-}
-```
+## References
 
-## Secrets Created
-
-The module creates the following Kubernetes Secrets:
-
-### OIDC Secrets (per OAuth2 Proxy instance)
-
-**Prometheus OIDC Secret:**
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <from-helm-values>
-  namespace: <prometheus_oauth2_proxy_namespace>
-data:
-  cookie-secret: <generated-32-char-alphanumeric>
-  client-id: <prometheus_keycloak_client_id>
-  client-secret: <prometheus_keycloak_client_secret>
-```
-
-**Alertmanager OIDC Secret:**
+- [OAuth2 Proxy Documentation](https://oauth2-proxy.github.io/oauth2-proxy/)
+- [Terraform Kubernetes Provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)
 ```yaml
 apiVersion: v1
 kind: Secret

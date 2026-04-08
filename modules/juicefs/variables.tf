@@ -8,13 +8,13 @@ variable "cluster_name" {
   }
 }
 
-variable "juicefs_cache_secret_name" {
+variable "juicefs_cache_namespace" {
   type        = string
-  description = "Name of the Kubernetes Secret used for JuiceFS cache credentials."
+  description = "Namespace where the JuiceFS cache is located."
 
   validation {
-    condition     = length(var.juicefs_cache_secret_name) > 0
-    error_message = "juicefs_cache_secret_name cannot be empty."
+    condition     = length(var.juicefs_cache_namespace) > 0
+    error_message = "juicefs_cache_namespace cannot be empty."
   }
 }
 
@@ -28,23 +28,13 @@ variable "juicefs_cache_secret_key" {
   }
 }
 
-variable "juicefs_cache_namespace" {
+variable "juicefs_cache_secret_name" {
   type        = string
-  description = "Namespace where the JuiceFS cache is located."
+  description = "Name of the Kubernetes Secret used for JuiceFS cache credentials."
 
   validation {
-    condition     = length(var.juicefs_cache_namespace) > 0
-    error_message = "juicefs_cache_namespace cannot be empty."
-  }
-}
-
-variable "juicefs_dashboard_secret_name" {
-  type        = string
-  description = "Name of the Kubernetes Secret containing JuiceFS dashboard credentials."
-
-  validation {
-    condition     = length(var.juicefs_dashboard_secret_name) > 0
-    error_message = "juicefs_dashboard_secret_name cannot be empty."
+    condition     = length(var.juicefs_cache_secret_name) > 0
+    error_message = "juicefs_cache_secret_name cannot be empty."
   }
 }
 
@@ -55,6 +45,16 @@ variable "juicefs_csi_driver_namespace" {
   validation {
     condition     = length(var.juicefs_csi_driver_namespace) > 0
     error_message = "juicefs_csi_driver_namespace cannot be empty."
+  }
+}
+
+variable "juicefs_dashboard_secret_name" {
+  type        = string
+  description = "Name of the Kubernetes Secret containing JuiceFS dashboard credentials."
+
+  validation {
+    condition     = length(var.juicefs_dashboard_secret_name) > 0
+    error_message = "juicefs_dashboard_secret_name cannot be empty."
   }
 }
 
@@ -79,17 +79,15 @@ variable "s3_access_key" {
   }
 }
 
-variable "s3_secret_key" {
+variable "s3_bucket_name" {
   type        = string
-  description = "Secret key for the S3-compatible object storage."
-  sensitive   = true
+  description = "Name of the S3 bucket to use for JuiceFS storage."
 
   validation {
-    condition     = length(var.s3_secret_key) > 0
-    error_message = "s3_secret_key cannot be empty."
+    condition     = length(var.s3_bucket_name) > 0
+    error_message = "s3_bucket_name cannot be empty."
   }
 }
-
 variable "s3_endpoint" {
   type        = string
   description = "Endpoint URL of the S3-compatible object storage."
@@ -100,12 +98,13 @@ variable "s3_endpoint" {
   }
 }
 
-variable "s3_bucket_name" {
+variable "s3_secret_key" {
   type        = string
-  description = "Name of the S3 bucket to use for JuiceFS storage."
+  description = "Secret key for the S3-compatible object storage."
+  sensitive   = true
 
   validation {
-    condition     = length(var.s3_bucket_name) > 0
-    error_message = "s3_bucket_name cannot be empty."
+    condition     = length(var.s3_secret_key) > 0
+    error_message = "s3_secret_key cannot be empty."
   }
 }

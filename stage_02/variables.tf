@@ -1,90 +1,7 @@
-/*
-Do not add Kubernetes/Helm related values in this file.
-Instead, build upon the environment-template repository
-https://github.com/CHORUS-TRE/environment-template
-and reference it using the "helm_values_path" variable below
-*/
-
-variable "cluster_name" {
-  description = "The cluster name to be used as a prefix to release names"
+variable "alertmanager_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Alertmanager"
   type        = string
-}
-
-variable "kubeconfig_path" {
-  description = "Path to the Kubernetes config file"
-  type        = string
-}
-
-variable "kubeconfig_context" {
-  description = "Kubernetes context to use"
-  type        = string
-}
-
-variable "chorus_release" {
-  description = "CHORUS-TRE release to install"
-  type        = string
-  default     = "v0.1.0-alpha"
-}
-
-variable "helm_registry" {
-  description = "CHORUS Helm chart registry"
-  type        = string
-}
-
-variable "helm_registry_username" {
-  description = "Username to connect to the CHORUS Helm chart registry"
-  type        = string
-  default     = ""
-}
-
-variable "helm_registry_password" {
-  description = "Password to connect to the CHORUS Helm chart registry"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "helm_values_path" {
-  description = "Path to the repository storing the Helm chart values"
-  type        = string
-  default     = "../values"
-}
-
-variable "helm_values_pat" {
-  description = "Fine-grained personal access token (PAT) to access the Helm chart values repository (e.g. CHORUS-TRE/environment-template)"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "argocd_chart_name" {
-  description = "ArgoCD Helm chart name"
-  type        = string
-  default     = "argo-cd"
-}
-
-variable "argo_workflows_chart_name" {
-  description = "Argo Workflows Helm chart name"
-  type        = string
-  default     = "argo-workflows"
-}
-
-variable "argo_deploy_chart_name" {
-  description = "Name of the Helm chart holding the CHORUS AppProject and ApplicationSet"
-  type        = string
-  default     = "argo-deploy"
-}
-
-variable "valkey_chart_name" {
-  description = "Valkey Helm chart name"
-  type        = string
-  default     = "valkey"
-}
-
-variable "oauth2_proxy_cache_chart_name" {
-  description = "OAuth2 Proxy cache Helm chart name"
-  type        = string
-  default     = "oauth2-proxy-cache"
+  default     = "alertmanager"
 }
 
 variable "alertmanager_oauth2_proxy_chart_name" {
@@ -93,190 +10,70 @@ variable "alertmanager_oauth2_proxy_chart_name" {
   default     = "alertmanager-oauth2-proxy"
 }
 
-variable "prometheus_oauth2_proxy_chart_name" {
-  description = "Prometheus OAuth2 Proxy Helm chart name"
-  type        = string
-  default     = "prometheus-oauth2-proxy"
-}
-
-variable "harbor_chart_name" {
-  description = "Harbor Helm chart name"
-  type        = string
-  default     = "harbor"
-}
-
-variable "kube_prometheus_stack_chart_name" {
-  description = "Kube Prometheus stack Helm chart name (i.e. Prometheus, Alertmanager, Grafana)"
-  type        = string
-  default     = "kube-prometheus-stack"
-}
-
-variable "github_orga" {
-  description = "GitHub organization to use repositories from"
-  type        = string
-  default     = "CHORUS-TRE"
-}
-
-variable "helm_values_repo" {
-  description = "GitHub repository to get the Helm charts values from"
-  type        = string
-  default     = "environment-template"
-}
-
-variable "helm_values_credentials_secret" {
-  description = "Secret to store the Helm charts values repository credentials in for ArgoCD"
-  type        = string
-  default     = "argo-cd-github-environments"
-}
-
-variable "github_actions_harbor_robot_username" {
-  description = "Harbor robot username used by GitHub Actions"
-  type        = string
-  default     = "chorus-tre"
-}
-
-variable "argocd_harbor_robot_username" {
-  description = "Harbor robot username used by ArgoCD"
+variable "argocd_chart_name" {
+  description = "ArgoCD Helm chart name"
   type        = string
   default     = "argo-cd"
 }
 
-variable "chorusci_chart_name" {
-  description = "ChorusCI Helm chart name"
+variable "backend_chart_name" {
+  description = "Chorus backend Helm chart name"
   type        = string
-  default     = "chorus-ci"
+  default     = "backend"
 }
 
-variable "chorusci_harbor_robot_username" {
-  description = "Harbor robot username used by ChorusCI"
+variable "cert_manager_crds_path" {
+  description = "Path to the downloaded Cert-Manager CRDs file"
   type        = string
-  default     = "chorus-ci"
+  default     = "../crds"
 }
 
-variable "renovate_harbor_robot_username" {
-  description = "Harbor robot username used by Renovate"
+variable "cluster_name" {
+  description = "The cluster name to be used as a prefix to release names"
   type        = string
-  default     = "renovate"
 }
 
-variable "keycloak_chart_name" {
-  description = "Keycloak Helm chart folder name"
+variable "didata_app_key" {
+  description = "DiData app key (base64 encoded)"
   type        = string
-  default     = "keycloak"
+  default     = ""
 }
 
-variable "keycloak_realm" {
-  description = "Keycloak realm name"
+variable "didata_chart_name" {
+  description = "didata Helm chart name"
   type        = string
-  default     = "infra"
+  default     = "didata"
 }
 
-variable "keycloak_admin_username" {
-  description = "Keycloak admin username"
+variable "didata_registry_password" {
+  description = "Password used to fetch the DiData image"
   type        = string
-  default     = "admin"
+  default     = ""
 }
 
-variable "harbor_keycloak_client_id" {
-  description = "Keycloak client ID used assigned to Harbor"
+variable "didata_registry_username" {
+  description = "Username used to fetch the DiData image"
   type        = string
-  default     = "harbor"
+  default     = "didatadevops"
 }
 
-variable "argocd_keycloak_client_id" {
-  description = "Keycloak client ID used assigned to ArgoCD"
+variable "frontend_chart_name" {
+  description = "Frontend Helm chart name"
   type        = string
-  default     = "argocd"
+  default     = "web-ui"
 }
 
-variable "argo_workflows_keycloak_client_id" {
-  description = "Keycloak client ID used assigned to Argo Workflows"
+variable "remote_cluster_google_identity_provider_client_id" {
+  description = "The Google client identifier"
   type        = string
-  default     = "argo-workflows"
+  default     = ""
 }
 
-variable "grafana_keycloak_client_id" {
-  description = "Keycloak client ID used assigned to Grafana"
+variable "remote_cluster_google_identity_provider_client_secret" {
+  description = "The Google client secret used for authentication"
   type        = string
-  default     = "grafana"
-}
-
-variable "alertmanager_keycloak_client_id" {
-  description = "Keycloak client ID used assigned to Alertmanager"
-  type        = string
-  default     = "alertmanager"
-}
-
-variable "prometheus_keycloak_client_id" {
-  description = "Keycloak client ID used assigned to Prometheus"
-  type        = string
-  default     = "prometheus"
-}
-
-variable "harbor_keycloak_oidc_admin_group" {
-  description = "Keycloak OIDC admin group assigned to Harbor"
-  type        = string
-  default     = "HarborAdmins"
-}
-
-variable "argocd_keycloak_oidc_admin_group" {
-  description = "Keycloak OIDC admin group assigned to ArgoCD"
-  type        = string
-  default     = "ArgoCDAdmins"
-}
-
-variable "argo_workflows_keycloak_oidc_admin_group" {
-  description = "Keycloak OIDC admin group assigned to Argo Workflows"
-  type        = string
-  default     = "ArgoWorkflowsAdmins"
-}
-
-variable "grafana_keycloak_oidc_admin_group" {
-  description = "Keycloak OIDC admin group assigned to Grafana"
-  type        = string
-  default     = "Grafana"
-}
-
-variable "harbor_keycloak_base_url" {
-  description = "Harbor base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/harbor/projects"
-}
-
-variable "argocd_keycloak_base_url" {
-  description = "ArgoCD base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/applications"
-}
-
-variable "argo_workflows_keycloak_base_url" {
-  description = "Argo Workflows base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/workflows/argo"
-}
-
-variable "grafana_keycloak_base_url" {
-  description = "Grafana base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/"
-}
-
-variable "alertmanager_keycloak_base_url" {
-  description = "Alertmanager base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/"
-}
-
-variable "prometheus_keycloak_base_url" {
-  description = "Prometheus base URL or home URL for the Keycloak auth server to redirect to"
-  type        = string
-  default     = "/"
-}
-
-variable "harbor_admin_username" {
-  description = "Harbor admin username"
-  type        = string
-  default     = "admin"
+  sensitive   = true
+  default     = ""
 }
 
 variable "grafana_admin_username" {
@@ -285,51 +82,203 @@ variable "grafana_admin_username" {
   default     = "admin"
 }
 
-variable "github_username" {
-  description = "GitHub username owner of all the tokens"
+variable "fluent_operator_chart_name" {
+  description = "Fluent Operator Helm chart name"
+  type        = string
+  default     = "fluent-operator"
+}
+
+variable "harbor_admin_username" {
+  description = "Harbor admin username"
+  type        = string
+  default     = "admin"
+}
+
+variable "harbor_chart_name" {
+  description = "Harbor Helm chart name"
+  type        = string
+  default     = "harbor"
+}
+
+variable "harbor_keycloak_client_id" {
+  description = "Keycloak client ID assigned to Harbor"
+  type        = string
+  default     = "harbor"
+}
+
+variable "harbor_keycloak_oidc_admin_group" {
+  description = "Keycloak client ID assigned to Harbor"
+  type        = string
+  default     = "HarborAdmins"
+}
+
+variable "helm_values_path" {
+  description = "Path to the repository storing the Helm chart values"
+  type        = string
+  default     = "../values"
+}
+
+variable "i2b2_chart_name" {
+  description = "i2b2 Helm chart name"
+  type        = string
+  default     = "i2b2"
+}
+
+variable "i2b2_db_password" {
+  description = "i2b2 database password"
   type        = string
 }
 
-variable "github_workbench_operator_token" {
-  description = "GitHub token for the Workbench Operator repository"
+variable "juicefs_chart_name" {
+  description = "JuiceFS Helm chart name used as prefix for CSI driver, S3 gateway and cache"
   type        = string
-  sensitive   = true
+  default     = "juicefs"
 }
 
-variable "github_chorus_web_ui_token" {
-  description = "GitHub token for the Chorus Web UI repository"
+variable "juicefs_dashboard_username" {
+  description = "JuiceFS dashboard username"
   type        = string
-  sensitive   = true
+  default     = "chorus"
 }
 
-variable "github_images_token" {
-  description = "GitHub token for the Images repository"
+variable "keycloak_admin_username" {
+  description = "Keycloak admin username"
   type        = string
-  sensitive   = true
+  default     = "admin"
 }
 
-variable "github_chorus_backend_token" {
-  description = "GitHub token for the Chorus Backend repository"
+variable "keycloak_chart_name" {
+  description = "Keycloak Helm chart folder name"
   type        = string
-  sensitive   = true
+  default     = "keycloak"
 }
 
-variable "google_identity_provider_client_id" {
-  description = "The Google client identifier"
+variable "keycloak_infra_realm" {
+  description = "Keycloak infrastructure realm name"
   type        = string
-  default     = ""
+  default     = "infra"
 }
 
-variable "google_identity_provider_client_secret" {
-  description = "The Google client secret used for authentication"
+variable "kube_prometheus_stack_chart_name" {
+  description = "Kube Prometheus stack Helm chart name (i.e. Prometheus, Alertmanager, Grafana)"
   type        = string
-  sensitive   = true
-  default     = ""
+  default     = "kube-prometheus-stack"
 }
 
-variable "webex_access_token" {
+variable "kubeconfig_context" {
+  description = "Kubernetes context to use"
+  type        = string
+}
+
+variable "kubeconfig_path" {
+  description = "Path to the Kubernetes config file"
+  type        = string
+}
+
+variable "loki_chart_name" {
+  description = "Loki Helm chart name"
+  type        = string
+  default     = "loki"
+}
+
+variable "matomo_chart_name" {
+  description = "Matomo Helm chart name"
+  type        = string
+  default     = "matomo"
+}
+
+variable "oauth2_proxy_cache_chart_name" {
+  description = "OAuth2 proxy cache Helm chart name"
+  type        = string
+  default     = "oauth2-proxy-cache"
+}
+
+variable "prometheus_keycloak_client_id" {
+  description = "Keycloak client ID used assigned to Prometheus"
+  type        = string
+  default     = "prometheus"
+}
+
+variable "prometheus_oauth2_proxy_chart_name" {
+  description = "Prometheus OAuth2 Proxy Helm chart name"
+  type        = string
+  default     = "prometheus-oauth2-proxy"
+}
+
+variable "reflector_chart_name" {
+  description = "Reflector Helm chart name"
+  type        = string
+  default     = "reflector"
+}
+
+variable "remote_cluster_insecure" {
+  description = "Allow insecure connection to remote cluster"
+  type        = bool
+  default     = false
+}
+
+variable "remote_cluster_kubeconfig_context" {
+  description = "Kubernetes context to use for the remote cluster"
+  type        = string
+}
+
+variable "remote_cluster_kubeconfig_path" {
+  description = "Path to the Kubernetes config file for the remote cluster"
+  type        = string
+}
+
+variable "remote_cluster_name" {
+  description = "The name of the remote cluster"
+  type        = string
+}
+
+variable "remote_cluster_server" {
+  description = "API server endpoint URL of the remote Kubernetes cluster"
+  type        = string
+}
+
+variable "remote_cluster_webex_access_token" {
   description = "The Webex access token for the Alertmanager integration"
   type        = string
   sensitive   = true
   default     = ""
+}
+
+variable "remote_cluster_loki_s3_access_key_id" {
+  description = "S3 access key ID for Loki storage in the remote cluster"
+  type        = string
+  sensitive   = true
+}
+
+variable "remote_cluster_loki_s3_secret_access_key" {
+  description = "S3 secret access key for Loki storage in the remote cluster"
+  type        = string
+  sensitive   = true
+}
+
+variable "s3_access_key" {
+  description = "S3 access key"
+  type        = string
+}
+
+variable "s3_bucket_name" {
+  description = "S3 access key"
+  type        = string
+}
+
+variable "s3_endpoint" {
+  description = "S3 endpoint"
+  type        = string
+}
+
+variable "s3_secret_key" {
+  description = "S3 secret key"
+  type        = string
+  sensitive   = true
+}
+
+variable "templates_path" {
+  description = "Path to the templates directory"
+  type        = string
+  default     = "../templates"
 }
