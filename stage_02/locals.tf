@@ -196,7 +196,7 @@ locals {
     tlsClientConfig = var.remote_cluster_insecure ? {
       insecure = var.remote_cluster_insecure
       caData   = base64encode(data.kubernetes_config_map.ca_data.data["ca.crt"])
-    } : {
+      } : {
       insecure = var.remote_cluster_insecure
     }
   })
