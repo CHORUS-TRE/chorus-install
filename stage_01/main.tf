@@ -201,18 +201,6 @@ module "alertmanager" {
   depends_on = [module.grafana]
 }
 
-module "fluent_operator" {
-  source = "../modules/fluent_operator"
-
-  namespace = local.fluent_operator_namespace
-
-  loki_http_user     = "${var.cluster_name}-fluentbit"
-  loki_http_password = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
-  loki_tenant_id     = var.cluster_name
-
-  depends_on = [module.loki]
-}
-
 module "oauth2_proxy" {
   source = "../modules/oauth2_proxy"
 
@@ -241,6 +229,27 @@ module "oauth2_proxy" {
     module.keycloak,
     module.grafana,
   ]
+}
+
+module "fluent_operator" {
+  source = "../modules/fluent_operator"
+
+  namespace = local.fluent_operator_namespace
+
+  loki_http_user     = "${var.cluster_name}-fluentbit"
+  loki_http_password = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
+  loki_tenant_id     = var.cluster_name
+
+  depends_on = [module.loki]
+}
+
+module "velero" {
+  source = "../modules/velero"
+
+  namespace               = local.velero_namespace
+  credentials_secret_name = local.velero_credentials_secret_name
+  access_key_id           = var.velero_access_key_id
+  secret_access_key       = var.velero_secret_access_key
 }
 
 module "argo_workflows" {
