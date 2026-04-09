@@ -14,7 +14,7 @@ This module manages the Velero namespace and S3 credentials on a Kubernetes clus
 | Name                       | Description                                                    | Type   | Default                    | Required | Sensitive |
 |----------------------------|----------------------------------------------------------------|--------|----------------------------|----------|----------|
 | `namespace`                | Name of the Kubernetes namespace to create for Velero          | string | -                          | Yes      | No       |
-| `credentials_secret_name`  | Name of the Kubernetes secret to store credentials             | string | -                          | No       | No       |
+| `credentials_secret_name`  | Name of the Kubernetes secret to store credentials             | string | -                          | Yes      | No       |
 | `access_key_id`            | S3 access key ID for Velero backup storage                     | string | -                          | Yes      | Yes      |
 | `secret_access_key`        | S3 secret access key for Velero backup storage                 | string | -                          | Yes      | Yes      |
 
