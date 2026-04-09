@@ -237,6 +237,18 @@ variable "remote_cluster_server" {
   type        = string
 }
 
+variable "remote_cluster_velero_access_key_id" {
+  description = "S3 access key ID for Velero backup storage"
+  type        = string
+  sensitive   = true
+}
+
+variable "remote_cluster_velero_secret_access_key" {
+  description = "S3 secret access key for Velero backup storage"
+  type        = string
+  sensitive   = true
+}
+
 variable "remote_cluster_webex_access_token" {
   description = "The Webex access token for the Alertmanager integration"
   type        = string
@@ -281,4 +293,10 @@ variable "templates_path" {
   description = "Path to the templates directory"
   type        = string
   default     = "../templates"
+}
+
+variable "velero_chart_name" {
+  description = "Velero Helm chart folder name"
+  type        = string
+  default     = "velero"
 }

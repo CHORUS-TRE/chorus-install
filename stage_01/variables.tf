@@ -285,6 +285,24 @@ variable "valkey_chart_name" {
   default     = "valkey"
 }
 
+variable "velero_access_key_id" {
+  description = "S3 access key ID for Velero backup storage"
+  type        = string
+  sensitive   = true
+}
+
+variable "velero_secret_access_key" {
+  description = "S3 secret access key for Velero backup storage"
+  type        = string
+  sensitive   = true
+}
+
+variable "velero_chart_name" {
+  description = "Velero Helm chart folder name"
+  type        = string
+  default     = "velero"
+}
+
 variable "webex_access_token" {
   description = "The Webex access token for the Alertmanager integration"
   type        = string

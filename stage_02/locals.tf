@@ -74,6 +74,7 @@ locals {
     loki                      = "${var.helm_values_path}/${var.remote_cluster_name}/${var.loki_chart_name}/config.json"
     fluent_operator           = "${var.helm_values_path}/${var.remote_cluster_name}/${var.fluent_operator_chart_name}/config.json"
     reflector                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.reflector_chart_name}/config.json"
+    velero                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.velero_chart_name}/config.json"
   }
   didata_db_namespace     = jsondecode(file(local.config_files.didata_db)).namespace
   didata_db_secret_name   = local.didata_db_values_parsed.mariadb.auth.existingSecret
@@ -217,5 +218,9 @@ locals {
     matomo_db                 = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}-db/values.yaml"
     oauth2_proxy_cache        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
     prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.remote_cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
+    velero                    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.velero_chart_name}/values.yaml"
   }
+  velero_namespace               = jsondecode(file(local.config_files.velero)).namespace
+  velero_values_parsed           = yamldecode(file(local.values_files.velero))
+  velero_credentials_secret_name = local.velero_values_parsed.velero.credentials.existingSecret
 }

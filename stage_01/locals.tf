@@ -58,6 +58,7 @@ locals {
     oauth2_proxy_cache        = "${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/config.json"
     prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/config.json"
     selfsigned                = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/config.json"
+    velero                    = "${var.helm_values_path}/${var.cluster_name}/${var.velero_chart_name}/config.json"
   }
   fluent_operator_namespace         = jsondecode(file(local.config_files.fluent_operator)).namespace
   grafana_namespace                 = local.prometheus_namespace
@@ -154,5 +155,9 @@ locals {
     oauth2_proxy_cache        = "${var.helm_values_path}/${var.cluster_name}/${var.oauth2_proxy_cache_chart_name}/values.yaml"
     prometheus_oauth2_proxy   = "${var.helm_values_path}/${var.cluster_name}/${var.prometheus_oauth2_proxy_chart_name}/values.yaml"
     selfsigned                = "${var.helm_values_path}/${var.cluster_name}/${var.selfsigned_chart_name}/values.yaml"
+    velero                    = "${var.helm_values_path}/${var.cluster_name}/${var.velero_chart_name}/values.yaml"
   }
+  velero_namespace               = jsondecode(file(local.config_files.velero)).namespace
+  velero_values_parsed           = yamldecode(file(local.values_files.velero))
+  velero_credentials_secret_name = local.velero_values_parsed.velero.credentials.existingSecret
 }

@@ -198,20 +198,6 @@ module "alertmanager" {
   depends_on = [kubernetes_namespace.prometheus]
 }
 
-# Fluent
-
-module "fluent_operator" {
-  source = "../modules/fluent_operator"
-
-  namespace = local.fluent_operator_namespace
-
-  loki_http_user     = "${var.cluster_name}-fluentbit"
-  loki_http_password = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
-  loki_tenant_id     = var.cluster_name
-
-  depends_on = [module.loki]
-}
-
 # OAuth2 proxy
 
 module "oauth2_proxy" {
@@ -237,6 +223,31 @@ module "oauth2_proxy" {
   oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
 
   depends_on = [kubernetes_namespace.keycloak]
+}
+
+# Fluent
+
+module "fluent_operator" {
+  source = "../modules/fluent_operator"
+
+  namespace = local.fluent_operator_namespace
+
+  loki_http_user     = "${var.cluster_name}-fluentbit"
+  loki_http_password = module.loki.loki_client_passwords["${var.cluster_name}-fluentbit"]
+  loki_tenant_id     = var.cluster_name
+
+  depends_on = [module.loki]
+}
+
+# Velero
+
+module "velero" {
+  source = "../modules/velero"
+
+  namespace               = local.velero_namespace
+  credentials_secret_name = local.velero_credentials_secret_name
+  access_key_id           = var.remote_cluster_velero_access_key_id
+  secret_access_key       = var.remote_cluster_velero_secret_access_key
 }
 
 # Matomo
