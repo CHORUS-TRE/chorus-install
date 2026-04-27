@@ -136,3 +136,12 @@ variable "selfsigned_helm_values" {
     error_message = "selfsigned_helm_values must be valid YAML."
   }
 }
+
+# Cloudflare DNS-01 API Token (optional)
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token for DNS-01 challenge. If provided, a secret will be created in cert-manager namespace. Leave empty to skip secret creation."
+  type        = string
+  sensitive   = true
+  default     = ""
+}

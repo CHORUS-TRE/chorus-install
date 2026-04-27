@@ -85,3 +85,22 @@ resource "helm_release" "selfsigned" {
 
   depends_on = [null_resource.wait_for_cert_manager_webhook]
 }
+
+# Cloudflare API Token Secret (for DNS-01 challenge)
+
+resource "kubernetes_secret" "cloudflare_api_token" {
+  count = var.cloudflare_api_token != "" ? 1 : 0
+
+  metadata {
+    name      = "cloudflare-api-token"
+    namespace = var.cert_manager_namespace
+  }
+
+  data = {
+    api-token = var.cloudflare_api_token
+  }
+
+  type = "Opaque"
+
+  depends_on = [kubernetes_namespace.cert_manager]
+}
