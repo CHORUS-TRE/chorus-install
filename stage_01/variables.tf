@@ -4,12 +4,6 @@ variable "alertmanager_keycloak_client_id" {
   default     = "alertmanager"
 }
 
-variable "alertmanager_oauth2_proxy_chart_name" {
-  description = "Alertmanager OAuth2 Proxy Helm chart folder name"
-  type        = string
-  default     = "alertmanager-oauth2-proxy"
-}
-
 variable "argo_deploy_chart_name" {
   description = "Argo Deploy Helm chart folder name"
   type        = string
@@ -69,6 +63,11 @@ variable "cloudflare_api_token" {
   type        = string
   sensitive   = true
   default     = ""
+
+  validation {
+    condition     = var.cloudflare_api_token == "" || length(var.cloudflare_api_token) >= 20
+    error_message = "Cloudflare API token appears invalid (too short). Expected at least 20 characters."
+  }
 }
 
 variable "chorus_priority_class_chart_name" {
@@ -86,6 +85,11 @@ variable "chorusci_chart_name" {
 variable "cluster_name" {
   description = "The cluster name to be used as a prefix to release names"
   type        = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?$", var.cluster_name))
+    error_message = "Cluster name must be lowercase alphanumeric with hyphens, start and end with alphanumeric (e.g., 'chorus-build')."
+  }
 }
 
 variable "fluent_operator_chart_name" {
@@ -98,12 +102,22 @@ variable "github_pat" {
   description = "GitHub Personal Access Token for Argo Workflows"
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = length(var.github_pat) >= 40
+    error_message = "GitHub PAT appears invalid (too short). Expected at least 40 characters."
+  }
 }
 
 variable "github_app_private_key" {
   description = "GitHub App private key for Argo Workflows"
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = can(regex("-----BEGIN.*PRIVATE KEY-----", var.github_app_private_key))
+    error_message = "GitHub App private key must be in PEM format (starting with -----BEGIN ... PRIVATE KEY-----)."
+  }
 }
 
 variable "github_orga" {
@@ -158,6 +172,11 @@ variable "harbor_keycloak_oidc_admin_group" {
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
   type        = string
+
+  validation {
+    condition     = var.helm_registry != "" && !can(regex("^https?://", var.helm_registry))
+    error_message = "Helm registry must not be empty and must not include the URL scheme (e.g., use 'registry.example.com' not 'https://registry.example.com')."
+  }
 }
 
 variable "helm_registry_password" {
@@ -262,12 +281,6 @@ variable "loki_chart_name" {
   default     = "loki"
 }
 
-variable "oauth2_proxy_cache_chart_name" {
-  description = "OAuth2 Proxy Cache Helm chart folder name"
-  type        = string
-  default     = "oauth2-proxy-cache"
-}
-
 variable "postgresql_chart_name" {
   description = "PostgreSQL Helm chart folder name"
   type        = string
@@ -278,12 +291,6 @@ variable "prometheus_keycloak_client_id" {
   description = "Keycloak client ID used assigned to Prometheus"
   type        = string
   default     = "prometheus"
-}
-
-variable "prometheus_oauth2_proxy_chart_name" {
-  description = "Prometheus OAuth2 Proxy Helm chart folder name"
-  type        = string
-  default     = "prometheus-oauth2-proxy"
 }
 
 variable "selfsigned_chart_name" {
