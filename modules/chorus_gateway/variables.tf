@@ -86,7 +86,6 @@ variable "kubeconfig_path" {
 variable "oidc_client_secrets" {
   description = "Map of OIDC client secrets to create in the gateway namespace. Key is secret name, value is the client secret."
   type        = map(string)
-  sensitive   = true
   default     = {}
 
   validation {
