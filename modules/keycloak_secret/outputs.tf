@@ -33,6 +33,11 @@ output "harbor_client_secret" {
   sensitive = true
 }
 
+output "juicefs_dashboard_client_secret" {
+  value     = var.cluster_type == "build" ? null : random_password.juicefs_dashboard_client_secret.result
+  sensitive = true
+}
+
 output "matomo_client_secret" {
   value     = var.cluster_type == "build" ? null : random_password.matomo_client_secret.result
   sensitive = true

@@ -4,12 +4,6 @@ variable "alertmanager_keycloak_client_id" {
   default     = "alertmanager"
 }
 
-variable "alertmanager_oauth2_proxy_chart_name" {
-  description = "Alertmanager OAuth2 Proxy Helm chart name"
-  type        = string
-  default     = "alertmanager-oauth2-proxy"
-}
-
 variable "argocd_chart_name" {
   description = "ArgoCD Helm chart name"
   type        = string
@@ -22,10 +16,23 @@ variable "backend_chart_name" {
   default     = "backend"
 }
 
-variable "cert_manager_crds_path" {
-  description = "Path to the downloaded Cert-Manager CRDs file"
+
+variable "chorus_gateway_chart_name" {
+  description = "Chorus Gateway Helm chart folder name"
   type        = string
-  default     = "../crds"
+  default     = "chorus-gateway"
+}
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token for DNS-01 challenge. If provided, a secret will be created in cert-manager namespace for use in ClusterIssuers. Requires Zone:DNS:Edit permissions for your domain."
+  type        = string
+  sensitive   = true
+  default     = ""
+
+  validation {
+    condition     = var.cloudflare_api_token == "" || length(var.cloudflare_api_token) >= 20
+    error_message = "Cloudflare API token appears invalid (too short). Expected at least 20 characters."
+  }
 }
 
 variable "cluster_name" {
@@ -55,6 +62,18 @@ variable "didata_registry_username" {
   description = "Username used to fetch the DiData image"
   type        = string
   default     = "didatadevops"
+}
+
+variable "envoy_gateway_chart_name" {
+  description = "Envoy Gateway Helm chart folder name"
+  type        = string
+  default     = "gateway-helm"
+}
+
+variable "envoy_gateway_crds_chart_name" {
+  description = "Gateway API CRDs Helm chart folder name"
+  type        = string
+  default     = "gateway-crds-helm"
 }
 
 variable "frontend_chart_name" {
@@ -110,6 +129,16 @@ variable "harbor_keycloak_oidc_admin_group" {
   description = "Keycloak client ID assigned to Harbor"
   type        = string
   default     = "HarborAdmins"
+}
+
+variable "helm_registry" {
+  description = "CHORUS Helm chart registry"
+  type        = string
+
+  validation {
+    condition     = var.helm_registry != "" && !can(regex("^https?://", var.helm_registry))
+    error_message = "Helm registry must not be empty and must not include the URL scheme (e.g., use 'registry.example.com' not 'https://registry.example.com')."
+  }
 }
 
 variable "helm_values_path" {
@@ -187,22 +216,10 @@ variable "matomo_chart_name" {
   default     = "matomo"
 }
 
-variable "oauth2_proxy_cache_chart_name" {
-  description = "OAuth2 proxy cache Helm chart name"
-  type        = string
-  default     = "oauth2-proxy-cache"
-}
-
 variable "prometheus_keycloak_client_id" {
   description = "Keycloak client ID used assigned to Prometheus"
   type        = string
   default     = "prometheus"
-}
-
-variable "prometheus_oauth2_proxy_chart_name" {
-  description = "Prometheus OAuth2 Proxy Helm chart name"
-  type        = string
-  default     = "prometheus-oauth2-proxy"
 }
 
 variable "reflector_chart_name" {
