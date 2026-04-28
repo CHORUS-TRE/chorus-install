@@ -50,14 +50,9 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 
 ### TLS Certificate Configuration
 
-TLS certificates for HTTPS listeners are configured via the Gateway helm chart values, not through Terraform variables. The `gateway-helm` chart supports both per-hostname certificates (HTTP-01 challenge) and wildcard certificates (DNS-01 challenge via Cloudflare or other DNS providers).
-
-**For DNS-01 wildcard certificates:**
-- Configure the `clusterIssuer` in the gateway-helm values (e.g., `"letsencrypt-dns01"`)
-- Configure the DNS-01 ClusterIssuer in the cert-manager helm chart values with provider credentials
-- Create a wildcard listener in the gateway-helm values (e.g., hostname: `"*.example.com"`)
-
-See the cert-manager and gateway-helm chart documentation for detailed configuration examples.
+| Variable | Description | Default |
+|----------|-------------|---------||
+| `cloudflare_api_token` | Cloudflare API token for DNS-01 challenge. If provided, a secret will be created in cert-manager namespace for use in ClusterIssuers. Requires `Zone:DNS:Edit` permissions for your domain. See [this section](#cloudflare_dns01) | `""` |
 
 ### Identity Provider Configuration
 
@@ -87,7 +82,7 @@ See the cert-manager and gateway-helm chart documentation for detailed configura
 ### Logging and Observability Configuration
 
 | Variable | Description | Default |
-|----------|-------------|---------||
+|----------|-------------|---------|
 | `loki_s3_access_key_id` | S3 access key ID for Loki storage backend (build cluster) | `""` |
 | `loki_s3_secret_access_key` | S3 secret access key for Loki storage backend (build cluster) | `""` |
 | `remote_cluster_loki_s3_access_key_id` | S3 access key ID for Loki storage backend (remote cluster) | `""` |
@@ -154,3 +149,19 @@ Go through the "Google Application" section of the following blog post to set up
 
 Go through the following blog post to set up the Webex robots and retrieve the `webex_access_token` and `remote_cluster_webex_access_token` variables:
 [Broadcasting prometheus alerts to webex space.](https://dev.to/akshay_awate_215ba6a285dc/broadcast-prometheus-alerts-to-webex-space-21gc)
+
+<a id="cloudflare_dns01"></a>
+## Cloudflare API Token for DNS-01 Challenge
+
+The `cloudflare_api_token` variable is used to create wildcard TLS certificates using the DNS-01 ACME challenge. This is optional and only needed if you want to use wildcard certificates (e.g., `*.example.com`).
+
+**Required steps:**
+1. Log in to your Cloudflare dashboard
+2. Navigate to My Profile > API Tokens
+3. Create a new API token with the following permissions:
+   - Zone: DNS: Edit (for your specific zone)
+4. Copy the generated token and use it as the value for `cloudflare_api_token`
+
+The token will be stored as a Kubernetes secret in the `cert-manager` namespace and can be referenced in ClusterIssuer configurations in the cert-manager helm values.
+
+See the Cloudflare documentation: [Creating API tokens](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/)

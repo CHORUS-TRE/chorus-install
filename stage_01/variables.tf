@@ -64,6 +64,13 @@ variable "cert_manager_crds_folder_name" {
   default     = "../crds"
 }
 
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token for DNS-01 challenge. If provided, a secret will be created in cert-manager namespace for use in ClusterIssuers. Requires Zone:DNS:Edit permissions for your domain."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "chorus_priority_class_chart_name" {
   description = "CHORUS Priority Class Helm chart folder name"
   type        = string

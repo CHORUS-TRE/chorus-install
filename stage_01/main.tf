@@ -74,6 +74,8 @@ module "certificate_authorities" {
   selfsigned_chart_version = local.selfsigned_chart_version
   selfsigned_helm_values   = file(local.values_files.selfsigned)
 
+  cloudflare_api_token = var.cloudflare_api_token
+
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
 }
