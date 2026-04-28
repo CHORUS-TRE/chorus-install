@@ -191,10 +191,16 @@ variable "helm_values_repo" {
   default     = "environment-template"
 }
 
-variable "ingress_nginx_chart_name" {
-  description = "Ingress-Nginx Helm chart folder name"
+variable "envoy_gateway_chart_name" {
+  description = "Envoy gateway Helm chart folder name"
   type        = string
-  default     = "ingress-nginx"
+  default     = "gateway-helm"
+}
+
+variable "envoy_gateway_crds_chart_name" {
+  description = "Envoy gateway CRDs Helm chart folder name"
+  type        = string
+  default     = "gateway-crds-helm"
 }
 
 variable "keycloak_chart_name" {

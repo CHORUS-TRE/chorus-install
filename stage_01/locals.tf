@@ -50,7 +50,8 @@ locals {
     harbor                    = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/config.json"
     harbor_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/config.json"
     harbor_db                 = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/config.json"
-    ingress_nginx             = "${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/config.json"
+    envoy_gateway             = "${var.helm_values_path}/${var.cluster_name}/${var.envoy_gateway_chart_name}/config.json"
+    envoy_gateway_crds        = "${var.helm_values_path}/${var.cluster_name}/${var.envoy_gateway_crds_chart_name}/config.json"
     keycloak                  = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/config.json"
     keycloak_db               = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/config.json"
     kube_prometheus_stack     = "${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
@@ -101,8 +102,9 @@ locals {
   harbor_values_parsed                    = yamldecode(file(local.values_files.harbor))
   harbor_xsrf_secret_key                  = local.harbor_values_parsed.harbor.core.existingXsrfSecretKey
   harbor_xsrf_secret_name                 = local.harbor_values_parsed.harbor.core.existingXsrfSecret
-  ingress_nginx_chart_version             = jsondecode(file(local.config_files.ingress_nginx)).version
-  ingress_nginx_namespace                 = jsondecode(file(local.config_files.ingress_nginx)).namespace
+  envoy_gateway_chart_version             = jsondecode(file(local.config_files.envoy_gateway)).version
+  envoy_gateway_crds_chart_version        = jsondecode(file(local.config_files.envoy_gateway_crds)).version
+  envoy_gateway_namespace                 = jsondecode(file(local.config_files.envoy_gateway)).namespace
   keycloak_chart_version                  = jsondecode(file(local.config_files.keycloak)).version
   keycloak_client_credentials_secret_name = coalesce(
     local.keycloak_values_parsed.client.existingSecret,
@@ -148,7 +150,8 @@ locals {
     harbor                    = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml"
     harbor_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/values.yaml"
     harbor_db                 = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-db/values.yaml"
-    ingress_nginx             = "${var.helm_values_path}/${var.cluster_name}/${var.ingress_nginx_chart_name}/values.yaml"
+    envoy_gateway             = "${var.helm_values_path}/${var.cluster_name}/${var.envoy_gateway_chart_name}/values.yaml"
+    envoy_gateway_crds        = "${var.helm_values_path}/${var.cluster_name}/${var.envoy_gateway_crds_chart_name}/values.yaml"
     keycloak                  = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}/values.yaml"
     keycloak_db               = "${var.helm_values_path}/${var.cluster_name}/${var.keycloak_chart_name}-db/values.yaml"
     kube_prometheus_stack     = "${var.helm_values_path}/${var.cluster_name}/${var.kube_prometheus_stack_chart_name}/values.yaml"

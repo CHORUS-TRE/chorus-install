@@ -39,16 +39,21 @@ module "chorus_priority_class" {
   kubeconfig_context = var.kubeconfig_context
 }
 
-module "ingress_nginx" {
-  source = "../modules/ingress_nginx"
+module "envoy_gateway" {
+  source = "../modules/envoy_gateway"
 
   cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
-  chart_name         = var.ingress_nginx_chart_name
-  chart_version      = local.ingress_nginx_chart_version
-  helm_values        = file(local.values_files.ingress_nginx)
-  namespace          = local.ingress_nginx_namespace
+  gateway_crds_chart_name    = var.envoy_gateway_crds_chart_name
+  gateway_crds_chart_version = local.envoy_gateway_crds_chart_version
+  gateway_crds_helm_values   = file(local.values_files.envoy_gateway_crds)
+
+  gateway_chart_name    = var.envoy_gateway_chart_name
+  gateway_chart_version = local.envoy_gateway_chart_version
+  gateway_helm_values   = file(local.values_files.envoy_gateway)
+  gateway_namespace     = local.envoy_gateway_namespace
+
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
 }
@@ -101,7 +106,7 @@ module "keycloak" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
   ]
 }
 
@@ -147,7 +152,7 @@ module "harbor" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
   ]
 }
 
@@ -182,7 +187,7 @@ module "grafana" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
     module.keycloak,
     module.loki,
   ]
@@ -225,7 +230,7 @@ module "oauth2_proxy" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
     module.keycloak,
     module.grafana,
   ]
@@ -266,7 +271,7 @@ module "argo_workflows" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
   ]
 }
 
@@ -345,7 +350,7 @@ resource "kubernetes_secret" "argocd_secret" {
 
 locals {
   output = {
-    loadbalancer_ip       = module.ingress_nginx.loadbalancer_ip
+    loadbalancer_ip       = module.envoy_gateway.loadbalancer_ip
     harbor_admin_username = var.harbor_admin_username
     harbor_admin_password = module.harbor.harbor_password
     harbor_url            = local.harbor_url
