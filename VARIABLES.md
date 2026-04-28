@@ -25,13 +25,11 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `chorus_release` | Version tag of the CHORUS release. Existing `helm_values_repo` branch name is supported as well | `"v0.1.0-alpha"` |
 | `github_orga` | GitHub organization where CHORUS repos reside | `"CHORUS-TRE"` |
 | `helm_registry_password` | Password for authenticating to a private Helm registry | `""` |
 | `helm_registry_username` | Username for authenticating to a private Helm registry | `""` |
 | `helm_values_credentials_secret` | Kubernetes secret name holding GitHub credentials for ArgoCD to read Helm values repo | `"argo-cd-github-environments"` |
 | `helm_values_pat` | GitHub PAT for private Helm values repos (read-only). See [this section](#github_pat) | `""` |
-| `helm_values_path` | Local path to Helm values files | `"../values"` |
 | `helm_values_repo` | Repository containing overriding Helm values | `"environment-template"` |
 
 ### Helm Chart Names
@@ -39,6 +37,7 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `cert_manager_chart_name` | Helm chart name for cert-manager. The corresponding folder within `helm_values_repo` needs to have the same name | `"cert-manager"` |
+| `cert_manager_crds_chart_name` | Helm chart name for cert-manager CRDs. The corresponding folder within `helm_values_repo` needs to have the same name | `"cert-manager-crds"` |
 | `chorus_gateway_chart_name` | Helm chart name for Chorus Gateway (HTTPRoutes and SecurityPolicies). The corresponding folder within `helm_values_repo` needs to have the same name | `"chorus-gateway"` |
 | `envoy_gateway_chart_name` | Helm chart name for Envoy Gateway. The corresponding folder within `helm_values_repo` needs to have the same name | `"gateway-helm"` |
 | `envoy_gateway_crds_chart_name` | Helm chart name for Gateway API CRDs. The corresponding folder within `helm_values_repo` needs to have the same name | `"gateway-crds-helm"` |

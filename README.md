@@ -114,8 +114,8 @@ The following requirements serve as a lower bound estimate, you might want to in
    kubectl patch storageclass your-default-storage-class-name -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
    ```
 
-1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps) for each stage (e.g. workspace_stage_00, workspace_stage_01, ...).
-    Make sure to add the necessary tag to your workspace (e.g. `stage_00` for the workspace used for stage_00).
+1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps) for each stage (e.g. workspace_stage_01, workspace_stage_02).
+    Make sure to add the necessary tag to your workspace (e.g. `stage_01` for the workspace used for stage_01).
 
     > If you don't have access to Terraform Cloud, you can delete all the `backend.tf` files, hence using the default local backend. The local backend type stores state as a local file on disk.
 
@@ -125,27 +125,29 @@ The following requirements serve as a lower bound estimate, you might want to in
     terraform login
     ```
 
-1. Initialize, plan and apply stage 0.
+1. Clone the required repositories.
 
-   > This stage downloads the necessary overriding Helm values from the https://github.com/$TF_VAR_github_orga/$TF_VAR_helm_values_repo repository (e.g. https://github.com/CHORUS-TRE/environment-template).
+   **Helm charts repository** - Contains the CHORUS wrapper Helm charts (e.g. https://github.com/CHORUS-TRE/chorus-tre):
 
     ```sh
-    cd stage_00
-    terraform init
+    git clone https://github.com/$TF_VAR_github_orga/chorus-tre.git charts
     ```
-    You'll be prompted to select a workspace.
-    Once you selected a workspace, run ```terraform workspace show``` to make sure your selection was correct.
+
+   **Helm values repository** - Contains the overriding Helm values for your clusters (e.g. https://github.com/CHORUS-TRE/environment-template):
+
     ```sh
-    terraform plan -out="stage_00.plan"
-    terraform apply "stage_00.plan"
+    git clone https://github.com/$TF_VAR_github_orga/$TF_VAR_helm_values_repo.git values
     ```
+
+    > Make sure you have git access configured (SSH keys, credentials, etc.) before cloning.
+    > Pull the latest changes from these repositories before running terraform if you need to update your configuration.
 
 1. Initialize, plan and apply stage 1.
 
     > This stage bootstraps the build cluster.
 
     ```sh
-    cd ../stage_01
+    cd stage_01
     terraform init
     ```
     You'll be prompted to select a workspace.
@@ -161,7 +163,7 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 1. Update your DNS record with the load balancer IP address.
 
-    > ACME challenges will fail as long as our hosts do not resolve properly
+    > HTTP-01 challenges will fail as long as our hosts do not resolve properly
 
 1. Make sure the different applications (Harbor, Keycloak, ArgoCD,) can be accessed using your browser. Log into each application using the credentials listed in "*your-build-cluster-name*_output.yaml.
 
@@ -180,7 +182,7 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 ## Install the remote cluster
 
-1. Go through steps 1 to 6 of the build cluster installation, making sure environment variables related to the remote cluster were filled in your env file.
+1. Go through steps 1 to 5 of the build cluster installation, making sure environment variables related to the remote cluster were filled in your env file.
 
 1. Initialize, plan and apply stage 2.
 
