@@ -1,17 +1,10 @@
 # Cert-Manager CRDs Module
 
-This module applies Cert-Manager Custom Resource Definitions (CRDs) to a Kubernetes cluster.
+Installs cert-manager Custom Resource Definitions (CRDs) via Helm chart.
 
 ## Purpose
 
-Deploys Cert-Manager CRDs from YAML content using the Kubernetes provider's `manifest_decode_multi` function to parse and apply multiple manifests dynamically.
-
-## Features
-
-- Parses multiple YAML manifests from a single string
-- Creates individual `kubernetes_manifest` resources for each CRD
-- Uses CRD name as the resource key for stable state management
-- Validates YAML content before application
+Deploys the cert-manager CRDs helm chart as a separate release. This must be installed before the main cert-manager chart.
 
 ## Usage
 
@@ -19,27 +12,30 @@ Deploys Cert-Manager CRDs from YAML content using the Kubernetes provider's `man
 module "cert_manager_crds" {
   source = "../modules/cert_manager_crds"
 
-  cert_manager_crds_content = file("${path.module}/crds/cert-manager.crds.yaml")
+  cluster_name            = "chorus-build"
+  helm_registry           = "registry.example.com"
+  chart_name              = "cert-manager-crds"
+  chart_version           = "v1.15.0"
+  helm_values             = file("path/to/values.yaml")
+  cert_manager_namespace  = "cert-manager"
+  kubeconfig_path         = "~/.kube/config"
+  kubeconfig_context      = "my-cluster"
 }
 ```
-
-## Requirements
-
-- Terraform >= 1.8.0 (required for provider functions)
-- Kubernetes provider >= 2.36.0
 
 ## Inputs
 
 | Name | Description | Type | Required |
 |------|-------------|------|----------|
-| `cert_manager_crds_content` | YAML content of the Cert-Manager CRDs to be applied. Should contain one or more Kubernetes manifests in YAML format. | `string` | Yes |
+| `cluster_name` | Cluster name prefix for release | string | Yes |
+| `helm_registry` | OCI registry for helm charts | string | Yes |
+| `chart_name` | Cert-Manager CRDs chart name | string | Yes |
+| `chart_version` | Chart version to install | string | Yes |
+| `helm_values` | Helm values YAML content | string | Yes |
+| `cert_manager_namespace` | Target namespace | string | Yes |
+| `kubeconfig_path` | Path to kubeconfig | string | Yes |
+| `kubeconfig_context` | Kubernetes context | string | Yes |
 
 ## Outputs
 
-This module has no outputs.
-
-## Notes
-
-- The module uses `provider::kubernetes::manifest_decode_multi` to split multi-document YAML into individual manifests
-- Each CRD is tracked separately in Terraform state using its metadata.name as the key
-- CRDs are typically applied before deploying Cert-Manager itself
+None
