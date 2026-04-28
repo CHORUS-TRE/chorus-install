@@ -39,12 +39,25 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `cert_manager_chart_name` | Helm chart name for cert-manager. The corresponding folder within `helm_values_repo` needs to have the same name | `"cert-manager"` |
+| `chorus_gateway_chart_name` | Helm chart name for Chorus Gateway (HTTPRoutes and SecurityPolicies). The corresponding folder within `helm_values_repo` needs to have the same name | `"chorus-gateway"` |
+| `envoy_gateway_chart_name` | Helm chart name for Envoy Gateway. The corresponding folder within `helm_values_repo` needs to have the same name | `"gateway-helm"` |
+| `envoy_gateway_crds_chart_name` | Helm chart name for Gateway API CRDs. The corresponding folder within `helm_values_repo` needs to have the same name | `"gateway-crds-helm"` |
 | `harbor_chart_name` | Helm chart name for Harbor. The corresponding folder within `helm_values_repo` needs to have the same name | `"harbor"` |
-| `ingress_nginx_chart_name` | Helm chart name for ingress-nginx. The corresponding folder within `helm_values_repo` needs to have the same name | `"ingress-nginx"` |
 | `keycloak_chart_name` | Helm chart name for Keycloak. The corresponding folder within `helm_values_repo` needs to have the same name | `"keycloak"` |
 | `postgresql_chart_name` | Helm chart name for PostgreSQL. The corresponding folder within `helm_values_repo` needs to have the same name | `"postgresql"` |
 | `selfsigned_chart_name` | Helm chart name for self-signed issuer. The corresponding folder within `helm_values_repo` needs to have the same name | `"self-signed-issuer"` |
 | `valkey_chart_name` | Helm chart name for Valkey. The corresponding folder within `helm_values_repo` needs to have the same name | `"valkey"` |
+
+### TLS Certificate Configuration
+
+TLS certificates for HTTPS listeners are configured via the Gateway helm chart values, not through Terraform variables. The `gateway-helm` chart supports both per-hostname certificates (HTTP-01 challenge) and wildcard certificates (DNS-01 challenge via Cloudflare or other DNS providers).
+
+**For DNS-01 wildcard certificates:**
+- Configure the `clusterIssuer` in the gateway-helm values (e.g., `"letsencrypt-dns01"`)
+- Configure the DNS-01 ClusterIssuer in the cert-manager helm chart values with provider credentials
+- Create a wildcard listener in the gateway-helm values (e.g., hostname: `"*.example.com"`)
+
+See the cert-manager and gateway-helm chart documentation for detailed configuration examples.
 
 ### Identity Provider Configuration
 
