@@ -41,7 +41,7 @@ jobs:
         run: |
           stages=$(find . -mindepth 1 -maxdepth 1 -type d -name 'stage_*' -exec basename {} \; | sort | jq -R -s -c 'split("\n")[:-1]')
           echo "stages=$stages" >> $GITHUB_OUTPUT
-      
+
   terraform-validate-modules:
     needs: discover-terraform-dirs
     runs-on: ubuntu-latest
