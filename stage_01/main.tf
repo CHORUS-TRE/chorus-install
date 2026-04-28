@@ -324,9 +324,11 @@ module "argo_cd" {
   argocd_cache_chart_version = local.argocd_cache_chart_version
   argocd_cache_helm_values   = file(local.values_files.argocd_cache)
 
-  helm_charts_values_credentials_secret = var.helm_values_credentials_secret
+  helm_charts_values_credentials_secret = "${var.cluster_name}-argocd-repocreds"
   helm_values_url                       = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
-  helm_values_pat                       = var.helm_values_pat
+  github_app_id                         = var.github_app_id
+  github_app_installation_id            = var.github_app_installation_id
+  github_app_private_key                = var.github_app_private_key
   harbor_domain                         = replace(local.harbor_url, "https://", "")
   harbor_robot_username                 = var.argocd_harbor_robot_username
   harbor_robot_password                 = module.harbor.harbor_robot_secrets[var.argocd_harbor_robot_username]

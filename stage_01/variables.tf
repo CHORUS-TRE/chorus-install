@@ -103,8 +103,28 @@ variable "github_pat" {
   }
 }
 
+variable "github_app_id" {
+  description = "GitHub App ID for ArgoCD repository access and Argo Workflows event source"
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_app_id))
+    error_message = "GitHub App ID must be a numeric string."
+  }
+}
+
+variable "github_app_installation_id" {
+  description = "GitHub App Installation ID for ArgoCD repository access"
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_app_installation_id))
+    error_message = "GitHub App Installation ID must be a numeric string."
+  }
+}
+
 variable "github_app_private_key" {
-  description = "GitHub App private key for Argo Workflows"
+  description = "GitHub App private key for ArgoCD repository access and Argo Workflows event source"
   type        = string
   sensitive   = true
 
@@ -186,18 +206,6 @@ variable "helm_registry_username" {
   default     = ""
 }
 
-variable "helm_values_credentials_secret" {
-  description = "Secret to store the Helm charts values repository credentials in for ArgoCD"
-  type        = string
-  default     = "argo-cd-github-environments"
-}
-
-variable "helm_values_pat" {
-  description = "Fine-grained personal access token (PAT) to access the Helm chart values repository (e.g. CHORUS-TRE/environment-template)"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
 
 variable "helm_values_path" {
   description = "Path to the repository storing the Helm chart values"

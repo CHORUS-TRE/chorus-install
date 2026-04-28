@@ -8,8 +8,10 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | Variable                            | Description                                                                 |
 |-------------------------------------|-----------------------------------------------------------------------------|
 | `cluster_name`                      | Cluster name used as a prefix for releases.                                 |
+| `github_app_id`                     | GitHub App ID for ArgoCD repository access and Argo Workflows event source. See [this section](#github_app). |
+| `github_app_installation_id`        | GitHub App Installation ID for ArgoCD repository access. See [this section](#github_app). |
+| `github_app_private_key`            | GitHub App private key for ArgoCD repository access and Argo Workflows event source. See [this section](#github_app). |
 | `github_pat`                        | GitHub Personal Access Token used by Argo Workflows for repository access. Requires read/write access to code, commit statuses, and pull requests. See [this section](#github_pat). |
-| `github_app_private_key`            | GitHub App private key used by the event source to configure GitHub webhooks for continuous integration. See [this section](#github_app). |
 | `helm_registry`                     | OCI registry where CHORUS Helm charts are hosted. If the registry is not public, you need to set the `helm_registry_username` and `helm_registry_password` described in the optional variables.|
 | `i2b2_db_password`                  | Password for the i2b2 database. A limitation of the i2b2 Helm chart is that this password cannot be randomly generated. |
 | `kubeconfig_context`                | Context name in the kubeconfig file for the build cluster.                  |
@@ -28,8 +30,6 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | `github_orga` | GitHub organization where CHORUS repos reside | `"CHORUS-TRE"` |
 | `helm_registry_password` | Password for authenticating to a private Helm registry | `""` |
 | `helm_registry_username` | Username for authenticating to a private Helm registry | `""` |
-| `helm_values_credentials_secret` | Kubernetes secret name holding GitHub credentials for ArgoCD to read Helm values repo | `"argo-cd-github-environments"` |
-| `helm_values_pat` | GitHub PAT for private Helm values repos (read-only). See [this section](#github_pat) | `""` |
 | `helm_values_repo` | Repository containing overriding Helm values | `"environment-template"` |
 
 ### Helm Chart Names
@@ -122,18 +122,25 @@ The GitHub PAT is used by Argo Workflows to authenticate when accessing reposito
 Go through the following documentation to set up your GitHub PAT: [creating-a-fine-grained-personal-access-token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
 
 <a id="github_app"></a>
-## GitHub App Private Key
+## GitHub App
 
-The GitHub App private key is used by the event source to configure GitHub webhooks for continuous integration across all CHORUS repositories (Workbench Operator, Web UI, Images, Backend).
+The GitHub App is used for:
+1. **ArgoCD repository access**: To read Helm values from the environment repository
+2. **Argo Workflows event source**: To configure GitHub webhooks for continuous integration across all CHORUS repositories (Workbench Operator, Web UI, Images, Backend)
 
 **Setup steps:**
 1. Create a GitHub App in your organization or personal account
 2. Grant the app the following permissions:
+   - Read access to contents (for ArgoCD to read repository files)
    - Read access to metadata
-   - Read and Write access to webhooks
-3. Install the app on the required repositories
+   - Read and Write access to webhooks (for Argo Workflows event source)
+3. Install the app on the required repositories (environment repository and CHORUS code repositories)
 4. Generate and download a private key
-5. Use the private key content as the value for `github_app_private_key`
+5. Note the App ID and Installation ID from the GitHub App settings page
+6. Use the following values:
+   - `github_app_id`: The App ID from the GitHub App settings
+   - `github_app_installation_id`: The Installation ID (found in the app's installations page)
+   - `github_app_private_key`: The private key content
 
 Go through the following documentation to set up your GitHub App: [creating-a-github-app](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps)
 

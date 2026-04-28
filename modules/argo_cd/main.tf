@@ -35,7 +35,7 @@ resource "kubernetes_secret" "argocd_cache" {
   depends_on = [kubernetes_namespace.argocd]
 }
 
-resource "kubernetes_secret" "public_environments_repository_credentials" {
+resource "kubernetes_secret" "environments_repository_credentials" {
   metadata {
     name      = var.helm_charts_values_credentials_secret
     namespace = var.argocd_namespace
@@ -45,35 +45,13 @@ resource "kubernetes_secret" "public_environments_repository_credentials" {
   }
 
   data = {
-    url  = var.helm_values_url
-    type = "git"
+    url                      = var.helm_values_url
+    githubAppID              = var.github_app_id
+    githubAppInstallationID  = var.github_app_installation_id
+    githubAppPrivateKey      = var.github_app_private_key
   }
 
   depends_on = [kubernetes_namespace.argocd]
-
-  # Public repository: no password needed
-  count = var.helm_values_pat != "" ? 0 : 1
-}
-
-resource "kubernetes_secret" "private_environments_repository_credentials" {
-  metadata {
-    name      = var.helm_charts_values_credentials_secret
-    namespace = var.argocd_namespace
-    labels = {
-      "argocd.argoproj.io/secret-type" = "repository"
-    }
-  }
-
-  data = {
-    url      = var.helm_values_url
-    password = var.helm_values_pat
-    type     = "git"
-  }
-
-  depends_on = [kubernetes_namespace.argocd]
-
-  # Private repository: password needed
-  count = var.helm_values_pat != "" ? 1 : 0
 }
 
 # Note: ArgoCD discovers OCI repositories by labels, not by name.

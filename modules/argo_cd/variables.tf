@@ -128,11 +128,35 @@ variable "helm_registry" {
   }
 }
 
-variable "helm_values_pat" {
-  description = "Fine-grained personal access token (PAT) to access the environments repository (empty for public repositories)"
+variable "github_app_id" {
+  description = "GitHub App ID for ArgoCD repository access"
   type        = string
-  default     = ""
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_app_id))
+    error_message = "GitHub App ID must be a numeric string."
+  }
+}
+
+variable "github_app_installation_id" {
+  description = "GitHub App Installation ID for ArgoCD repository access"
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_app_installation_id))
+    error_message = "GitHub App Installation ID must be a numeric string."
+  }
+}
+
+variable "github_app_private_key" {
+  description = "GitHub App private key for ArgoCD repository access"
+  type        = string
   sensitive   = true
+
+  validation {
+    condition     = can(regex("-----BEGIN.*PRIVATE KEY-----", var.github_app_private_key))
+    error_message = "GitHub App private key must be in PEM format."
+  }
 }
 
 variable "helm_values_url" {
