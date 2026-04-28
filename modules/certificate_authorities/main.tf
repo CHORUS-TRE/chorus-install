@@ -1,19 +1,3 @@
-# Namespace
-
-resource "kubernetes_namespace" "cert_manager" {
-  metadata {
-    name = var.cert_manager_namespace
-  }
-}
-
-# Cert-Manager CRDs
-
-module "cert_manager_crds" {
-  source = "../cert_manager_crds"
-
-  cert_manager_crds_content = var.cert_manager_crds_content
-}
-
 # Cert-Manager
 
 resource "helm_release" "cert_manager" {
@@ -22,7 +6,7 @@ resource "helm_release" "cert_manager" {
   chart            = "charts/${var.cert_manager_chart_name}"
   version          = var.cert_manager_chart_version
   namespace        = var.cert_manager_namespace
-  create_namespace = false
+  create_namespace = true
   wait             = true
 
   values = [var.cert_manager_helm_values]
@@ -32,11 +16,6 @@ resource "helm_release" "cert_manager" {
       name  = "cert-manager.crds.enabled"
       value = "false"
     }
-  ]
-
-  depends_on = [
-    kubernetes_namespace.cert_manager,
-    module.cert_manager_crds
   ]
 }
 
@@ -102,5 +81,5 @@ resource "kubernetes_secret" "cloudflare_api_token" {
 
   type = "Opaque"
 
-  depends_on = [kubernetes_namespace.cert_manager]
+  depends_on = [helm_release.cert_manager]
 }

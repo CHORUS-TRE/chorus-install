@@ -46,16 +46,10 @@ variable "cert_manager_chart_name" {
   default     = "cert-manager"
 }
 
-variable "cert_manager_crds_file_name" {
-  description = "Cert-Manager CRDs file name"
+variable "cert_manager_crds_chart_name" {
+  description = "Cert-Manager CRDs Helm chart folder name"
   type        = string
-  default     = "cert-manager.crds.yaml"
-}
-
-variable "cert_manager_crds_folder_name" {
-  description = "Name of the folder where the Cert-Manager CRDs file will be downloaded (pattern: folder_name/cluster_name/file_name)"
-  type        = string
-  default     = "../crds"
+  default     = "cert-manager-crds"
 }
 
 variable "cloudflare_api_token" {

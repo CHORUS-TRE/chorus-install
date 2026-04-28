@@ -58,6 +58,19 @@ module "envoy_gateway" {
   kubeconfig_context = var.kubeconfig_context
 }
 
+module "cert_manager_crds" {
+  source = "../modules/cert_manager_crds"
+
+  cluster_name           = var.cluster_name
+  helm_registry          = var.helm_registry
+  chart_name             = var.cert_manager_crds_chart_name
+  chart_version          = local.cert_manager_crds_chart_version
+  helm_values            = file(local.values_files.cert_manager_crds)
+  cert_manager_namespace = local.cert_manager_namespace
+  kubeconfig_path        = var.kubeconfig_path
+  kubeconfig_context     = var.kubeconfig_context
+}
+
 module "certificate_authorities" {
   source = "../modules/certificate_authorities"
 
@@ -68,7 +81,6 @@ module "certificate_authorities" {
   cert_manager_chart_version = local.cert_manager_chart_version
   cert_manager_helm_values   = file(local.values_files.cert_manager)
   cert_manager_namespace     = local.cert_manager_namespace
-  cert_manager_crds_content  = file(local.cert_manager_crds_path)
 
   selfsigned_chart_name    = var.selfsigned_chart_name
   selfsigned_chart_version = local.selfsigned_chart_version
@@ -78,6 +90,10 @@ module "certificate_authorities" {
 
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
+
+  depends_on = [
+    module.cert_manager_crds,
+  ]
 }
 
 module "keycloak" {
