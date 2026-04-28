@@ -206,27 +206,23 @@ module "alertmanager" {
   depends_on = [module.grafana]
 }
 
-module "oauth2_proxy" {
-  source = "../modules/oauth2_proxy"
+module "chorus_gateway" {
+  source = "../modules/chorus_gateway"
 
-  alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
-  prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
-  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
+  cluster_name      = var.cluster_name
+  helm_registry     = var.helm_registry
+  chart_name        = var.chorus_gateway_chart_name
+  chart_version     = local.chorus_gateway_chart_version
+  helm_values       = file(local.values_files.chorus_gateway)
+  gateway_namespace = local.envoy_gateway_namespace
 
-  prometheus_keycloak_client_id          = var.prometheus_keycloak_client_id
-  prometheus_keycloak_client_secret      = module.keycloak.prometheus_keycloak_client_secret
-  prometheus_session_storage_secret_name = local.prometheus_session_storage_secret_name
-  prometheus_session_storage_secret_key  = local.prometheus_session_storage_secret_key
-  prometheus_oidc_secret_name            = local.prometheus_oidc_secret_name
+  oidc_client_secrets = {
+    "prometheus-oidc-secret"   = module.keycloak.prometheus_keycloak_client_secret
+    "alertmanager-oidc-secret" = module.keycloak.alertmanager_keycloak_client_secret
+  }
 
-  alertmanager_keycloak_client_id          = var.alertmanager_keycloak_client_id
-  alertmanager_keycloak_client_secret      = module.keycloak.alertmanager_keycloak_client_secret
-  alertmanager_session_storage_secret_name = local.alertmanager_session_storage_secret_name
-  alertmanager_session_storage_secret_key  = local.alertmanager_session_storage_secret_key
-  alertmanager_oidc_secret_name            = local.alertmanager_oidc_secret_name
-
-  oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_session_storage_secret_name
-  oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
+  kubeconfig_path    = var.kubeconfig_path
+  kubeconfig_context = var.kubeconfig_context
 
   depends_on = [
     module.certificate_authorities,

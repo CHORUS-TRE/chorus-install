@@ -29,6 +29,7 @@ locals {
   cert_manager_chart_version          = jsondecode(file(local.config_files.cert_manager)).version
   cert_manager_crds_path              = join("/", [var.cert_manager_crds_folder_name, var.cluster_name, var.cert_manager_crds_file_name])
   cert_manager_namespace              = jsondecode(file(local.config_files.cert_manager)).namespace
+  chorus_gateway_chart_version        = jsondecode(file(local.config_files.chorus_gateway)).version
   chorus_priority_class_chart_version = jsondecode(file(local.config_files.chorus_priority_class)).version
   chorusci_namespace                  = jsondecode(file(local.config_files.chorusci)).namespace
   chorusci_sensor_regcred_secret_name = try(local.chorusci_values_parsed.sensor.dockerConfig.secretName, "regcred")
@@ -44,6 +45,7 @@ locals {
     argocd                    = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json"
     argocd_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/config.json"
     cert_manager              = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/config.json"
+    chorus_gateway            = "${var.helm_values_path}/${var.cluster_name}/${var.chorus_gateway_chart_name}/config.json"
     chorus_priority_class     = "${var.helm_values_path}/${var.cluster_name}/${var.chorus_priority_class_chart_name}/config.json"
     chorusci                  = "${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/config.json"
     fluent_operator           = "${var.helm_values_path}/${var.cluster_name}/${var.fluent_operator_chart_name}/config.json"
@@ -146,6 +148,7 @@ locals {
     argocd                    = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/values.yaml"
     argocd_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}-cache/values.yaml"
     cert_manager              = "${var.helm_values_path}/${var.cluster_name}/${var.cert_manager_chart_name}/values.yaml"
+    chorus_gateway            = "${var.helm_values_path}/${var.cluster_name}/${var.chorus_gateway_chart_name}/values.yaml"
     chorusci                  = "${var.helm_values_path}/${var.cluster_name}/${var.chorusci_chart_name}/values.yaml"
     harbor                    = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}/values.yaml"
     harbor_cache              = "${var.helm_values_path}/${var.cluster_name}/${var.harbor_chart_name}-cache/values.yaml"

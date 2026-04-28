@@ -203,6 +203,12 @@ variable "envoy_gateway_crds_chart_name" {
   default     = "gateway-crds-helm"
 }
 
+variable "chorus_gateway_chart_name" {
+  description = "Chorus Gateway Helm chart folder name"
+  type        = string
+  default     = "chorus-gateway"
+}
+
 variable "keycloak_chart_name" {
   description = "Keycloak Helm chart folder name"
   type        = string
