@@ -51,7 +51,7 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 ### TLS Certificate Configuration
 
 | Variable | Description | Default |
-|----------|-------------|---------||
+|----------|-------------|---------|
 | `cloudflare_api_token` | Cloudflare API token for DNS-01 challenge. If provided, a secret will be created in cert-manager namespace for use in ClusterIssuers. Requires `Zone:DNS:Edit` permissions for your domain. See [this section](#cloudflare_dns01) | `""` |
 
 ### Identity Provider Configuration
