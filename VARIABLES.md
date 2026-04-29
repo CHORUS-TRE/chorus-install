@@ -16,10 +16,22 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 | `i2b2_db_password`                  | Password for the i2b2 database. A limitation of the i2b2 Helm chart is that this password cannot be randomly generated. |
 | `kubeconfig_context`                | Context name in the kubeconfig file for the build cluster.                  |
 | `kubeconfig_path`                   | Absolute path to the kubeconfig file used to connect to the build cluster.  |
+| `loki_s3_access_key_id`             | S3 access key ID for Loki storage backend (build cluster)                   |
+| `loki_s3_secret_access_key`         | S3 secret access key for Loki storage backend (build cluster)               |
+| `velero_access_key_id`              | S3 access key ID for Velero backup storage (build cluster)                  |
+| `velero_secret_access_key`          | S3 secret access key for Velero backup storage (build cluster)              |
 | `remote_cluster_kubeconfig_context` | Context name in the kubeconfig file for the remote cluster.                 |
 | `remote_cluster_kubeconfig_path`    | Absolute path to the kubeconfig file for the remote cluster.                |
 | `remote_cluster_name`               | Remote cluster name used as a prefix for releases.                          |
 | `remote_cluster_server`             | K8s API server URL of the remote cluster.                                   |
+| `remote_cluster_loki_s3_access_key_id` | S3 access key ID for Loki storage backend (remote cluster)                |
+| `remote_cluster_loki_s3_secret_access_key` | S3 secret access key for Loki storage backend (remote cluster)          |
+| `remote_cluster_velero_access_key_id` | S3 access key ID for Velero backup storage (remote cluster)               |
+| `remote_cluster_velero_secret_access_key` | S3 secret access key for Velero backup storage (remote cluster)         |
+| `s3_access_key`                     | S3 access key for JuiceFS storage backend (remote cluster)                  |
+| `s3_bucket_name`                    | S3 bucket name for JuiceFS storage backend (remote cluster)                 |
+| `s3_endpoint`                       | S3 endpoint URL for JuiceFS storage backend (remote cluster)                |
+| `s3_secret_key`                     | S3 secret key for JuiceFS storage backend (remote cluster)                  |
 
 ## Optional variables
 
@@ -68,24 +80,6 @@ We make the distinction between the _build_ cluster, where ArgoCD is running, an
 |----------|-------------|---------|
 | `remote_cluster_webex_access_token` | Webex bot access token for sending alerts from the remote cluster. See [this section](#webex_alerts) | `""` |
 | `webex_access_token` | Webex bot access token for sending alerts. See [this section](#webex_alerts) | `""` |
-
-### Remote Storage Configuration
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `s3_access_key` | S3 access key for JuiceFS storage backend | `""` |
-| `s3_bucket_name` | S3 bucket name for JuiceFS storage backend | `""` |
-| `s3_endpoint` | S3 endpoint URL for JuiceFS storage backend | `""` |
-| `s3_secret_key` | S3 secret key for JuiceFS storage backend | `""` |
-
-### Logging and Observability Configuration
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `loki_s3_access_key_id` | S3 access key ID for Loki storage backend (build cluster) | `""` |
-| `loki_s3_secret_access_key` | S3 secret access key for Loki storage backend (build cluster) | `""` |
-| `remote_cluster_loki_s3_access_key_id` | S3 access key ID for Loki storage backend (remote cluster) | `""` |
-| `remote_cluster_loki_s3_secret_access_key` | S3 secret access key for Loki storage backend (remote cluster) | `""` |
 
 ### Applications Configuration
 
