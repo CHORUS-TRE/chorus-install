@@ -260,6 +260,13 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 1. You'll find important variables (e.g. URLs, admin usernames, admin passwords) in the "*your-remote-cluster-name*_output.yaml" file in the same folder as this readme.
 
+1. Depending on your cluster's security, you might have to explicitly give privilege to some namespaces
+
+  ```yaml
+  kubectl label ns prometheus pod-security.kubernetes.io/enforce=privileged
+  kubectl label ns velero pod-security.kubernetes.io/enforce=privileged
+  ```
+
 1. Once everything (applications, repositories, clusters) turns green in the ArgoCD UI, the remote cluster installation is complete.
 
     > In case of issues, refer to the official [Kubernetes documentation](https://kubernetes.io/docs/tasks/debug/debug-application/).
