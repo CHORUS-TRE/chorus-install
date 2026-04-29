@@ -171,7 +171,6 @@ locals {
   matomo_values                       = file(local.values_files.matomo)
   matomo_values_parsed                = yamldecode(local.matomo_values)
   prometheus_namespace                = jsondecode(file(local.config_files.kube_prometheus_stack)).namespace
-  prometheus_url                      = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.prometheus.ingress.hosts.0
   alertmanager_url                    = local.kube_prometheus_stack_values_parsed.kube-prometheus-stack.alertmanager.ingress.hosts.0
   reflector_namespace                 = jsondecode(file(local.config_files.reflector)).namespace
   remote_cluster_config = jsonencode({
