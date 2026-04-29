@@ -212,7 +212,6 @@ module "chorus_gateway" {
   kubeconfig_context = var.remote_cluster_kubeconfig_context
 
   depends_on = [
-    module.envoy_gateway,
     module.keycloak_secret,
     module.grafana,
   ]
