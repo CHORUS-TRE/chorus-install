@@ -130,8 +130,8 @@ locals {
   harbor_values_parsed                    = yamldecode(local.harbor_values)
   harbor_xsrf_secret_key                  = local.harbor_values_parsed.harbor.core.existingXsrfSecretKey
   harbor_xsrf_secret_name                 = local.harbor_values_parsed.harbor.core.existingXsrfSecret
-  i2b2_db_namespace                       = jsondecode(file(local.config_files.i2b2_db)).namespace
-  i2b2_wildfly_namespace                  = jsondecode(file(local.config_files.i2b2_wildfly)).namespace
+  i2b2_db_namespace                       = fileexists(local.values_files.i2b2_db) ? jsondecode(file(local.config_files.i2b2_db)).namespace : null
+  i2b2_wildfly_namespace                  = fileexists(local.values_files.i2b2_wildfly) ? jsondecode(file(local.config_files.i2b2_wildfly)).namespace : null
   juicefs_cache_namespace                 = jsondecode(file(local.config_files.juicefs_cache)).namespace
   juicefs_cache_values                    = file(local.values_files.juicefs_cache)
   juicefs_cache_values_parsed             = yamldecode(local.juicefs_cache_values)
