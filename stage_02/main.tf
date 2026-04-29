@@ -331,7 +331,7 @@ resource "kubernetes_namespace" "i2b2" {
   metadata {
     name = local.i2b2_wildfly_namespace
   }
-  count      = fileexists(local.config_files.i2b2_wildfly) ? 1 : 0
+  count = fileexists(local.config_files.i2b2_wildfly) ? 1 : 0
 }
 
 resource "kubernetes_secret" "i2b2_db_secret" {
@@ -372,7 +372,7 @@ resource "kubernetes_namespace" "didata" {
   metadata {
     name = local.didata_namespace
   }
-  count      = fileexists(local.config_files.didata) ? 1 : 0
+  count = fileexists(local.config_files.didata) ? 1 : 0
 }
 
 resource "random_password" "didata_db_password" {
