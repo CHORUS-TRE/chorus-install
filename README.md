@@ -217,7 +217,7 @@ The following requirements serve as a lower bound estimate, you might want to in
    apiVersion: v1
    kind: Secret
    metadata:
-     name: ebrains-dev-cluster
+     name: your-remote-cluster-name
      namespace: argocd
      labels:
        argocd.argoproj.io/secret-type: cluster
