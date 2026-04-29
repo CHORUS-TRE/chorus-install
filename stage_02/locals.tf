@@ -172,9 +172,9 @@ locals {
     bearerToken = data.kubernetes_secret.argocd_manager_token.data.token
     tlsClientConfig = var.remote_cluster_insecure ? {
       insecure = tobool(var.remote_cluster_insecure)
-      caData   = base64encode(data.kubernetes_config_map.ca_data.data["ca.crt"])
       } : {
       insecure = tobool(var.remote_cluster_insecure)
+      caData   = base64encode(data.kubernetes_config_map.ca_data.data["ca.crt"])
     }
   })
   values_files = {
