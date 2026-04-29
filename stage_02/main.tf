@@ -192,14 +192,15 @@ module "alertmanager" {
 
 # Chorus Gateway
 
-module "chorus_gateway" {
-  source = "../modules/chorus_gateway"
+resource "kubernetes_namespace" "chorus_gateway" {
+  metadata {
+    name = local.chorus_gateway_namespace
+  }
+}
 
-  cluster_name      = var.remote_cluster_name
-  helm_registry     = var.helm_registry
-  chart_name        = var.chorus_gateway_chart_name
-  chart_version     = local.chorus_gateway_chart_version
-  helm_values       = file(local.values_files.chorus_gateway)
+module "chorus_gateway" {
+  source = "../modules/chorus_gateway_secret"
+
   gateway_namespace = local.chorus_gateway_namespace
 
   oidc_client_secrets = {
@@ -208,12 +209,10 @@ module "chorus_gateway" {
     "juicefs-dashboard-oidc-secret" = module.keycloak_secret.juicefs_dashboard_client_secret
   }
 
-  kubeconfig_path    = var.remote_cluster_kubeconfig_path
-  kubeconfig_context = var.remote_cluster_kubeconfig_context
-
   depends_on = [
     module.keycloak_secret,
     module.grafana,
+    kubernetes_namespace.chorus_gateway,
   ]
 }
 
