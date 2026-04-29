@@ -27,6 +27,7 @@ locals {
       daemon_metrics_authentication_password = random_password.metrics_password.result
       daemon_private_key                     = tls_private_key.chorus_backend_daemon.private_key_pem
       storage_datastores_chorus_password     = module.backend_db_secret.db_password
+      storage_datastores_audit_password      = module.audit_db_secret.db_password
       k8s_client_is_watcher                  = "true"
       k8s_client_image_pull_secrets = [
         {
