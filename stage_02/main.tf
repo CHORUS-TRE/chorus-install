@@ -147,7 +147,7 @@ module "juicefs" {
   juicefs_cache_secret_name     = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
   juicefs_cache_secret_key      = local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey
   juicefs_cache_namespace       = local.juicefs_cache_namespace
-  juicefs_dashboard_secret_name = local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret
+  juicefs_dashboard_secret_name = try(local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret, "juicefs-dashboard-secret")
   juicefs_csi_driver_namespace  = local.juicefs_csi_driver_namespace
   juicefs_dashboard_username    = var.juicefs_dashboard_username
   s3_access_key                 = var.s3_access_key
