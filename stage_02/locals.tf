@@ -24,7 +24,7 @@ locals {
       k8s_client_is_watcher                  = "true"
       k8s_client_image_pull_secrets = [
         {
-          registry = "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}"
+          registry = "${var.remote_cluster_harbor_url}"
           username = join("$", ["robot", "${var.remote_cluster_name}"])
           password = module.harbor_secret.harbor_robot_secrets["${var.remote_cluster_name}"]
         }

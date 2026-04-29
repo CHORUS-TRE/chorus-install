@@ -519,7 +519,7 @@ resource "kubernetes_secret" "regcred" {
   data = {
     ".dockerconfigjson" = jsonencode({
       "auths" = {
-        "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}" = {
+        "${var.remote_cluster_harbor_url}" = {
           "auth" = base64encode(join(":", [join("$", ["robot", "${var.remote_cluster_name}"]), module.harbor_secret.harbor_robot_secrets["${var.remote_cluster_name}"]]))
         }
       }
