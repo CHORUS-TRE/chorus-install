@@ -256,6 +256,8 @@ The following requirements serve as a lower bound estimate, you might want to in
    kubectl get svc -n envoy-gateway-system --field-selector spec.type=LoadBalancer -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}'
    ```
 
+    > If you get an error, it might simply be due to the service not being ready yet. Check the certificate requests status.
+
 1. Update your DNS record with the load balancer IP address.
 
 1. You'll find important variables (e.g. URLs, admin usernames, admin passwords) in the "*your-remote-cluster-name*_output.yaml" file in the same folder as this readme.
