@@ -45,10 +45,10 @@ resource "kubernetes_secret" "environments_repository_credentials" {
   }
 
   data = {
-    url                      = var.helm_values_url
-    githubAppID              = var.github_app_id
-    githubAppInstallationID  = var.github_app_installation_id
-    githubAppPrivateKey      = var.github_app_private_key
+    url                     = var.helm_values_url
+    githubAppID             = var.github_app_id
+    githubAppInstallationID = var.github_app_installation_id
+    githubAppPrivateKey     = var.github_app_private_key
   }
 
   depends_on = [kubernetes_namespace.argocd]
