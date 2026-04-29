@@ -131,6 +131,11 @@ variable "harbor_keycloak_oidc_admin_group" {
   default     = "HarborAdmins"
 }
 
+variable "remote_cluster_harbor_url" {
+  description = "Harbor url for the remote cluster"
+  type        = string
+}
+
 variable "helm_registry" {
   description = "CHORUS Helm chart registry"
   type        = string
