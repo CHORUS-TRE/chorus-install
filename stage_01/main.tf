@@ -358,7 +358,7 @@ resource "kubernetes_secret" "argocd_secret" {
   }
 
   data = {
-    "${local.argocd_keycloak_issuer_key}"        = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
+    "${local.argocd_keycloak_issuer_key}"        = join("/", [var.keycloak_url, "realms", var.keycloak_realm])
     "${local.argocd_keycloak_client_id_key}"     = var.argocd_keycloak_client_id
     "${local.argocd_keycloak_client_secret_key}" = module.keycloak.argocd_keycloak_client_secret
   }
@@ -382,7 +382,6 @@ locals {
 
     keycloak_admin_username    = "admin"
     keycloak_admin_password    = module.keycloak.keycloak_password
-    keycloak_url               = local.keycloak_url
     keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
     keycloak_db_password       = module.keycloak.keycloak_db_password
     keycloak_db_admin_username = "postgres"
