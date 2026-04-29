@@ -253,7 +253,7 @@ The following requirements serve as a lower bound estimate, you might want to in
 1. Fetch the loadbalancer IP address using the kubectl command below
 
    ```sh
-   kubectl get svc -n ingress-nginx --field-selector spec.type=LoadBalancer -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}'
+   kubectl get svc -n envoy-gateway-system --field-selector spec.type=LoadBalancer -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}'
    ```
 
 1. Update your DNS record with the load balancer IP address.
