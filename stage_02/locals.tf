@@ -168,7 +168,6 @@ locals {
   matomo_db_values_parsed             = yamldecode(local.matomo_db_values)
   matomo_namespace                    = jsondecode(file(local.config_files.matomo)).namespace
   matomo_secret_name                  = local.matomo_values_parsed.matomo.existingSecret
-  matomo_url                          = "https://${local.matomo_values_parsed.matomo.ingress.hostname}"
   matomo_values                       = file(local.values_files.matomo)
   matomo_values_parsed                = yamldecode(local.matomo_values)
   prometheus_namespace                = jsondecode(file(local.config_files.kube_prometheus_stack)).namespace

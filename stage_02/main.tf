@@ -642,7 +642,6 @@ locals {
     grafana_url            = local.grafana_url
     grafana_admin_username = var.grafana_admin_username
 
-    matomo_url      = local.matomo_url
     matomo_username = "admin"
     matomo_password = random_password.matomo_password.result
 
