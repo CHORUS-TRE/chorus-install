@@ -637,7 +637,6 @@ locals {
     keycloak_admin_username = var.keycloak_admin_username
     keycloak_admin_password = module.keycloak_secret.admin_password
 
-    alertmanager_url       = local.alertmanager_url
     grafana_url            = local.grafana_url
     grafana_admin_username = var.grafana_admin_username
 
