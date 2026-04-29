@@ -217,14 +217,14 @@ The following requirements serve as a lower bound estimate, you might want to in
    apiVersion: v1
    kind: Secret
    metadata:
-     name: your-remote-cluster-name
+     name: "<your remote cluster name>-cluster"
      namespace: argocd
      labels:
        argocd.argoproj.io/secret-type: cluster
    type: Opaque
    stringData:
-     name: your-remote-cluster-name
-     server: https://remote-cluster.example:6443
+     name: "<your remote cluster name>"
+     server: "<your remote cluster k8s server url>"
      config: |
        {
          "bearerToken": "<authentication token>",
