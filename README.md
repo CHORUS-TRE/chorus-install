@@ -204,6 +204,37 @@ The following requirements serve as a lower bound estimate, you might want to in
     terraform apply "stage_02.plan"
     ```
 
+1. Retrieve the ```token``` and the ```ca.crt``` from the argocd-manager on the remote cluster to fill in the next step
+
+    ```yaml
+    caData=$(kubectl get secret argocd-manager-token -ojsonpath='{.data.ca\.crt}')
+    bearerToken=$(kubectl get secret argocd-manager-token -ojsonpath='{.data.token}' | base64 -d)
+    ```
+
+1. Create the [necessary secret](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#clusters) on the build cluster to start managing the remote cluster using the template below
+
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: ebrains-dev-cluster
+     namespace: argocd
+     labels:
+       argocd.argoproj.io/secret-type: cluster
+   type: Opaque
+   stringData:
+     name: your-remote-cluster-name
+     server: https://remote-cluster.example:6443
+     config: |
+       {
+         "bearerToken": "<authentication token>",
+         "tlsClientConfig": {
+           "insecure":false,
+           "caData": "<base64 encoded certificate>"
+         }
+       }
+   ```
+
 1. Make sure to add the remote cluster to the list of environments in the overriding values of the argo-deploy Helm chart deployed on the build cluster.
 
    ```yaml
