@@ -577,7 +577,7 @@ resource "kubernetes_secret" "remote_clusters" {
   data = {
     name   = var.remote_cluster_name
     server = var.remote_cluster_server
-    config = local.remote_cluster_config
+    config = base64encode(local.remote_cluster_config)
   }
 
   # We wait for the remote cluster configuration
