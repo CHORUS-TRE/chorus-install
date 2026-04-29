@@ -64,18 +64,6 @@ variable "didata_registry_username" {
   default     = "didatadevops"
 }
 
-variable "envoy_gateway_chart_name" {
-  description = "Envoy Gateway Helm chart folder name"
-  type        = string
-  default     = "gateway-helm"
-}
-
-variable "envoy_gateway_crds_chart_name" {
-  description = "Gateway API CRDs Helm chart folder name"
-  type        = string
-  default     = "gateway-crds-helm"
-}
-
 variable "frontend_chart_name" {
   description = "Frontend Helm chart name"
   type        = string

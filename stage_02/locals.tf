@@ -42,16 +42,12 @@ locals {
   backend_values                   = file(local.values_files.backend)
   backend_values_parsed            = yamldecode(local.backend_values)
   chorus_gateway_chart_version     = jsondecode(file(local.config_files.chorus_gateway)).version
-  envoy_gateway_chart_version      = jsondecode(file(local.config_files.envoy_gateway)).version
-  envoy_gateway_crds_chart_version = jsondecode(file(local.config_files.envoy_gateway_crds)).version
-  envoy_gateway_namespace          = jsondecode(file(local.config_files.envoy_gateway)).namespace
+  chorus_gateway_namespace         = jsondecode(file(local.config_files.chorus_gateway)).namespace
   config_files = {
     # ArgoCD runs on build cluster
     argocd = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json"
     # Remote cluster resources
     chorus_gateway        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.chorus_gateway_chart_name}/config.json"
-    envoy_gateway         = "${var.helm_values_path}/${var.remote_cluster_name}/${var.envoy_gateway_chart_name}/config.json"
-    envoy_gateway_crds    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.envoy_gateway_crds_chart_name}/config.json"
     keycloak              = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/config.json"
     harbor                = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/config.json"
     kube_prometheus_stack = "${var.helm_values_path}/${var.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
@@ -186,8 +182,6 @@ locals {
     backend_db            = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml"
     chorus_gateway        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.chorus_gateway_chart_name}/values.yaml"
     didata_db             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml"
-    envoy_gateway         = "${var.helm_values_path}/${var.remote_cluster_name}/${var.envoy_gateway_chart_name}/values.yaml"
-    envoy_gateway_crds    = "${var.helm_values_path}/${var.remote_cluster_name}/${var.envoy_gateway_crds_chart_name}/values.yaml"
     frontend              = "${var.helm_values_path}/${var.remote_cluster_name}/${var.frontend_chart_name}/values.yaml"
     harbor                = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/values.yaml"
     harbor_db             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}-db/values.yaml"

@@ -34,27 +34,6 @@ provider "kubernetes" {
   config_context = var.kubeconfig_context
 }
 
-# Envoy Gateway
-
-module "envoy_gateway" {
-  source = "../modules/envoy_gateway"
-
-  cluster_name  = var.remote_cluster_name
-  helm_registry = var.helm_registry
-
-  gateway_crds_chart_name    = var.envoy_gateway_crds_chart_name
-  gateway_crds_chart_version = local.envoy_gateway_crds_chart_version
-  gateway_crds_helm_values   = file(local.values_files.envoy_gateway_crds)
-
-  gateway_chart_name    = var.envoy_gateway_chart_name
-  gateway_chart_version = local.envoy_gateway_chart_version
-  gateway_helm_values   = file(local.values_files.envoy_gateway)
-  gateway_namespace     = local.envoy_gateway_namespace
-
-  kubeconfig_path    = var.remote_cluster_kubeconfig_path
-  kubeconfig_context = var.remote_cluster_kubeconfig_context
-}
-
 # Keycloak
 
 resource "kubernetes_namespace" "keycloak" {
@@ -221,7 +200,7 @@ module "chorus_gateway" {
   chart_name        = var.chorus_gateway_chart_name
   chart_version     = local.chorus_gateway_chart_version
   helm_values       = file(local.values_files.chorus_gateway)
-  gateway_namespace = local.envoy_gateway_namespace
+  gateway_namespace = local.chorus_gateway_namespace
 
   oidc_client_secrets = {
     "prometheus-oidc-secret"        = module.keycloak_secret.prometheus_client_secret
