@@ -39,10 +39,10 @@ locals {
     }
   )
   # TODO REMOVE THIS LINE
-  backend_values                   = file(local.values_files.backend)
-  backend_values_parsed            = yamldecode(local.backend_values)
-  chorus_gateway_chart_version     = jsondecode(file(local.config_files.chorus_gateway)).version
-  chorus_gateway_namespace         = jsondecode(file(local.config_files.chorus_gateway)).namespace
+  backend_values               = file(local.values_files.backend)
+  backend_values_parsed        = yamldecode(local.backend_values)
+  chorus_gateway_chart_version = jsondecode(file(local.config_files.chorus_gateway)).version
+  chorus_gateway_namespace     = jsondecode(file(local.config_files.chorus_gateway)).namespace
   config_files = {
     # ArgoCD runs on build cluster
     argocd = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json"
