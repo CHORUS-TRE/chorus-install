@@ -38,7 +38,6 @@ locals {
       s3_bucket_name                = var.s3_bucket_name
     }
   )
-  backend_url                      = "https://${local.backend_values_parsed.ingress.hosts.0.host}"
   backend_values                   = file(local.values_files.backend)
   backend_values_parsed            = yamldecode(local.backend_values)
   chorus_gateway_chart_version     = jsondecode(file(local.config_files.chorus_gateway)).version
