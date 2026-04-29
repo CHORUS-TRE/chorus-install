@@ -38,6 +38,7 @@ locals {
       s3_bucket_name                = var.s3_bucket_name
     }
   )
+  # TODO REMOVE THIS LINE
   backend_values                   = file(local.values_files.backend)
   backend_values_parsed            = yamldecode(local.backend_values)
   chorus_gateway_chart_version     = jsondecode(file(local.config_files.chorus_gateway)).version
@@ -70,12 +71,12 @@ locals {
     reflector             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.reflector_chart_name}/config.json"
     velero                = "${var.helm_values_path}/${var.remote_cluster_name}/${var.velero_chart_name}/config.json"
   }
-  didata_db_namespace     = jsondecode(file(local.config_files.didata_db)).namespace
-  didata_db_secret_name   = local.didata_db_values_parsed.mariadb.auth.existingSecret
-  didata_db_values        = file(local.values_files.didata_db)
-  didata_db_values_parsed = yamldecode(local.didata_db_values)
-  didata_namespace        = jsondecode(file(local.config_files.didata)).namespace
-  didata_secrets_content = templatefile("${var.templates_path}/didata_secrets.tmpl",
+  didata_db_namespace     = fileexists(local.config_files.didata_db) ? jsondecode(file(local.config_files.didata_db)).namespace : null
+  didata_db_secret_name   = fileexists(local.config_files.didata_db) ? local.didata_db_values_parsed.mariadb.auth.existingSecret : null
+  didata_db_values        = fileexists(local.values_files.didata_db) ? file(local.values_files.didata_db) : null
+  didata_db_values_parsed = fileexists(local.values_files.didata_db) ? yamldecode(local.didata_db_values) : null
+  didata_namespace        = fileexists(local.config_files.didata) ? jsondecode(file(local.config_files.didata)).namespace : null
+  didata_secrets_content = fileexists(local.config_files.didata) && fileexists(local.config_files.didata_db) ? templatefile("${var.templates_path}/didata_secrets.tmpl",
     {
       didata_app_name    = "didata_chorus"
       didata_app_key     = var.didata_app_key
@@ -86,8 +87,8 @@ locals {
       didata_db_password = random_password.didata_db_password.result
       didata_jwt_secret  = random_password.didata_jwt_secret.result
     }
-  )
-  didata_url                        = "https://didata.${var.remote_cluster_name}.chorus-tre.ch/"
+  ) : null
+  didata_url                        = fileexists(local.config_files.didata) ? "https://didata.${var.remote_cluster_name}.chorus-tre.ch/" : null
   frontend_url                      = "https://${local.frontend_values_parsed.ingress.hosts.0.host}"
   frontend_values                   = file(local.values_files.frontend)
   frontend_values_parsed            = yamldecode(local.frontend_values)
