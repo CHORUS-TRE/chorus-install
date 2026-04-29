@@ -331,6 +331,7 @@ resource "kubernetes_namespace" "i2b2" {
   metadata {
     name = local.i2b2_wildfly_namespace
   }
+  count      = fileexists(local.config_files.i2b2_wildfly) ? 1 : 0
 }
 
 resource "kubernetes_secret" "i2b2_db_secret" {
@@ -341,7 +342,7 @@ resource "kubernetes_secret" "i2b2_db_secret" {
   data = {
     "postgres-password" = var.i2b2_db_password
   }
-
+  count      = fileexists(local.config_files.i2b2_db) ? 1 : 0
   depends_on = [kubernetes_namespace.i2b2]
 }
 
@@ -361,7 +362,7 @@ resource "kubernetes_secret" "i2b2_wildfly" {
     ds_wd_pass   = var.i2b2_db_password
     pg_pass      = var.i2b2_db_password
   }
-
+  count      = fileexists(local.config_files.i2b2_wildfly) ? 1 : 0
   depends_on = [kubernetes_namespace.i2b2]
 }
 
@@ -371,6 +372,7 @@ resource "kubernetes_namespace" "didata" {
   metadata {
     name = local.didata_namespace
   }
+  count      = fileexists(local.config_files.didata) ? 1 : 0
 }
 
 resource "random_password" "didata_db_password" {
@@ -401,8 +403,7 @@ resource "kubernetes_secret" "didata_env" {
   data = {
     "didata.env" = local.didata_secrets_content
   }
-
-  count      = var.didata_registry_password != "" ? 1 : 0
+  count      = fileexists(local.config_files.didata) ? 1 : 0
   depends_on = [kubernetes_namespace.didata]
 }
 
@@ -417,8 +418,7 @@ resource "kubernetes_secret" "didata_db_secret" {
     mariadb-replication-password = random_password.didata_db_replication_password.result
     mariadb-root-password        = random_password.didata_db_root_password.result
   }
-
-  count      = var.didata_registry_password != "" ? 1 : 0
+  count      = fileexists(local.config_files.didata_db) ? 1 : 0
   depends_on = [kubernetes_namespace.didata]
 }
 
