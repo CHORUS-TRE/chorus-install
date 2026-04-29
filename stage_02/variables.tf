@@ -16,6 +16,11 @@ variable "backend_chart_name" {
   default     = "backend"
 }
 
+variable "audit_db_chart_name" {
+  description = "Chorus audit DB Helm chart name"
+  type        = string
+  default     = "audit-db"
+}
 
 variable "chorus_gateway_chart_name" {
   description = "Chorus Gateway Helm chart folder name"

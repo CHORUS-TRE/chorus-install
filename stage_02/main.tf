@@ -449,6 +449,17 @@ module "backend_db_secret" {
   depends_on = [kubernetes_namespace.backend]
 }
 
+module "audit_db_secret" {
+  source = "../modules/db_secret"
+
+  namespace           = local.audit_db_namespace
+  secret_name         = local.audit_db_secret_name
+  db_user_secret_key  = local.audit_db_user_secret_key
+  db_admin_secret_key = local.audit_db_admin_secret_key
+
+  depends_on = [kubernetes_namespace.backend]
+}
+
 resource "random_password" "jwt_signature" {
   length  = 32
   special = false

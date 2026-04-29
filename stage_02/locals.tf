@@ -8,6 +8,12 @@ locals {
   backend_db_user_secret_key     = local.backend_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
   backend_db_values              = file(local.values_files.backend_db)
   backend_db_values_parsed       = yamldecode(local.backend_db_values)
+  audit_db_admin_secret_key      = local.audit_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.adminPasswordKey
+  audit_db_namespace             = jsondecode(file(local.config_files.audit_db)).namespace
+  audit_db_secret_name           = local.audit_db_values_parsed.postgresql.global.postgresql.auth.existingSecret
+  audit_db_user_secret_key       = local.audit_db_values_parsed.postgresql.global.postgresql.auth.secretKeys.userPasswordKey
+  audit_db_values                = file(local.values_files.audit_db)
+  audit_db_values_parsed         = yamldecode(local.audit_db_values)
   backend_keycloak_dev_enabled = try(
     local.backend_values_parsed.config.services.authentication_service.mode.keycloakdev.enabled,
     false
@@ -55,6 +61,7 @@ locals {
     matomo_db             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.matomo_chart_name}-db/config.json"
     backend               = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}/config.json"
     backend_db            = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}-db/config.json"
+    audit_db              = "${var.helm_values_path}/${var.remote_cluster_name}/${var.audit_db_chart_name}/config.json"
     i2b2_wildfly          = "${var.helm_values_path}/${var.remote_cluster_name}/${var.i2b2_chart_name}-wildfly/config.json"
     i2b2_db               = "${var.helm_values_path}/${var.remote_cluster_name}/${var.i2b2_chart_name}-db/config.json"
     didata                = "${var.helm_values_path}/${var.remote_cluster_name}/${var.didata_chart_name}/config.json"
@@ -180,6 +187,7 @@ locals {
   values_files = {
     backend               = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}/values.yaml"
     backend_db            = "${var.helm_values_path}/${var.remote_cluster_name}/${var.backend_chart_name}-db/values.yaml"
+    audit_db              = "${var.helm_values_path}/${var.remote_cluster_name}/${var.audit_db_chart_name}/values.yaml"
     chorus_gateway        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.chorus_gateway_chart_name}/values.yaml"
     didata_db             = "${var.helm_values_path}/${var.remote_cluster_name}/${var.didata_chart_name}-db/values.yaml"
     frontend              = "${var.helm_values_path}/${var.remote_cluster_name}/${var.frontend_chart_name}/values.yaml"
