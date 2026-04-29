@@ -249,6 +249,11 @@ variable "keycloak_realm" {
   default     = "infra"
 }
 
+variable "keycloak_url" {
+  description = "Keycloak url for the build cluster"
+  type        = string
+}
+
 variable "kube_prometheus_stack_chart_name" {
   description = "Kube Prometheus Stack Helm chart folder name"
   type        = string
