@@ -636,7 +636,6 @@ locals {
 
     keycloak_admin_username = var.keycloak_admin_username
     keycloak_admin_password = module.keycloak_secret.admin_password
-    keycloak_url            = local.keycloak_url
 
     prometheus_url         = local.prometheus_url
     alertmanager_url       = local.alertmanager_url
