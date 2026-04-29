@@ -229,7 +229,7 @@ The following requirements serve as a lower bound estimate, you might want to in
        {
          "bearerToken": "<authentication token>",
          "tlsClientConfig": {
-           "insecure":false,
+           "insecure": false,
            "caData": "<base64 encoded certificate>"
          }
        }
