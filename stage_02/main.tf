@@ -34,6 +34,29 @@ provider "kubernetes" {
   config_context = var.kubeconfig_context
 }
 
+# Cloudflare API Token Secret (for DNS-01 challenge)
+
+resource "kubernetes_namespace" "cert_manager" {
+  metadata {
+    name = local.cert_manager_namespace
+  }
+}
+
+resource "kubernetes_secret" "cloudflare_api_token" {
+  count = var.cloudflare_api_token != "" ? 1 : 0
+
+  metadata {
+    name      = "cloudflare-api-token"
+    namespace = local.cert_manager_namespace
+  }
+
+  data = {
+    api-token = var.cloudflare_api_token
+  }
+
+  type = "Opaque"
+}
+
 # Keycloak
 
 resource "kubernetes_namespace" "keycloak" {

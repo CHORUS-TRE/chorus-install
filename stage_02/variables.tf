@@ -28,6 +28,12 @@ variable "chorus_gateway_chart_name" {
   default     = "chorus-gateway"
 }
 
+variable "cert_manager_chart_name" {
+  description = "Cert-Manager Helm chart folder name"
+  type        = string
+  default     = "cert-manager"
+}
+
 variable "cloudflare_api_token" {
   description = "Cloudflare API token for DNS-01 challenge. If provided, a secret will be created in cert-manager namespace for use in ClusterIssuers. Requires Zone:DNS:Edit permissions for your domain."
   type        = string

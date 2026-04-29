@@ -44,9 +44,9 @@ locals {
       s3_bucket_name                = var.s3_bucket_name
     }
   )
-  # TODO REMOVE THIS LINE
   backend_values               = file(local.values_files.backend)
   backend_values_parsed        = yamldecode(local.backend_values)
+  cert_manager_namespace       = jsondecode(file(local.config_files.cert_manager)).namespace
   chorus_gateway_chart_version = jsondecode(file(local.config_files.chorus_gateway)).version
   chorus_gateway_namespace     = jsondecode(file(local.config_files.chorus_gateway)).namespace
   config_files = {
@@ -54,6 +54,7 @@ locals {
     argocd = "${var.helm_values_path}/${var.cluster_name}/${var.argocd_chart_name}/config.json"
     # Remote cluster resources
     chorus_gateway        = "${var.helm_values_path}/${var.remote_cluster_name}/${var.chorus_gateway_chart_name}/config.json"
+    cert_manager          = "${var.helm_values_path}/${var.remote_cluster_name}/${var.cert_manager_chart_name}/config.json"
     keycloak              = "${var.helm_values_path}/${var.remote_cluster_name}/${var.keycloak_chart_name}/config.json"
     harbor                = "${var.helm_values_path}/${var.remote_cluster_name}/${var.harbor_chart_name}/config.json"
     kube_prometheus_stack = "${var.helm_values_path}/${var.remote_cluster_name}/${var.kube_prometheus_stack_chart_name}/config.json"
