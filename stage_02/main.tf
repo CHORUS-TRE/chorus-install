@@ -647,9 +647,6 @@ locals {
     matomo_username = "admin"
     matomo_password = random_password.matomo_password.result
 
-    frontend_url = local.frontend_url
-    didata_url   = local.didata_url
-
     juicefs_enabled = var.s3_secret_key != "" ? true : false
     didata_enabled  = var.didata_registry_password != "" ? true : false
   }

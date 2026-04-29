@@ -80,7 +80,7 @@ locals {
     {
       didata_app_name    = "didata_chorus"
       didata_app_key     = var.didata_app_key
-      didata_app_url     = local.didata_url
+      didata_app_url     = "https://didata.${var.remote_cluster_name}.chorus-tre.ch/"
       didata_db_host     = "${var.remote_cluster_name}-didata-db-mariadb"
       didata_db_database = "didata"
       didata_db_username = "didata"
@@ -88,8 +88,6 @@ locals {
       didata_jwt_secret  = random_password.didata_jwt_secret.result
     }
   ) : null
-  didata_url                        = fileexists(local.config_files.didata) ? "https://didata.${var.remote_cluster_name}.chorus-tre.ch/" : null
-  frontend_url                      = "https://${local.frontend_values_parsed.ingress.hosts.0.host}"
   frontend_values                   = file(local.values_files.frontend)
   frontend_values_parsed            = yamldecode(local.frontend_values)
   fluent_operator_namespace         = jsondecode(file(local.config_files.fluent_operator)).namespace
