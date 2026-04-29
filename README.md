@@ -130,13 +130,17 @@ The following requirements serve as a lower bound estimate, you might want to in
    **Helm charts repository** - Contains the CHORUS wrapper Helm charts (e.g. https://github.com/CHORUS-TRE/chorus-tre):
 
     ```sh
-    git clone https://github.com/$TF_VAR_github_orga/chorus-tre.git charts
+    git clone git@github.com:CHORUS-TRE/chorus-tre.git charts
+    # or
+    git clone https://github.com/CHORUS-TRE/chorus-tre.git charts
     ```
 
    **Helm values repository** - Contains the overriding Helm values for your clusters (e.g. https://github.com/CHORUS-TRE/environment-template):
 
     ```sh
-    git clone https://github.com/$TF_VAR_github_orga/$TF_VAR_helm_values_repo.git values
+    git clone git@github.com:CHORUS-TRE/environment-template.git values
+    # or
+    git clone https://github.com/CHORUS-TRE/environment-template.git values
     ```
 
     > Make sure you have git access configured (SSH keys, credentials, etc.) before cloning.
