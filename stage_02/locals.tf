@@ -202,5 +202,5 @@ locals {
   }
   velero_namespace               = jsondecode(file(local.config_files.velero)).namespace
   velero_values_parsed           = yamldecode(file(local.values_files.velero))
-  velero_credentials_secret_name = local.velero_values_parsed.velero.credentials.existingSecret
+  velero_credentials_secret_name = try(local.velero_values_parsed.velero.credentials.existingSecret, "velero-credentials")
 }
