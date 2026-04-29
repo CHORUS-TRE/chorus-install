@@ -182,6 +182,11 @@ variable "keycloak_chart_name" {
   default     = "keycloak"
 }
 
+variable "remote_cluster_keycloak_url" {
+  description = "Keycloak url for the remote cluster"
+  type        = string
+}
+
 variable "keycloak_infra_realm" {
   description = "Keycloak infrastructure realm name"
   type        = string

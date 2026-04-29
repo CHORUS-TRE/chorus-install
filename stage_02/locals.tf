@@ -118,7 +118,7 @@ locals {
     for env in local.harbor_values_parsed.harbor.core.extraEnvVars :
     env if env.name == "CONFIG_OVERWRITE_JSON"
   ][0]
-  harbor_oidc_endpoint                    = join("/", [local.keycloak_url, "realms", var.keycloak_infra_realm])
+  harbor_oidc_endpoint                    = join("/", [var.remote_cluster_keycloak_url, "realms", var.keycloak_infra_realm])
   harbor_oidc_secret_key                  = local.harbor_oidc_config_env.valueFrom.secretKeyRef.key
   harbor_oidc_secret_name                 = local.harbor_oidc_config_env.valueFrom.secretKeyRef.name
   harbor_registry_credentials_secret_name = local.harbor_values_parsed.harbor.registry.credentials.existingSecret
@@ -156,7 +156,6 @@ locals {
   )
   keycloak_secret_key                 = local.keycloak_values_parsed.keycloak.auth.passwordSecretKey
   keycloak_secret_name                = local.keycloak_values_parsed.keycloak.auth.existingSecret
-  keycloak_url                        = "https://${local.keycloak_values_parsed.keycloak.ingress.hostname}"
   keycloak_values                     = file(local.values_files.keycloak)
   keycloak_values_parsed              = yamldecode(local.keycloak_values)
   kube_prometheus_stack_values        = file(local.values_files.kube_prometheus_stack)
