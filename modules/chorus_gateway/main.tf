@@ -4,7 +4,7 @@
 module "chorus_gateway" {
   source = "../chorus_gateway_secret"
 
-  gateway_namespace = var.gateway_namespace
+  gateway_namespace   = var.gateway_namespace
   oidc_client_secrets = var.oidc_client_secrets
 }
 
