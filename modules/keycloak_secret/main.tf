@@ -39,6 +39,11 @@ resource "random_password" "harbor_client_secret" {
   special = false
 }
 
+resource "random_password" "juicefs_dashboard_client_secret" {
+  length  = 32
+  special = false
+}
+
 resource "random_password" "matomo_client_secret" {
   length  = 32
   special = false
@@ -99,14 +104,15 @@ resource "kubernetes_secret" "remote_keycloak_client_credentials" {
   }
 
   data = {
-    GOOGLE_CLIENT_ID           = var.google_identity_provider_client_id
-    GOOGLE_CLIENT_SECRET       = var.google_identity_provider_client_secret
-    ALERTMANAGER_CLIENT_SECRET = random_password.alertmanager_client_secret.result
-    GRAFANA_CLIENT_SECRET      = random_password.grafana_client_secret.result
-    HARBOR_CLIENT_SECRET       = random_password.harbor_client_secret.result
-    MATOMO_CLIENT_SECRET       = random_password.matomo_client_secret.result
-    PROMETHEUS_CLIENT_SECRET   = random_password.prometheus_client_secret.result
-    CHORUS_CLIENT_SECRET       = random_password.chorus_client_secret.result
+    GOOGLE_CLIENT_ID                = var.google_identity_provider_client_id
+    GOOGLE_CLIENT_SECRET            = var.google_identity_provider_client_secret
+    ALERTMANAGER_CLIENT_SECRET      = random_password.alertmanager_client_secret.result
+    GRAFANA_CLIENT_SECRET           = random_password.grafana_client_secret.result
+    HARBOR_CLIENT_SECRET            = random_password.harbor_client_secret.result
+    JUICEFS_DASHBOARD_CLIENT_SECRET = random_password.juicefs_dashboard_client_secret.result
+    MATOMO_CLIENT_SECRET            = random_password.matomo_client_secret.result
+    PROMETHEUS_CLIENT_SECRET        = random_password.prometheus_client_secret.result
+    CHORUS_CLIENT_SECRET            = random_password.chorus_client_secret.result
   }
 }
 

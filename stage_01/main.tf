@@ -39,18 +39,36 @@ module "chorus_priority_class" {
   kubeconfig_context = var.kubeconfig_context
 }
 
-module "ingress_nginx" {
-  source = "../modules/ingress_nginx"
+module "envoy_gateway" {
+  source = "../modules/envoy_gateway"
 
   cluster_name  = var.cluster_name
   helm_registry = var.helm_registry
 
-  chart_name         = var.ingress_nginx_chart_name
-  chart_version      = local.ingress_nginx_chart_version
-  helm_values        = file(local.values_files.ingress_nginx)
-  namespace          = local.ingress_nginx_namespace
+  gateway_crds_chart_name    = var.envoy_gateway_crds_chart_name
+  gateway_crds_chart_version = local.envoy_gateway_crds_chart_version
+  gateway_crds_helm_values   = file(local.values_files.envoy_gateway_crds)
+
+  gateway_chart_name    = var.envoy_gateway_chart_name
+  gateway_chart_version = local.envoy_gateway_chart_version
+  gateway_helm_values   = file(local.values_files.envoy_gateway)
+  gateway_namespace     = local.envoy_gateway_namespace
+
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
+}
+
+module "cert_manager_crds" {
+  source = "../modules/cert_manager_crds"
+
+  cluster_name           = var.cluster_name
+  helm_registry          = var.helm_registry
+  chart_name             = var.cert_manager_crds_chart_name
+  chart_version          = local.cert_manager_crds_chart_version
+  helm_values            = file(local.values_files.cert_manager_crds)
+  cert_manager_namespace = local.cert_manager_namespace
+  kubeconfig_path        = var.kubeconfig_path
+  kubeconfig_context     = var.kubeconfig_context
 }
 
 module "certificate_authorities" {
@@ -63,14 +81,19 @@ module "certificate_authorities" {
   cert_manager_chart_version = local.cert_manager_chart_version
   cert_manager_helm_values   = file(local.values_files.cert_manager)
   cert_manager_namespace     = local.cert_manager_namespace
-  cert_manager_crds_content  = file(local.cert_manager_crds_path)
 
   selfsigned_chart_name    = var.selfsigned_chart_name
   selfsigned_chart_version = local.selfsigned_chart_version
   selfsigned_helm_values   = file(local.values_files.selfsigned)
 
+  cloudflare_api_token = var.cloudflare_api_token
+
   kubeconfig_path    = var.kubeconfig_path
   kubeconfig_context = var.kubeconfig_context
+
+  depends_on = [
+    module.cert_manager_crds,
+  ]
 }
 
 module "keycloak" {
@@ -101,7 +124,7 @@ module "keycloak" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
   ]
 }
 
@@ -147,7 +170,7 @@ module "harbor" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
   ]
 }
 
@@ -182,7 +205,7 @@ module "grafana" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
     module.keycloak,
     module.loki,
   ]
@@ -201,31 +224,27 @@ module "alertmanager" {
   depends_on = [module.grafana]
 }
 
-module "oauth2_proxy" {
-  source = "../modules/oauth2_proxy"
+module "chorus_gateway" {
+  source = "../modules/chorus_gateway"
 
-  alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
-  prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
-  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
+  cluster_name      = var.cluster_name
+  helm_registry     = var.helm_registry
+  chart_name        = var.chorus_gateway_chart_name
+  chart_version     = local.chorus_gateway_chart_version
+  helm_values       = file(local.values_files.chorus_gateway)
+  gateway_namespace = local.envoy_gateway_namespace
 
-  prometheus_keycloak_client_id          = var.prometheus_keycloak_client_id
-  prometheus_keycloak_client_secret      = module.keycloak.prometheus_keycloak_client_secret
-  prometheus_session_storage_secret_name = local.prometheus_session_storage_secret_name
-  prometheus_session_storage_secret_key  = local.prometheus_session_storage_secret_key
-  prometheus_oidc_secret_name            = local.prometheus_oidc_secret_name
+  oidc_client_secrets = {
+    "prometheus-oidc-secret"   = module.keycloak.prometheus_keycloak_client_secret
+    "alertmanager-oidc-secret" = module.keycloak.alertmanager_keycloak_client_secret
+  }
 
-  alertmanager_keycloak_client_id          = var.alertmanager_keycloak_client_id
-  alertmanager_keycloak_client_secret      = module.keycloak.alertmanager_keycloak_client_secret
-  alertmanager_session_storage_secret_name = local.alertmanager_session_storage_secret_name
-  alertmanager_session_storage_secret_key  = local.alertmanager_session_storage_secret_key
-  alertmanager_oidc_secret_name            = local.alertmanager_oidc_secret_name
-
-  oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_session_storage_secret_name
-  oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
+  kubeconfig_path    = var.kubeconfig_path
+  kubeconfig_context = var.kubeconfig_context
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
     module.keycloak,
     module.grafana,
   ]
@@ -266,7 +285,7 @@ module "argo_workflows" {
 
   depends_on = [
     module.certificate_authorities,
-    module.ingress_nginx,
+    module.envoy_gateway,
   ]
 }
 
@@ -305,9 +324,11 @@ module "argo_cd" {
   argocd_cache_chart_version = local.argocd_cache_chart_version
   argocd_cache_helm_values   = file(local.values_files.argocd_cache)
 
-  helm_charts_values_credentials_secret = var.helm_values_credentials_secret
+  helm_charts_values_credentials_secret = "${var.cluster_name}-argocd-repocreds"
   helm_values_url                       = "https://github.com/${var.github_orga}/${var.helm_values_repo}"
-  helm_values_pat                       = var.helm_values_pat
+  github_app_id                         = var.github_app_id
+  github_app_installation_id            = var.github_app_installation_id
+  github_app_private_key                = var.github_app_private_key
   harbor_domain                         = replace(local.harbor_url, "https://", "")
   harbor_robot_username                 = var.argocd_harbor_robot_username
   harbor_robot_password                 = module.harbor.harbor_robot_secrets[var.argocd_harbor_robot_username]
@@ -337,7 +358,7 @@ resource "kubernetes_secret" "argocd_secret" {
   }
 
   data = {
-    "${local.argocd_keycloak_issuer_key}"        = join("/", [local.keycloak_url, "realms", var.keycloak_realm])
+    "${local.argocd_keycloak_issuer_key}"        = join("/", [var.keycloak_url, "realms", var.keycloak_realm])
     "${local.argocd_keycloak_client_id_key}"     = var.argocd_keycloak_client_id
     "${local.argocd_keycloak_client_secret_key}" = module.keycloak.argocd_keycloak_client_secret
   }
@@ -345,7 +366,7 @@ resource "kubernetes_secret" "argocd_secret" {
 
 locals {
   output = {
-    loadbalancer_ip       = module.ingress_nginx.loadbalancer_ip
+    loadbalancer_ip       = module.envoy_gateway.loadbalancer_ip
     harbor_admin_username = var.harbor_admin_username
     harbor_admin_password = module.harbor.harbor_password
     harbor_url            = local.harbor_url
@@ -361,7 +382,6 @@ locals {
 
     keycloak_admin_username    = "admin"
     keycloak_admin_password    = module.keycloak.keycloak_password
-    keycloak_url               = local.keycloak_url
     keycloak_db_username       = local.keycloak_db_values_parsed.postgresql.global.postgresql.auth.username
     keycloak_db_password       = module.keycloak.keycloak_db_password
     keycloak_db_admin_username = "postgres"

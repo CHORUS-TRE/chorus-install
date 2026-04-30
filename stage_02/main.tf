@@ -1,30 +1,30 @@
 # Validate all config files exist
-resource "null_resource" "validate_config_files" {
-  lifecycle {
-    precondition {
-      condition     = alltrue([for path in values(local.config_files) : can(file(path))])
-      error_message = <<-EOT
-        Missing configuration files!
-
-        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v))])}
-      EOT
-    }
-  }
-}
+#resource "null_resource" "validate_config_files" {
+#  lifecycle {
+#    precondition {
+#      condition     = alltrue([for path in values(local.config_files) : can(file(path))])
+#      error_message = <<-EOT
+#        Missing configuration files!
+#
+#        ${join("\n        ", [for k, v in local.config_files : "Missing ${k}: ${v}" if !can(file(v))])}
+#      EOT
+#    }
+#  }
+#}
 
 # Validate all values files exist
-resource "null_resource" "validate_values_files" {
-  lifecycle {
-    precondition {
-      condition     = alltrue([for path in values(local.values_files) : can(file(path))])
-      error_message = <<-EOT
-        Missing values files!
-
-        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v))])}
-      EOT
-    }
-  }
-}
+#resource "null_resource" "validate_values_files" {
+#  lifecycle {
+#    precondition {
+#      condition     = alltrue([for path in values(local.values_files) : can(file(path))])
+#      error_message = <<-EOT
+#        Missing values files!
+#
+#        ${join("\n        ", [for k, v in local.values_files : "Missing ${k}: ${v}" if !can(file(v))])}
+#      EOT
+#    }
+#  }
+#}
 
 # Providers
 
@@ -34,12 +34,27 @@ provider "kubernetes" {
   config_context = var.kubeconfig_context
 }
 
-# Cert-Manager CRDs
+# Cloudflare API Token Secret (for DNS-01 challenge)
 
-module "cert_manager_crds" {
-  source = "../modules/cert_manager_crds"
+resource "kubernetes_namespace" "cert_manager" {
+  metadata {
+    name = local.cert_manager_namespace
+  }
+}
 
-  cert_manager_crds_content = local.cert_manager_crds_content
+resource "kubernetes_secret" "cloudflare_api_token" {
+  count = var.cloudflare_api_token != "" ? 1 : 0
+
+  metadata {
+    name      = "cloudflare-api-token"
+    namespace = local.cert_manager_namespace
+  }
+
+  data = {
+    api-token = var.cloudflare_api_token
+  }
+
+  type = "Opaque"
 }
 
 # Keycloak
@@ -134,7 +149,7 @@ module "juicefs" {
   juicefs_cache_secret_name     = local.juicefs_cache_values_parsed.valkey.auth.existingSecret
   juicefs_cache_secret_key      = local.juicefs_cache_values_parsed.valkey.auth.existingSecretPasswordKey
   juicefs_cache_namespace       = local.juicefs_cache_namespace
-  juicefs_dashboard_secret_name = local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret
+  juicefs_dashboard_secret_name = try(local.juicefs_csi_driver_values_parsed.juicefs-csi-driver.dashboard.auth.existingSecret, "juicefs-dashboard-secret")
   juicefs_csi_driver_namespace  = local.juicefs_csi_driver_namespace
   juicefs_dashboard_username    = var.juicefs_dashboard_username
   s3_access_key                 = var.s3_access_key
@@ -198,31 +213,30 @@ module "alertmanager" {
   depends_on = [kubernetes_namespace.prometheus]
 }
 
-# OAuth2 proxy
+# Chorus Gateway
 
-module "oauth2_proxy" {
-  source = "../modules/oauth2_proxy"
+resource "kubernetes_namespace" "chorus_gateway" {
+  metadata {
+    name = local.chorus_gateway_namespace
+  }
+}
 
-  alertmanager_oauth2_proxy_namespace = local.alertmanager_oauth2_proxy_namespace
-  prometheus_oauth2_proxy_namespace   = local.prometheus_oauth2_proxy_namespace
-  oauth2_proxy_cache_namespace        = local.oauth2_proxy_cache_namespace
+module "chorus_gateway" {
+  source = "../modules/chorus_gateway_secret"
 
-  prometheus_keycloak_client_id          = var.prometheus_keycloak_client_id
-  prometheus_keycloak_client_secret      = module.keycloak_secret.prometheus_client_secret
-  prometheus_session_storage_secret_name = local.prometheus_session_storage_secret_name
-  prometheus_session_storage_secret_key  = local.prometheus_session_storage_secret_key
-  prometheus_oidc_secret_name            = local.prometheus_oidc_secret_name
+  gateway_namespace = local.chorus_gateway_namespace
 
-  alertmanager_keycloak_client_id          = var.alertmanager_keycloak_client_id
-  alertmanager_keycloak_client_secret      = module.keycloak_secret.alertmanager_client_secret
-  alertmanager_session_storage_secret_name = local.alertmanager_session_storage_secret_name
-  alertmanager_session_storage_secret_key  = local.alertmanager_session_storage_secret_key
-  alertmanager_oidc_secret_name            = local.alertmanager_oidc_secret_name
+  oidc_client_secrets = {
+    "prometheus-oidc-secret"        = module.keycloak_secret.prometheus_client_secret
+    "alertmanager-oidc-secret"      = module.keycloak_secret.alertmanager_client_secret
+    "juicefs-dashboard-oidc-secret" = module.keycloak_secret.juicefs_dashboard_client_secret
+  }
 
-  oauth2_proxy_cache_session_storage_secret_name = local.oauth2_proxy_cache_session_storage_secret_name
-  oauth2_proxy_cache_session_storage_secret_key  = local.oauth2_proxy_cache_session_storage_secret_key
-
-  depends_on = [kubernetes_namespace.keycloak]
+  depends_on = [
+    module.keycloak_secret,
+    module.grafana,
+    kubernetes_namespace.chorus_gateway,
+  ]
 }
 
 # Fluent
@@ -317,6 +331,7 @@ resource "kubernetes_namespace" "i2b2" {
   metadata {
     name = local.i2b2_wildfly_namespace
   }
+  count = fileexists(local.config_files.i2b2_wildfly) ? 1 : 0
 }
 
 resource "kubernetes_secret" "i2b2_db_secret" {
@@ -327,7 +342,7 @@ resource "kubernetes_secret" "i2b2_db_secret" {
   data = {
     "postgres-password" = var.i2b2_db_password
   }
-
+  count      = fileexists(local.config_files.i2b2_db) ? 1 : 0
   depends_on = [kubernetes_namespace.i2b2]
 }
 
@@ -347,7 +362,7 @@ resource "kubernetes_secret" "i2b2_wildfly" {
     ds_wd_pass   = var.i2b2_db_password
     pg_pass      = var.i2b2_db_password
   }
-
+  count      = fileexists(local.config_files.i2b2_wildfly) ? 1 : 0
   depends_on = [kubernetes_namespace.i2b2]
 }
 
@@ -357,6 +372,7 @@ resource "kubernetes_namespace" "didata" {
   metadata {
     name = local.didata_namespace
   }
+  count = fileexists(local.config_files.didata) ? 1 : 0
 }
 
 resource "random_password" "didata_db_password" {
@@ -387,8 +403,7 @@ resource "kubernetes_secret" "didata_env" {
   data = {
     "didata.env" = local.didata_secrets_content
   }
-
-  count      = var.didata_registry_password != "" ? 1 : 0
+  count      = fileexists(local.config_files.didata) ? 1 : 0
   depends_on = [kubernetes_namespace.didata]
 }
 
@@ -403,8 +418,7 @@ resource "kubernetes_secret" "didata_db_secret" {
     mariadb-replication-password = random_password.didata_db_replication_password.result
     mariadb-root-password        = random_password.didata_db_root_password.result
   }
-
-  count      = var.didata_registry_password != "" ? 1 : 0
+  count      = fileexists(local.config_files.didata_db) ? 1 : 0
   depends_on = [kubernetes_namespace.didata]
 }
 
@@ -458,6 +472,17 @@ module "backend_db_secret" {
   depends_on = [kubernetes_namespace.backend]
 }
 
+module "audit_db_secret" {
+  source = "../modules/db_secret"
+
+  namespace           = local.audit_db_namespace
+  secret_name         = local.audit_db_secret_name
+  db_user_secret_key  = local.audit_db_user_secret_key
+  db_admin_secret_key = local.audit_db_admin_secret_key
+
+  depends_on = [kubernetes_namespace.backend]
+}
+
 resource "random_password" "jwt_signature" {
   length  = 32
   special = false
@@ -505,7 +530,7 @@ resource "kubernetes_secret" "regcred" {
   data = {
     ".dockerconfigjson" = jsonencode({
       "auths" = {
-        "${local.harbor_values_parsed.harbor.expose.ingress.hosts.core}" = {
+        "${var.remote_cluster_harbor_url}" = {
           "auth" = base64encode(join(":", [join("$", ["robot", "${var.remote_cluster_name}"]), module.harbor_secret.harbor_robot_secrets["${var.remote_cluster_name}"]]))
         }
       }
@@ -572,47 +597,6 @@ data "kubernetes_config_map" "ca_data" {
   }
 }
 
-resource "kubernetes_secret" "remote_clusters" {
-  provider = kubernetes.build_cluster
-
-  metadata {
-    name      = "${var.remote_cluster_name}-cluster"
-    namespace = local.argocd_namespace
-    labels = {
-      "argocd.argoproj.io/secret-type" = "cluster"
-    }
-  }
-
-  data = {
-    name   = var.remote_cluster_name
-    server = var.remote_cluster_server
-    config = local.remote_cluster_config
-  }
-
-  # We wait for the remote cluster configuration
-  # to complete to avoid race condition on
-  # namespace creation
-  depends_on = [
-    module.harbor_db_secret,
-    module.harbor_secret,
-    module.keycloak_db_secret,
-    module.keycloak_secret,
-    module.juicefs,
-    module.grafana,
-    module.alertmanager,
-    module.oauth2_proxy,
-    kubernetes_secret.matomo_secret,
-    kubernetes_secret.matomo_db_secret,
-    kubernetes_secret.i2b2_db_secret,
-    kubernetes_secret.i2b2_wildfly,
-    kubernetes_secret.didata_env,
-    kubernetes_secret.didata_db_secret,
-    kubernetes_secret.regcred_didata,
-    module.backend_db_secret,
-    kubernetes_secret.backend_secrets
-  ]
-}
-
 locals {
   output = {
     harbor_admin_username = var.harbor_admin_username
@@ -622,23 +606,18 @@ locals {
 
     keycloak_admin_username = var.keycloak_admin_username
     keycloak_admin_password = module.keycloak_secret.admin_password
-    keycloak_url            = local.keycloak_url
 
-    prometheus_url         = local.prometheus_url
-    alertmanager_url       = local.alertmanager_url
     grafana_url            = local.grafana_url
     grafana_admin_username = var.grafana_admin_username
 
-    matomo_url      = local.matomo_url
     matomo_username = "admin"
     matomo_password = random_password.matomo_password.result
 
-    frontend_url = local.frontend_url
-    backend_url  = local.backend_url
-    didata_url   = local.didata_url
-
     juicefs_enabled = var.s3_secret_key != "" ? true : false
     didata_enabled  = var.didata_registry_password != "" ? true : false
+
+    argocd_manager_token   = data.kubernetes_secret.argocd_manager_token.data.token
+    argocd_manager_ca_data = data.kubernetes_config_map.ca_data.data["ca.crt"]
   }
 }
 

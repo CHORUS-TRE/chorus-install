@@ -1,4 +1,8 @@
-# Namespace is assumed to be created by the parent module, so we reference it here without creating it.
+resource "kubernetes_namespace" "loki" {
+  metadata {
+    name = var.namespace
+  }
+}
 
 # Generate random passwords for each Loki client
 resource "random_password" "loki_client_password" {

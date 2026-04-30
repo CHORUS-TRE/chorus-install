@@ -114,8 +114,8 @@ The following requirements serve as a lower bound estimate, you might want to in
    kubectl patch storageclass your-default-storage-class-name -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
    ```
 
-1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps) for each stage (e.g. workspace_stage_00, workspace_stage_01, ...).
-    Make sure to add the necessary tag to your workspace (e.g. `stage_00` for the workspace used for stage_00).
+1. [Create a workspace on Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/create#create-a-workspacehttps) for each stage (e.g. workspace_stage_01, workspace_stage_02).
+    Make sure to add the necessary tag to your workspace (e.g. `stage_01` for the workspace used for stage_01).
 
     > If you don't have access to Terraform Cloud, you can delete all the `backend.tf` files, hence using the default local backend. The local backend type stores state as a local file on disk.
 
@@ -125,27 +125,33 @@ The following requirements serve as a lower bound estimate, you might want to in
     terraform login
     ```
 
-1. Initialize, plan and apply stage 0.
+1. Clone the required repositories.
 
-   > This stage downloads the necessary overriding Helm values from the https://github.com/$TF_VAR_github_orga/$TF_VAR_helm_values_repo repository (e.g. https://github.com/CHORUS-TRE/environment-template).
+   **Helm charts repository** - Contains the CHORUS wrapper Helm charts (e.g. https://github.com/CHORUS-TRE/chorus-tre):
 
     ```sh
-    cd stage_00
-    terraform init
+    git clone git@github.com:CHORUS-TRE/chorus-tre.git charts
+    # or
+    git clone https://github.com/CHORUS-TRE/chorus-tre.git charts
     ```
-    You'll be prompted to select a workspace.
-    Once you selected a workspace, run ```terraform workspace show``` to make sure your selection was correct.
+
+   **Helm values repository** - Contains the overriding Helm values for your clusters (e.g. https://github.com/CHORUS-TRE/environment-template):
+
     ```sh
-    terraform plan -out="stage_00.plan"
-    terraform apply "stage_00.plan"
+    git clone git@github.com:CHORUS-TRE/environment-template.git values
+    # or
+    git clone https://github.com/CHORUS-TRE/environment-template.git values
     ```
+
+    > Make sure you have git access configured (SSH keys, credentials, etc.) before cloning.
+    > Pull the latest changes from these repositories before running terraform if you need to update your configuration.
 
 1. Initialize, plan and apply stage 1.
 
     > This stage bootstraps the build cluster.
 
     ```sh
-    cd ../stage_01
+    cd stage_01
     terraform init
     ```
     You'll be prompted to select a workspace.
@@ -161,7 +167,7 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 1. Update your DNS record with the load balancer IP address.
 
-    > ACME challenges will fail as long as our hosts do not resolve properly
+    > HTTP-01 challenges will fail as long as our hosts do not resolve properly
 
 1. Make sure the different applications (Harbor, Keycloak, ArgoCD,) can be accessed using your browser. Log into each application using the credentials listed in "*your-build-cluster-name*_output.yaml.
 
@@ -180,7 +186,7 @@ The following requirements serve as a lower bound estimate, you might want to in
 
 ## Install the remote cluster
 
-1. Go through steps 1 to 6 of the build cluster installation, making sure environment variables related to the remote cluster were filled in your env file.
+1. Go through steps 1 to 5 of the build cluster installation, making sure environment variables related to the remote cluster were filled in your env file.
 
 1. Initialize, plan and apply stage 2.
 
@@ -197,6 +203,37 @@ The following requirements serve as a lower bound estimate, you might want to in
     terraform plan -out="stage_02.plan"
     terraform apply "stage_02.plan"
     ```
+
+1. Retrieve the ```token``` and the ```ca.crt``` from the argocd-manager on the remote cluster to fill in the next step
+
+    ```yaml
+    caData=$(kubectl get secret argocd-manager-token -ojsonpath='{.data.ca\.crt}')
+    bearerToken=$(kubectl get secret argocd-manager-token -ojsonpath='{.data.token}' | base64 -d)
+    ```
+
+1. Create the [necessary secret](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#clusters) on the build cluster to start managing the remote cluster using the template below
+
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: "<your remote cluster name>-cluster"
+     namespace: argocd
+     labels:
+       argocd.argoproj.io/secret-type: cluster
+   type: Opaque
+   stringData:
+     name: "<your remote cluster name>"
+     server: "<your remote cluster k8s server url>"
+     config: |
+       {
+         "bearerToken": "<authentication token>",
+         "tlsClientConfig": {
+           "insecure": false,
+           "caData": "<base64 encoded certificate>"
+         }
+       }
+   ```
 
 1. Make sure to add the remote cluster to the list of environments in the overriding values of the argo-deploy Helm chart deployed on the build cluster.
 
@@ -216,12 +253,21 @@ The following requirements serve as a lower bound estimate, you might want to in
 1. Fetch the loadbalancer IP address using the kubectl command below
 
    ```sh
-   kubectl get svc -n ingress-nginx --field-selector spec.type=LoadBalancer -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}'
+   kubectl get svc -n envoy-gateway-system --field-selector spec.type=LoadBalancer -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}'
    ```
+
+    > If you get an error, it might simply be due to the service not being ready yet. Check the certificate requests status.
 
 1. Update your DNS record with the load balancer IP address.
 
 1. You'll find important variables (e.g. URLs, admin usernames, admin passwords) in the "*your-remote-cluster-name*_output.yaml" file in the same folder as this readme.
+
+1. Depending on your cluster's security, you might have to explicitly give privilege to some namespaces
+
+  ```yaml
+  kubectl label ns prometheus pod-security.kubernetes.io/enforce=privileged
+  kubectl label ns velero pod-security.kubernetes.io/enforce=privileged
+  ```
 
 1. Once everything (applications, repositories, clusters) turns green in the ArgoCD UI, the remote cluster installation is complete.
 

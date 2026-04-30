@@ -24,4 +24,4 @@ _This module does not define explicit Terraform outputs. All resources are manag
 - [Cert-Manager Documentation](https://cert-manager.io/docs/)
 - [Kubernetes TLS Management](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/)
 - [Terraform Kubernetes Provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)
-- [Terraform Helm Provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) 
+- [Terraform Helm Provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs)

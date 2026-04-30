@@ -4,9 +4,13 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.36.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.7.2"
+    helm = {
+      source  = "hashicorp/helm"
+      version = "3.0.2"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.4"
     }
   }
   # Provider functions require Terraform 1.8 and later.

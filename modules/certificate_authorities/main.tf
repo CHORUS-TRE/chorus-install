@@ -1,19 +1,3 @@
-# Namespace
-
-resource "kubernetes_namespace" "cert_manager" {
-  metadata {
-    name = var.cert_manager_namespace
-  }
-}
-
-# Cert-Manager CRDs
-
-module "cert_manager_crds" {
-  source = "../cert_manager_crds"
-
-  cert_manager_crds_content = var.cert_manager_crds_content
-}
-
 # Cert-Manager
 
 resource "helm_release" "cert_manager" {
@@ -22,7 +6,7 @@ resource "helm_release" "cert_manager" {
   chart            = "charts/${var.cert_manager_chart_name}"
   version          = var.cert_manager_chart_version
   namespace        = var.cert_manager_namespace
-  create_namespace = false
+  create_namespace = true
   wait             = true
 
   values = [var.cert_manager_helm_values]
@@ -32,11 +16,6 @@ resource "helm_release" "cert_manager" {
       name  = "cert-manager.crds.enabled"
       value = "false"
     }
-  ]
-
-  depends_on = [
-    kubernetes_namespace.cert_manager,
-    module.cert_manager_crds
   ]
 }
 
@@ -84,4 +63,23 @@ resource "helm_release" "selfsigned" {
   values = [var.selfsigned_helm_values]
 
   depends_on = [null_resource.wait_for_cert_manager_webhook]
+}
+
+# Cloudflare API Token Secret (for DNS-01 challenge)
+
+resource "kubernetes_secret" "cloudflare_api_token" {
+  count = var.cloudflare_api_token != "" ? 1 : 0
+
+  metadata {
+    name      = "cloudflare-api-token"
+    namespace = var.cert_manager_namespace
+  }
+
+  data = {
+    api-token = var.cloudflare_api_token
+  }
+
+  type = "Opaque"
+
+  depends_on = [helm_release.cert_manager]
 }
